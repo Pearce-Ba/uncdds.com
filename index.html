@@ -42,7 +42,10 @@ body{margin:0;background:#0A1A30;-webkit-font-smoothing:antialiased;font-family:
 .nav-mobile-close span:first-child{transform:translate(-50%,-50%) rotate(45deg);}
 .nav-mobile-close span:last-child{transform:translate(-50%,-50%) rotate(-45deg);}
 body.nav-open{overflow:hidden;}
-@media(max-width:860px){.nav-links{display:none !important;}.nav-burger{display:flex;}body{overflow-x:hidden;}}
+/* NOTE: never set overflow-x:hidden on body — it silently breaks every
+   position:sticky on the page (officer-profiles pin, pillar-stories backdrop).
+   html{overflow-x:clip} already prevents sideways page scroll. */
+@media(max-width:860px){.nav-links{display:none !important;}.nav-burger{display:flex;}}
 .join-btn:hover{transform:translateY(-2px);}
 .cta-gold:hover{transform:translateY(-3px);}
 .cta-outline:hover{background:rgba(215,226,234,.12);}
@@ -107,8 +110,16 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .op-glowtext{color:transparent;background-image:radial-gradient(circle 320px at var(--px,-999px) var(--py,-999px),#B9975B 0%,#B9975B 30%,#C7D6E6 70%);-webkit-background-clip:text;background-clip:text;}
 /* Big Little family tree */
 #big-little{position:relative;overflow:clip;}
-/* Family rail — horizontal scroll of family cards with fan-out back cards */
-.bl-rail{display:flex;gap:clamp(16px,2.2vw,26px);overflow-x:auto;overflow-y:hidden;padding:12px 12px 32px;margin:clamp(34px,4.5vw,56px) -12px clamp(28px,4vw,44px);scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:rgba(75,156,211,.45) rgba(255,255,255,.06);}
+/* Family rail — horizontal scroll of family cards with fan-out back cards.
+   Arrows + the add tile live OUTSIDE the scroller so they never scroll away. */
+.bl-rail-shell{display:flex;align-items:center;gap:clamp(8px,1.2vw,16px);margin:clamp(34px,4.5vw,56px) 0 clamp(28px,4vw,44px);}
+.bl-rail{flex:1;min-width:0;display:flex;gap:clamp(16px,2.2vw,26px);overflow-x:auto;overflow-y:hidden;padding:12px 12px 32px;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:rgba(75,156,211,.45) rgba(255,255,255,.06);}
+.bl-arrow{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid rgba(75,156,211,.4);background:rgba(9,20,38,.7);color:#7FB2E0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s ease,color .2s ease,opacity .2s ease,transform .2s ease;}
+.bl-arrow:hover:not([disabled]){background:rgba(75,156,211,.18);color:#fff;transform:scale(1.08);}
+.bl-arrow[disabled]{opacity:.25;cursor:default;}
+.bl-add-dock{flex:none;display:flex;align-items:center;padding-left:clamp(6px,1vw,14px);margin-left:clamp(2px,.5vw,6px);border-left:1px dashed rgba(185,151,91,.35);}
+.bl-add-dock .blr-add{width:clamp(116px,11vw,148px);}
+@media(max-width:768px){.bl-arrow{display:none;}.bl-add-dock .blr-add{width:100px;}.bl-add-dock .blr-add .blr-plus{font-size:1.9rem;}}
 .bl-rail::-webkit-scrollbar{height:8px;}
 .bl-rail::-webkit-scrollbar-thumb{background:rgba(75,156,211,.4);border-radius:999px;}
 .bl-rail::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:999px;}
@@ -127,7 +138,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .blr-card img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px;background:#0c2042;}
 .blr-fam{margin:12px 0 3px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;font-size:.98rem;color:#EAF1F8;line-height:1.15;}
 .blr-sub{color:#8CA6C4;font-size:11.5px;letter-spacing:.8px;text-transform:uppercase;font-weight:600;}
-.blr-add{flex:none;align-self:center;scroll-snap-align:center;width:clamp(150px,15vw,180px);aspect-ratio:1;border-radius:50%;border:2px dashed rgba(185,151,91,.6);background:rgba(185,151,91,.05);color:#B9975B;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-family:'Montserrat',sans-serif;text-align:center;transition:transform .25s ease,background .25s ease,border-color .25s ease;}
+.blr-add{flex:none;width:clamp(116px,11vw,148px);aspect-ratio:1;border-radius:50%;border:2px dashed rgba(185,151,91,.6);background:rgba(185,151,91,.05);color:#B9975B;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-family:'Montserrat',sans-serif;text-align:center;transition:transform .25s ease,background .25s ease,border-color .25s ease;}
 .blr-add:hover{transform:scale(1.05);background:rgba(185,151,91,.12);border-color:#B9975B;}
 .blr-add .blr-plus{font-size:2.6rem;font-weight:300;line-height:1;}
 .blr-add .blr-addlbl{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;line-height:1.5;}
@@ -460,7 +471,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <div class="pd-num" data-pd-num style="position:absolute;right:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">01</div>
         <div class="pdc-wrap pdc-r">
         <div class="pdc-back"><div class="pdc-back-in"><p>Course roadmaps, DAT cohorts &amp; a 3.0+ GPA community.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
-        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(9,20,38,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(75,156,211,.28);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
+        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(75,156,211,.28);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 01 · Academic Excellence</span></div>
           <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Sharpen the mind first</h3>
           <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Dentistry starts in the classroom. DDS pairs members with course roadmaps, exam archives, and study groups that turn Carolina's toughest prerequisites into a shared project instead of a solo grind.</p>
@@ -473,7 +484,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <div class="pd-num" data-pd-num style="position:absolute;left:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">02</div>
         <div class="pdc-wrap pdc-l">
         <div class="pdc-back"><div class="pdc-back-in"><p>Seminars, shadowing &amp; conferences across the dental field.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
-        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(9,20,38,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(185,151,91,.3);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
+        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(185,151,91,.3);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#4B9CD3;display:block;"></span><span style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 02 · Professional Development</span></div>
           <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Practice the profession early</h3>
           <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">From guest lecturers to shadowing placements, members meet dentistry where it happens. Seminars with the UNC Adams School of Dentistry put specialties, admissions, and real casework in front of you before you ever apply.</p>
@@ -486,7 +497,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <div class="pd-num" data-pd-num style="position:absolute;right:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">03</div>
         <div class="pdc-wrap pdc-r">
         <div class="pdc-back"><div class="pdc-back-in"><p>Tracked service points &amp; annual chapter honors.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
-        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(9,20,38,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(75,156,211,.28);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
+        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(75,156,211,.28);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 03 · Service</span></div>
           <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Serve before you're asked</h3>
           <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Service is tracked, celebrated, and constant. Members volunteer in dental clinics and across the Chapel Hill community, logging hours through the chapter points system and earning recognition at year's end.</p>
@@ -499,7 +510,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <div class="pd-num" data-pd-num style="position:absolute;left:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">04</div>
         <div class="pdc-wrap pdc-l">
         <div class="pdc-back"><div class="pdc-back-in"><p>Big–little families &amp; application reviews, every rush class.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
-        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(9,20,38,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(185,151,91,.3);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
+        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(185,151,91,.3);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#4B9CD3;display:block;"></span><span style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 04 · Mentorship</span></div>
           <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Pass it down</h3>
           <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Every rushee joins a big–little family. Upperclassmen review applications, run mock interviews, and hand down what worked — so no member reinvents the road to dental school alone.</p>
@@ -512,7 +523,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <div class="pd-num" data-pd-num style="position:absolute;right:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">05</div>
         <div class="pdc-wrap pdc-r">
         <div class="pdc-back"><div class="pdc-back-in"><p>Formals, DDS families &amp; friendships beyond graduation.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
-        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(9,20,38,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(75,156,211,.28);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
+        <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(75,156,211,.28);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 05 · Community</span></div>
           <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Stay for the people</h3>
           <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Formals, socials, DDS families, intramurals — the professional network doubles as a friend group. The people you rush with are the people who show up at your white coat ceremony.</p>
@@ -611,8 +622,13 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <h2 style="margin:0 0 24px;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2.6rem,8vw,6rem);"><span style="background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Big Little.</span><span style="color:#B9975B;">&nbsp;Period.</span></h2>
       <p style="margin:0 auto;max-width:600px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.98rem,1.4vw,1.18rem);">When you join DDS you don't just get a chapter — you get a family. Every new member is paired with a <em style="color:#EAF1F8;font-style:normal;font-weight:500;">big</em>: an upperclassman mentor who has already walked the road to dental school. Bigs hand down notes, introductions, and hard-won advice; littles keep the line going. Pick a family below to trace its tree.</p>
     </header>
-    <div data-reveal="0.05">
+    <div data-reveal="0.05" class="bl-rail-shell">
+      <button class="bl-arrow" type="button" data-bl-prev aria-label="Scroll families left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
       <div class="bl-rail" data-bl-rail aria-label="DDS families — scroll sideways to browse"></div>
+      <button class="bl-arrow" type="button" data-bl-next aria-label="Scroll families right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <div class="bl-add-dock">
+        <button type="button" class="blr-add" data-blm-open aria-label="Add yourself as a big or little"><span class="blr-plus">+</span><span class="blr-addlbl">Add a Big<br>or Little</span></button>
+      </div>
     </div>
     <div class="bl-stage" data-bl-stage>
       <svg class="bl-links" data-bl-links preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bl-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9975B"/><stop offset="1" stop-color="#4B9CD3"/></linearGradient></defs></svg>
@@ -1785,22 +1801,35 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
         '</button>';
       railEl.appendChild(wrap);
     });
-    const add = document.createElement('button');
-    add.type = 'button';
-    add.className = 'blr-add';
-    add.setAttribute('data-blm-open','');
-    add.setAttribute('aria-label','Add yourself as a big or little');
-    add.innerHTML = '<span class="blr-plus">+</span><span class="blr-addlbl">Add a Big<br>or Little</span>';
-    railEl.appendChild(add);
+    updateArrows();
   };
 
   railEl.addEventListener('click', (e) => {
     const attach = e.target.closest('[data-attach]');
     if (attach) { openModal({ mode:'attach', famIdx: parseInt(attach.getAttribute('data-attach'), 10) }); return; }
-    if (e.target.closest('[data-blm-open]')) { openModal({ mode:'add' }); return; }
     const card = e.target.closest('[data-fam]');
     if (card) select(parseInt(card.getAttribute('data-fam'), 10));
   });
+
+  // -- rail arrows (outside the scroller, never scroll away) --
+  const prevBtn = root.querySelector('[data-bl-prev]');
+  const nextBtn = root.querySelector('[data-bl-next]');
+  const railStep = () => {
+    const w = railEl.querySelector('.blr-wrap');
+    return w ? w.getBoundingClientRect().width + 22 : 260;
+  };
+  function updateArrows(){
+    if (!prevBtn || !nextBtn) return;
+    const max = railEl.scrollWidth - railEl.clientWidth - 2;
+    prevBtn.disabled = railEl.scrollLeft <= 2;
+    nextBtn.disabled = railEl.scrollLeft >= max;
+  }
+  if (prevBtn) prevBtn.addEventListener('click', () => railEl.scrollBy({ left: -railStep(), behavior: 'smooth' }));
+  if (nextBtn) nextBtn.addEventListener('click', () => railEl.scrollBy({ left: railStep(), behavior: 'smooth' }));
+  railEl.addEventListener('scroll', updateArrows, { passive: true });
+  window.addEventListener('resize', updateArrows, { passive: true });
+  const dockAdd = root.querySelector('.bl-add-dock [data-blm-open]');
+  if (dockAdd) dockAdd.addEventListener('click', () => openModal({ mode: 'add' }));
 
   // -- add-yourself modal --
   const modal = document.querySelector('[data-blm]');
