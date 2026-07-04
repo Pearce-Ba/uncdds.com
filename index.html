@@ -90,14 +90,15 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .pd-panel.pd-even .pd-row .pd-v{color:#B9975B;}
 @media(max-width:980px){.pd-spine{display:none;}.pd-num{opacity:.45;}}
 /* Deep-dive fan-out shadow cards (above spine & numeral, below the glass card) */
-.pdc-wrap{position:relative;max-width:600px;width:100%;z-index:2;}
-.pdc-card{transition:transform .25s cubic-bezier(.25,.1,.25,1);will-change:transform;}
-.pdc-back{position:absolute;inset:0;z-index:0;border-radius:26px;background:rgba(9,20,38,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);box-shadow:0 26px 60px -28px rgba(0,0,0,.6);transition:transform .6s cubic-bezier(.25,.1,.25,1);}
+.pdc-wrap{position:relative;max-width:600px;width:100%;z-index:2;isolation:isolate;}
+.pdc-card{transition:transform .25s cubic-bezier(.25,.1,.25,1);will-change:transform;transform:translateZ(0);}
+.pdc-back{position:absolute;inset:0;z-index:0;border-radius:26px;background:rgba(11,23,42,.92);border:1px solid rgba(255,255,255,.2);box-shadow:0 26px 60px -28px rgba(0,0,0,.6);transition:transform .6s cubic-bezier(.25,.1,.25,1);}
 .pdc-r .pdc-back{transform:translate(8px,6px) rotate(.5deg);transform-origin:bottom left;}
 .pdc-l .pdc-back{transform:translate(-8px,6px) rotate(-.5deg);transform-origin:bottom right;}
 .pdc-r:hover .pdc-back{transform:translate(100%,16px) rotate(2.2deg);}
 .pdc-l:hover .pdc-back{transform:translate(-100%,16px) rotate(-2.2deg);}
-.pdc-back-in{position:absolute;inset:0;display:flex;flex-direction:column;gap:16px;padding:clamp(24px,3vw,42px);}
+.pdc-back-in{position:absolute;inset:0;display:flex;flex-direction:column;gap:16px;padding:clamp(24px,3vw,42px);opacity:0;transition:opacity .35s ease;}
+.pdc-wrap:hover .pdc-back-in{opacity:1;transition-delay:.14s;}
 .pdc-back-in p{margin:0;flex:1;display:flex;align-items:center;font-size:clamp(15px,1.7vw,20px);line-height:1.55;color:#C5D6E8;font-weight:500;}
 .pdc-r .pdc-back-in .pb-btn{align-self:flex-end;}
 .pdc-l .pdc-back-in .pb-btn{align-self:flex-start;}
@@ -106,10 +107,55 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .op-glowtext{color:transparent;background-image:radial-gradient(circle 320px at var(--px,-999px) var(--py,-999px),#B9975B 0%,#B9975B 30%,#C7D6E6 70%);-webkit-background-clip:text;background-clip:text;}
 /* Big Little family tree */
 #big-little{position:relative;overflow:clip;}
-.bl-tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:clamp(30px,4vw,52px) auto clamp(40px,5vw,64px);max-width:820px;}
-.bl-tab{cursor:pointer;border:1px solid rgba(75,156,211,.35);background:rgba(255,255,255,.03);color:#C7D6E6;font-family:'Montserrat',sans-serif;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;font-size:12px;padding:11px 22px;border-radius:999px;transition:transform .2s ease,background .2s ease,color .2s ease,border-color .2s ease;white-space:nowrap;}
-.bl-tab:hover{transform:translateY(-2px);border-color:rgba(75,156,211,.7);}
-.bl-tab.active{background:#B9975B;border-color:#B9975B;color:#0A1A30;}
+/* Family rail — horizontal scroll of family cards with fan-out back cards */
+.bl-rail{display:flex;gap:clamp(16px,2.2vw,26px);overflow-x:auto;overflow-y:hidden;padding:12px 12px 32px;margin:clamp(34px,4.5vw,56px) -12px clamp(28px,4vw,44px);scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:rgba(75,156,211,.45) rgba(255,255,255,.06);}
+.bl-rail::-webkit-scrollbar{height:8px;}
+.bl-rail::-webkit-scrollbar-thumb{background:rgba(75,156,211,.4);border-radius:999px;}
+.bl-rail::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:999px;}
+.blr-wrap{position:relative;flex:none;width:clamp(205px,21vw,244px);scroll-snap-align:center;z-index:1;}
+.blr-wrap:hover,.blr-wrap:focus-within{z-index:6;}
+.blr-back{position:absolute;inset:0;z-index:0;border-radius:22px;background:rgba(11,23,42,.94);border:1px solid rgba(185,151,91,.45);box-shadow:0 24px 54px -26px rgba(0,0,0,.75);transform:translate(9px,7px) rotate(.6deg);transform-origin:bottom left;transition:transform .55s cubic-bezier(.25,.1,.25,1);display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:18px;}
+.blr-wrap:hover .blr-back,.blr-wrap:focus-within .blr-back{transform:translate(84%,14px) rotate(2.6deg);}
+.blr-back>*{opacity:0;transition:opacity .3s ease;}
+.blr-wrap:hover .blr-back>*,.blr-wrap:focus-within .blr-back>*{opacity:1;transition-delay:.16s;}
+.blr-back .pb-btn{align-self:flex-start;}
+.blr-eyebrow{color:#B9975B;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:10.5px;}
+.blr-backname{color:#EAF1F8;font-weight:700;font-size:1.02rem;line-height:1.3;}
+.blr-card{position:relative;z-index:2;display:block;width:100%;text-align:left;cursor:pointer;border:1px solid rgba(75,156,211,.3);border-radius:22px;background:rgba(9,20,38,.72);padding:12px 12px 16px;font-family:'Montserrat',sans-serif;color:#fff;transition:transform .3s cubic-bezier(.25,.1,.25,1),border-color .25s ease,box-shadow .25s ease;box-shadow:0 20px 44px -24px rgba(0,0,0,.7);}
+.blr-card:hover{transform:translateY(-6px);}
+.blr-card.active{border-color:#B9975B;box-shadow:0 24px 54px -22px rgba(185,151,91,.5);}
+.blr-card img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px;background:#0c2042;}
+.blr-fam{margin:12px 0 3px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;font-size:.98rem;color:#EAF1F8;line-height:1.15;}
+.blr-sub{color:#8CA6C4;font-size:11.5px;letter-spacing:.8px;text-transform:uppercase;font-weight:600;}
+.blr-add{flex:none;align-self:center;scroll-snap-align:center;width:clamp(150px,15vw,180px);aspect-ratio:1;border-radius:50%;border:2px dashed rgba(185,151,91,.6);background:rgba(185,151,91,.05);color:#B9975B;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-family:'Montserrat',sans-serif;text-align:center;transition:transform .25s ease,background .25s ease,border-color .25s ease;}
+.blr-add:hover{transform:scale(1.05);background:rgba(185,151,91,.12);border-color:#B9975B;}
+.blr-add .blr-plus{font-size:2.6rem;font-weight:300;line-height:1;}
+.blr-add .blr-addlbl{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;line-height:1.5;}
+.bl-doc{display:inline-flex;align-items:center;gap:5px;margin-top:2px;color:#B9975B;font-weight:700;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none;}
+.bl-doc:hover{text-decoration:underline;}
+@media(max-width:560px){.blr-wrap{width:74vw;}}
+/* Add-yourself modal */
+.blm-overlay{position:fixed;inset:0;z-index:300;background:rgba(4,10,22,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s;}
+.blm-overlay.open{opacity:1;visibility:visible;}
+.blm-card{position:relative;width:min(460px,100%);max-height:min(86vh,720px);overflow-y:auto;background:#0e2140;border:1px solid rgba(75,156,211,.4);border-radius:22px;padding:clamp(24px,4vw,34px);box-shadow:0 40px 90px -30px rgba(0,0,0,.85);transform:translateY(14px);transition:transform .3s cubic-bezier(.25,.1,.25,1);}
+.blm-overlay.open .blm-card{transform:none;}
+.blm-close{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#D7E2EA;font-size:16px;cursor:pointer;line-height:1;}
+.blm-close:hover{background:rgba(255,255,255,.12);}
+.blm-card h3{margin:0 0 8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;font-size:1.35rem;color:#EAF1F8;}
+.blm-sub{margin:0 0 20px;color:#8CA6C4;font-size:.9rem;line-height:1.55;}
+.blm-toggle{display:flex;gap:8px;margin-bottom:18px;}
+.blm-toggle button{flex:1;padding:11px 10px;border-radius:12px;border:1px solid rgba(75,156,211,.35);background:rgba(255,255,255,.03);color:#C7D6E6;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:11.5px;cursor:pointer;transition:background .2s,color .2s,border-color .2s;}
+.blm-toggle button.active{background:#B9975B;border-color:#B9975B;color:#0A1A30;}
+.blm-card label{display:block;margin-bottom:14px;color:#7FB2E0;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:10.5px;}
+.blm-card label[hidden]{display:none;}
+.blm-card input,.blm-card select{display:block;width:100%;margin-top:6px;padding:11px 13px;border-radius:11px;border:1px solid rgba(75,156,211,.3);background:rgba(9,20,38,.7);color:#EAF1F8;font-family:'Montserrat',sans-serif;font-size:14px;letter-spacing:normal;text-transform:none;font-weight:500;}
+.blm-card input:focus,.blm-card select:focus{outline:2px solid #4B9CD3;outline-offset:1px;}
+.blm-card input[type=file]{padding:9px;font-size:12.5px;color:#9FB6CE;}
+.blm-err{display:none;margin:0 0 14px;padding:10px 13px;border-radius:10px;background:rgba(200,60,60,.14);border:1px solid rgba(220,90,90,.4);color:#F3B8B8;font-size:12.5px;line-height:1.5;}
+.blm-err.show{display:block;}
+.blm-submit{display:block;width:100%;padding:14px;border-radius:999px;border:0;background:#B9975B;color:#0A1A30;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:12.5px;cursor:pointer;transition:transform .2s;}
+.blm-submit:hover{transform:translateY(-2px);}
+.blm-note{margin:14px 0 0;color:#6E89A6;font-size:11.5px;line-height:1.55;text-align:center;}
 .bl-stage{position:relative;max-width:880px;margin:0 auto;min-height:clamp(430px,52vw,560px);}
 .bl-links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible;}
 .bl-links path{transition:stroke-width .25s ease,opacity .25s ease;}
@@ -160,13 +206,17 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .mtg-scroll::-webkit-scrollbar-thumb{background:rgba(75,156,211,.35);border-radius:999px;}
 .mtg-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:999px;}
 .pres-body{color:transparent;background-image:radial-gradient(circle 300px at var(--px,-999px) var(--py,-999px),#B9975B 0%,#B9975B 32%,#9FB6CE 72%);-webkit-background-clip:text;background-clip:text;}
-@media (prefers-reduced-motion: no-preference){#top,#president-letter,#officer-profiles{cursor:none;}}
+@media (prefers-reduced-motion: no-preference){#top,#president-letter,#officer-profiles,#offers{cursor:none;}}
+/* Offers: cursor-follow glow inside the stacked cards (lightens the navy) + radial gold text */
+.of-glow{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;background:radial-gradient(circle 360px at var(--gx,-999px) var(--gy,-999px),rgba(126,176,232,.42) 0%,rgba(75,156,211,.16) 46%,transparent 72%);mix-blend-mode:screen;opacity:0;transition:opacity .45s ease;}
+.of-glowtext{color:transparent;background-image:radial-gradient(circle 300px at var(--px,-999px) var(--py,-999px),#B9975B 0%,#B9975B 30%,var(--base,#EAF1F8) 70%);-webkit-background-clip:text;background-clip:text;}
 /* ===== Mobile / responsive ===== */
 @media(max-width:820px){
   .pres-inner{flex-direction:column !important;gap:24px !important;}
   .pres-photo{width:100% !important;min-height:0 !important;aspect-ratio:16/10 !important;align-self:auto !important;}
 }
 @media(max-width:768px){
+  .of-grid{grid-template-columns:1fr !important;}
   .join-photo{display:none !important;}
   .join-grid{grid-template-columns:1fr !important;max-width:460px;margin-left:auto;margin-right:auto;}
   .hpin-only{display:none !important;}
@@ -348,10 +398,10 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 <!-- ABOUT -->
 <section id="about" style="position:relative;background:#F5F7FA;color:#13294B;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;z-index:5;padding:clamp(90px,13vw,180px) clamp(20px,4vw,48px) clamp(80px,11vw,150px);overflow:clip;">
   <div style="position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.28;mix-blend-mode:multiply;z-index:1;"></div>
-  <div data-decor style="position:absolute;top:5%;left:2%;width:clamp(78px,11vw,170px);opacity:0;"><img src="https://placehold.co/170x170/E8F0F8/4B9CD3" alt="" style="display:block;width:100%;aspect-ratio:1/1;border-radius:20px;"></div>
-  <div data-decor style="position:absolute;top:6%;right:2%;width:clamp(78px,11vw,170px);opacity:0;"><img src="https://placehold.co/170x170/E8F0F8/B9975B" alt="" style="display:block;width:100%;aspect-ratio:1/1;border-radius:20px;"></div>
-  <div data-decor style="position:absolute;bottom:9%;left:4%;width:clamp(66px,9vw,150px);opacity:0;"><img src="https://placehold.co/150x150/E8F0F8/4B9CD3" alt="" style="display:block;width:100%;aspect-ratio:1/1;border-radius:20px;"></div>
-  <div data-decor style="position:absolute;bottom:9%;right:4%;width:clamp(74px,10vw,160px);opacity:0;"><img src="https://placehold.co/160x160/E8F0F8/B9975B" alt="" style="display:block;width:100%;aspect-ratio:1/1;border-radius:20px;"></div>
+  <div data-decor style="position:absolute;top:5%;left:2%;width:clamp(78px,11vw,170px);opacity:0;"><img src="slot-mq-2.webp" alt="" style="display:block;transform:rotate(-5deg);width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:20px;box-shadow:0 18px 40px -18px rgba(19,41,75,.45);"></div>
+  <div data-decor style="position:absolute;top:6%;right:2%;width:clamp(78px,11vw,170px);opacity:0;"><img src="slot-mq-5.webp" alt="" style="display:block;transform:rotate(4deg);width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:20px;box-shadow:0 18px 40px -18px rgba(19,41,75,.45);"></div>
+  <div data-decor style="position:absolute;bottom:9%;left:4%;width:clamp(66px,9vw,150px);opacity:0;"><img src="slot-mq-8.webp" alt="" style="display:block;transform:rotate(3deg);width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:20px;box-shadow:0 18px 40px -18px rgba(19,41,75,.45);"></div>
+  <div data-decor style="position:absolute;bottom:9%;right:4%;width:clamp(74px,10vw,160px);opacity:0;"><img src="slot-mq-11.webp" alt="" style="display:block;transform:rotate(-4deg);width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:20px;box-shadow:0 18px 40px -18px rgba(19,41,75,.45);"></div>
   <div style="max-width:880px;margin:0 auto;text-align:center;position:relative;z-index:2;">
     <div data-reveal="0" style="color:#4B9CD3;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:clamp(16px,2vw,26px);">About DDS</div>
     <h2 data-reveal="0.05" style="margin:0 0 clamp(34px,5vw,56px);font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2.6rem,9vw,7rem);background:linear-gradient(165deg,#13294B 18%,#4B9CD3 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Dentistry<br>Begins Here</h2>
@@ -386,8 +436,14 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 </section>
 
 <!-- PILLAR DEEP DIVES -->
-<section id="pillar-stories" style="position:relative;z-index:6;background:radial-gradient(130% 90% at 50% -8%,#22242d 0%,#17181d 46%,#121317 100%);border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;color:#fff;overflow:clip;padding:clamp(90px,12vw,160px) clamp(20px,4vw,48px) clamp(80px,11vw,140px);">
-  <div style="position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.5;mix-blend-mode:overlay;z-index:1;"></div>
+<section id="pillar-stories" style="position:relative;z-index:6;background:#101d33;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;color:#fff;overflow:clip;padding:clamp(90px,12vw,160px) clamp(20px,4vw,48px) clamp(80px,11vw,140px);">
+  <!-- Sticky viewport-height backdrop: same officer-bg + grain treatment as the profile/gallery sections, without the fixed-attachment glitches -->
+  <div aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;">
+    <div style="position:sticky;top:0;height:100vh;background:#15171c url('officer-bg.png') center/cover no-repeat;">
+      <div style="position:absolute;inset:0;background:rgba(8,14,26,.42);"></div>
+      <div style="position:absolute;inset:0;background:url('grain.png') repeat;opacity:.5;mix-blend-mode:overlay;"></div>
+    </div>
+  </div>
   <div style="max-width:1200px;margin:0 auto;position:relative;z-index:2;">
     <div data-reveal="0" style="text-align:center;margin-bottom:clamp(56px,8vw,110px);">
       <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">The Pillars, Up Close</div>
@@ -475,6 +531,8 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <div style="position:absolute;bottom:2%;right:-6%;width:min(44vw,580px);height:min(44vw,580px);border-radius:50%;background:radial-gradient(circle,rgba(185,151,91,.14),transparent 68%);filter:blur(12px);animation:of-float2 29s ease-in-out infinite;will-change:transform;"></div>
     <div style="position:absolute;top:40%;left:52%;width:min(34vw,440px);height:min(34vw,440px);border-radius:50%;background:radial-gradient(circle,rgba(127,178,224,.10),transparent 70%);filter:blur(14px);animation:of-float1 34s ease-in-out infinite reverse;will-change:transform;"></div>
   </div>
+  <div id="offers-glow" style="position:absolute;top:0;left:0;width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,rgba(185,151,91,.18) 0%,rgba(185,151,91,.06) 45%,transparent 70%);mix-blend-mode:screen;pointer-events:none;opacity:0;transition:opacity .5s ease,transform .22s ease-out;will-change:transform;z-index:0;"></div>
+  <div id="tooth-offers" style="position:absolute;top:0;left:0;width:38px;height:49px;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform;filter:drop-shadow(0 5px 12px rgba(0,0,0,.6));"><img src="slot-hero-portrait.webp" alt="" style="display:block;width:100%;height:100%;object-fit:contain;"></div>
   <div style="max-width:1120px;margin:0 auto;position:relative;z-index:1;">
     <div data-reveal="0" style="text-align:center;margin-bottom:clamp(40px,6vw,72px);">
       <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">What DDS Offers</div>
@@ -482,25 +540,28 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     </div>
     <div data-stack-wrap style="height:88vh;">
       <div data-stack-card style="position:sticky;top:110px;will-change:transform;">
-        <div data-offer-inner style="border:1.5px solid rgba(75,156,211,.45);background:#0c2042;border-radius:clamp(26px,3vw,44px);padding:clamp(20px,3vw,40px);">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">01</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Seminars</div><h3 style="margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Intro to Dentistry</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
-          <div style="display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p style="margin:0;align-self:center;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">In conjunction with the UNC School of Dentistry, we host a series of introduction-to-dentistry seminars — inviting guest lecturers from across the dental community to speak on general dentistry and the specialties.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off1-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off1-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
+        <div data-offer-inner style="position:relative;overflow:hidden;border:1.5px solid rgba(75,156,211,.45);background:#0c2042;border-radius:clamp(26px,3vw,44px);padding:clamp(20px,3vw,40px);">
+          <div class="of-glow" aria-hidden="true"></div>
+          <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">01</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Seminars</div><h3 class="of-glowtext" style="--base:#FFFFFF;margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Intro to Dentistry</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
+          <div class="of-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p class="of-glowtext" style="--base:#A9C0D8;margin:0;align-self:center;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">In conjunction with the UNC School of Dentistry, we host a series of introduction-to-dentistry seminars — inviting guest lecturers from across the dental community to speak on general dentistry and the specialties.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off1-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off1-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
         </div>
       </div>
     </div>
     <div data-stack-wrap style="height:88vh;">
       <div data-stack-card style="position:sticky;top:132px;will-change:transform;">
-        <div data-offer-inner style="border:1.5px solid rgba(75,156,211,.45);background:#0c2042;border-radius:clamp(26px,3vw,44px);padding:clamp(20px,3vw,40px);">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">02</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Guidance</div><h3 style="margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Dental School Prep</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
-          <div style="display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p style="margin:0;align-self:center;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">We guide members throughout their undergraduate education and the dental school application process — building a social and academic support network that gives our members a clear advantage as future dental students.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off2-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off2-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
+        <div data-offer-inner style="position:relative;overflow:hidden;border:1.5px solid rgba(75,156,211,.45);background:#0c2042;border-radius:clamp(26px,3vw,44px);padding:clamp(20px,3vw,40px);">
+          <div class="of-glow" aria-hidden="true"></div>
+          <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">02</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Guidance</div><h3 class="of-glowtext" style="--base:#FFFFFF;margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Dental School Prep</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
+          <div class="of-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p class="of-glowtext" style="--base:#A9C0D8;margin:0;align-self:center;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">We guide members throughout their undergraduate education and the dental school application process — building a social and academic support network that gives our members a clear advantage as future dental students.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off2-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off2-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
         </div>
       </div>
     </div>
     <div data-stack-wrap style="height:88vh;">
       <div data-stack-card style="position:sticky;top:154px;will-change:transform;">
-        <div data-offer-inner style="border:1.5px solid rgba(75,156,211,.45);background:#0c2042;border-radius:clamp(26px,3vw,44px);padding:clamp(20px,3vw,40px);">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">03</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Service &amp; Awards</div><h3 style="margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Give Back, Get Recognized</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
-          <div style="display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p style="margin:0;align-self:center;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">Members volunteer within the dental field and the broader community, tracking service through our points system. Outstanding contributions are celebrated each year with chapter service awards.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off3-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off3-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
+        <div data-offer-inner style="position:relative;overflow:hidden;border:1.5px solid rgba(75,156,211,.45);background:#0c2042;border-radius:clamp(26px,3vw,44px);padding:clamp(20px,3vw,40px);">
+          <div class="of-glow" aria-hidden="true"></div>
+          <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">03</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Service &amp; Awards</div><h3 class="of-glowtext" style="--base:#FFFFFF;margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Give Back, Get Recognized</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
+          <div class="of-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p class="of-glowtext" style="--base:#A9C0D8;margin:0;align-self:center;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">Members volunteer within the dental field and the broader community, tracking service through our points system. Outstanding contributions are celebrated each year with chapter service awards.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off3-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off3-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
         </div>
       </div>
     </div>
@@ -550,7 +611,9 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <h2 style="margin:0 0 24px;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2.6rem,8vw,6rem);"><span style="background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Big Little.</span><span style="color:#B9975B;">&nbsp;Period.</span></h2>
       <p style="margin:0 auto;max-width:600px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.98rem,1.4vw,1.18rem);">When you join DDS you don't just get a chapter — you get a family. Every new member is paired with a <em style="color:#EAF1F8;font-style:normal;font-weight:500;">big</em>: an upperclassman mentor who has already walked the road to dental school. Bigs hand down notes, introductions, and hard-won advice; littles keep the line going. Pick a family below to trace its tree.</p>
     </header>
-    <div class="bl-tabs" data-bl-tabs role="tablist" aria-label="DDS families"></div>
+    <div data-reveal="0.05">
+      <div class="bl-rail" data-bl-rail aria-label="DDS families — scroll sideways to browse"></div>
+    </div>
     <div class="bl-stage" data-bl-stage>
       <svg class="bl-links" data-bl-links preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bl-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9975B"/><stop offset="1" stop-color="#4B9CD3"/></linearGradient></defs></svg>
       <div class="bl-tier bl-tier-big" data-bl-big></div>
@@ -560,6 +623,27 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <div data-reveal="0.1" style="text-align:center;margin-top:clamp(48px,6vw,80px);">
       <p style="margin:0 0 20px;color:#8CA6C4;font-weight:300;font-size:clamp(.95rem,1.3vw,1.1rem);">Every member gets a big. Every big was once a little.</p>
       <a href="#join" class="cta-gold" style="display:inline-flex;align-items:center;padding:16px 34px;border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -12px rgba(185,151,91,.85);transition:transform .2s;">Find Your Family&nbsp;&rarr;</a>
+    </div>
+  </div>
+  <!-- Add-yourself modal -->
+  <div class="blm-overlay" data-blm aria-hidden="true">
+    <div class="blm-card" role="dialog" aria-modal="true" aria-labelledby="blm-title">
+      <button class="blm-close" type="button" data-blm-close aria-label="Close">✕</button>
+      <h3 id="blm-title">Join The Tree</h3>
+      <p class="blm-sub" data-blm-sub>Add yourself as a potential big or little. Attach a PDF or link that tells your future family who you are.</p>
+      <div class="blm-toggle" data-blm-toggle>
+        <button type="button" data-role="big" class="active">I'm a Big</button>
+        <button type="button" data-role="little">I'm a Little</button>
+      </div>
+      <label>Your name<input type="text" data-blm-name placeholder="First Last" maxlength="40"></label>
+      <label>Class year<input type="text" data-blm-year placeholder="'27" maxlength="4"></label>
+      <label data-blm-famwrap hidden>Join a family<select data-blm-family></select></label>
+      <label data-blm-newfamwrap>Name your new family line<input type="text" data-blm-newfam placeholder="e.g. The Milk Teeth" maxlength="40"></label>
+      <label>Link to your PDF or page<input type="url" data-blm-link placeholder="https://…"></label>
+      <label>Or upload a PDF (max 2 MB)<input type="file" accept="application/pdf" data-blm-file></label>
+      <div class="blm-err" data-blm-err></div>
+      <button type="button" class="blm-submit" data-blm-submit>Add Me To The Tree&nbsp;→</button>
+      <p class="blm-note">Additions are saved in this browser and appear on the page instantly. The exec board publishes them for everyone in the next site update.</p>
     </div>
   </div>
 </section>
@@ -736,6 +820,30 @@ const FAMILIES = [
     note:'A tight two-little family with a big footprint — most service hours logged per member, two years running.',
     big:{ name:'Maya Feldman', year:"'25", photo:'slot-officer-photo-4.webp' },
     littles:[ {name:'Owen Tran',year:"'27",photo:'slot-officer-photo-2.webp'}, {name:'Isabella Rossi',year:"'28",photo:'slot-officer-photo-8.webp'} ] },
+  { name:'The Bicuspid Bunch', founded:2022, tag:'Two points, one family',
+    note:'Half study group, half supper club. Their post-exam potlucks are chapter legend, and their group chat never sleeps.',
+    big:{ name:'Tessa Grant', year:"'25", photo:'slot-officer-photo-6.webp' },
+    littles:[ {name:'Cole Whitman',year:"'27",photo:'slot-officer-photo-2.webp'}, {name:'Amara Diallo',year:"'28",photo:'slot-officer-photo-7.webp'} ] },
+  { name:'Floss & Found', founded:2023, tag:'Chaos, but color-coded',
+    note:'The youngest line with the oldest soul — shared study boards, themed review sessions, and a found-family energy that shows.',
+    big:{ name:'Riley Nakamura', year:"'26", photo:'slot-officer-photo-8.webp' },
+    littles:[ {name:'Jae Min',year:"'28",photo:'slot-officer-photo-1.webp'} ] },
+  { name:'The Incisal Edge', founded:2021, tag:'Sharp and steady',
+    note:'Precision people: flashcard decks with version numbers and a family calendar that has never once double-booked.',
+    big:{ name:'Andre Bishop', year:"'25", photo:'slot-officer-photo-7.webp' },
+    littles:[ {name:'Sana Iqbal',year:"'27",photo:'slot-officer-photo-4.webp'}, {name:'Leo Martinez',year:"'28",photo:'slot-officer-photo-3.webp'} ] },
+  { name:'The Cusp Crusaders', founded:2022, tag:'Service hours for days',
+    note:'First to sign up, last to leave. If there is a service event on the calendar, at least two Crusaders are already there.',
+    big:{ name:'Nia Thompson', year:"'25", photo:'slot-officer-photo-5.webp' },
+    littles:[ {name:'Sam Rivera',year:"'27",photo:'slot-officer-photo-6.webp'}, {name:'Katie Zhao',year:"'28",photo:'slot-officer-photo-2.webp'} ] },
+  { name:'The Apex Line', founded:2020, tag:'Deep roots, high standards',
+    note:'Quietly one of the most decorated lines in the chapter — three dental school acceptances in the last two cycles.',
+    big:{ name:'Miguel Santos', year:"'24", photo:'slot-officer-photo-1.webp' },
+    littles:[ {name:'Erin Walsh',year:"'26",photo:'slot-officer-photo-8.webp'}, {name:'Tobi Adeyemi',year:"'27",photo:'slot-officer-photo-5.webp'} ] },
+  { name:'The Bracket Pack', founded:2023, tag:'Newest line, biggest energy',
+    note:'Born at last year\'s formal and already recruiting. Motto: straighten up, show up, and bring snacks.',
+    big:{ name:'Harper Ellis', year:"'26", photo:'slot-officer-photo-4.webp' },
+    littles:[ {name:'Quinn Barnes',year:"'28",photo:'slot-officer-photo-6.webp'} ] },
 ];
 
 // ---- Year ----
@@ -826,9 +934,9 @@ document.getElementById('yr').textContent = new Date().getFullYear();
               <p style="margin:0;color:rgba(255,255,255,.88);line-height:1.6;font-size:13.5px;">"A dedicated officer who brings genuine care and enthusiasm to everything DDS does. A true asset to our chapter."</p>
               <div style="margin-top:16px;font-size:13px;color:#fff;"><strong>Chapter Member</strong><span style="color:rgba(255,255,255,.6);"> — DDS '26</span></div>
             </div>
-            <div data-tilt data-depth="1.1" style="position:relative;overflow:hidden;border-radius:20px;background:#16181d;min-height:clamp(150px,16vw,210px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:18px;box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.45);will-change:transform;">
-              <img src="https://placehold.co/210x210/16181d/B9975B" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;">
-              <div style="position:relative;z-index:2;pointer-events:none;">
+            <div data-tilt data-depth="1.1" style="position:relative;overflow:hidden;border-radius:20px;background:radial-gradient(120% 120% at 30% 20%,#20242d 0%,#16181d 62%);min-height:clamp(150px,16vw,210px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:18px;box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.45);will-change:transform;">
+              <div style="position:absolute;inset:0;border:1px solid rgba(185,151,91,.25);border-radius:20px;pointer-events:none;"></div>
+              <div style="position:relative;z-index:2;pointer-events:none;color:#B9975B;">
                 <div style="font-weight:300;letter-spacing:-0.02em;font-size:clamp(2.4rem,4vw,3.6rem);text-shadow:0 4px 24px rgba(0,0,0,.7);">3.0+</div>
                 <div style="margin-top:6px;color:rgba(255,255,255,.85);font-size:12.5px;">GPA Community</div>
               </div>
@@ -1464,30 +1572,121 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   };
   make(document.getElementById('top'), document.getElementById('tooth-hero'));
   make(document.querySelector('#officer-profiles [data-hpin-stage]'), document.getElementById('tooth-officers'));
+  make(document.getElementById('offers'), document.getElementById('tooth-offers'));
 })();
 
-// ---- Big Little: interactive family tree with animated connector lines ----
+// ---- Offers: gold background glow + in-card navy-lightening glow + radial gold text ----
+(function initOffersGlow(){
+  if (REDUCED_MOTION) return;
+  const sec = document.getElementById('offers');
+  const glow = document.getElementById('offers-glow');
+  if (!sec || !glow) return;
+  const cards = Array.from(sec.querySelectorAll('[data-offer-inner]'));
+  const innerGlows = cards.map(c => c.querySelector('.of-glow'));
+  const texts = Array.from(sec.querySelectorAll('.of-glowtext'));
+  let raf = null, cx = 0, cy = 0;
+  sec.addEventListener('mousemove', (e) => {
+    cx = e.clientX; cy = e.clientY;
+    glow.style.opacity = '1';
+    innerGlows.forEach(g => { if (g) g.style.opacity = '1'; });
+    if (!raf) raf = requestAnimationFrame(() => {
+      raf = null;
+      const r = sec.getBoundingClientRect();
+      glow.style.transform = 'translate3d(' + (cx - r.left - 320) + 'px,' + (cy - r.top - 320) + 'px,0)';
+      cards.forEach((c, i) => {
+        const cr = c.getBoundingClientRect();
+        const g = innerGlows[i];
+        if (g) { g.style.setProperty('--gx', (cx - cr.left) + 'px'); g.style.setProperty('--gy', (cy - cr.top) + 'px'); }
+      });
+      for (const t of texts) {
+        const br = t.getBoundingClientRect();
+        t.style.setProperty('--px', (cx - br.left) + 'px');
+        t.style.setProperty('--py', (cy - br.top) + 'px');
+      }
+    });
+  }, {passive:true});
+  sec.addEventListener('mouseleave', () => {
+    glow.style.opacity = '0';
+    innerGlows.forEach(g => { if (g) g.style.opacity = '0'; });
+    for (const t of texts) { t.style.setProperty('--px', '-999px'); t.style.setProperty('--py', '-999px'); }
+  });
+})();
+
+// ---- Big Little: horizontal family rail + tree + add-yourself modal ----
 (function initBigLittle(){
   const root = document.getElementById('big-little');
   if (!root) return;
-  const tabsEl = root.querySelector('[data-bl-tabs]');
+  const railEl = root.querySelector('[data-bl-rail]');
   const bigEl = root.querySelector('[data-bl-big]');
   const littlesEl = root.querySelector('[data-bl-littles]');
   const noteEl = root.querySelector('[data-bl-note]');
   const svg = root.querySelector('[data-bl-links]');
   const stage = root.querySelector('.bl-stage');
   const SVGNS = 'http://www.w3.org/2000/svg';
-  let paths = [], current = 0;
+  const STORE_KEY = 'dds-big-little-v1';
+  let paths = [], current = 0, families = [];
 
-  const nodeHTML = (m, kind) =>
-    '<div class="bl-node bl-node-' + kind + '">' +
-      '<div class="bl-photo"><img src="' + m.photo + '" alt="' + m.name + '" onerror="this.style.opacity=0"></div>' +
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const loadSaved = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch(e){ return []; } };
+
+  // Generated initials portrait for self-added members
+  const avatar = (name) => {
+    const initials = esc(String(name).trim().split(/\s+/).map(w => w[0]).join('').slice(0,2).toUpperCase());
+    const s = '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="300"><rect width="240" height="300" fill="#0c2042"/><circle cx="120" cy="150" r="86" fill="none" stroke="#B9975B" stroke-width="2" opacity=".55"/><text x="120" y="150" fill="#B9975B" font-family="Montserrat,Arial,sans-serif" font-size="64" font-weight="700" text-anchor="middle" dominant-baseline="central">' + initials + '</text></svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+  };
+
+  // data: PDFs can't open in a new tab directly — serve them through a blob URL
+  const linkHref = (m) => {
+    if (!m || !m.pdf) return null;
+    if (m.pdf.slice(0,5) !== 'data:') return m.pdf;
+    if (!m._blobUrl) {
+      try {
+        const byteStr = atob(m.pdf.split(',')[1]);
+        const bytes = new Uint8Array(byteStr.length);
+        for (let i = 0; i < byteStr.length; i++) bytes[i] = byteStr.charCodeAt(i);
+        m._blobUrl = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'}));
+      } catch(e){ return null; }
+    }
+    return m._blobUrl;
+  };
+
+  // Base families + everything saved in this browser, merged
+  const buildFamilies = () => {
+    families = FAMILIES.map(f => ({
+      name:f.name, founded:f.founded, tag:f.tag, note:f.note, custom:false,
+      big:Object.assign({}, f.big), littles:f.littles.map(l => Object.assign({}, l))
+    }));
+    loadSaved().forEach(entry => {
+      if (entry.role === 'big') {
+        families.push({
+          name: entry.family, founded: new Date().getFullYear(), tag: 'Newest branch', custom: true,
+          note: entry.name + ' just planted this line and is looking for littles — say hi at the next meeting.',
+          big: { name: entry.name, year: entry.year, photo: avatar(entry.name), pdf: entry.link || null },
+          littles: []
+        });
+      } else if (entry.role === 'link') {
+        const fam = families.find(f => f.name === entry.family);
+        if (fam) fam.big.pdf = entry.link;
+      } else {
+        const fam = families.find(f => f.name === entry.family);
+        if (fam) fam.littles.push({ name: entry.name, year: entry.year, photo: avatar(entry.name), pdf: entry.link || null });
+      }
+    });
+  };
+
+  const nodeHTML = (m, kind) => {
+    const href = linkHref(m);
+    return '<div class="bl-node bl-node-' + kind + '">' +
+      '<div class="bl-photo"><img src="' + m.photo + '" alt="' + esc(m.name) + '" onerror="this.style.opacity=0"></div>' +
       '<div class="bl-meta">' +
         '<span class="bl-role bl-role-' + kind + '">' + (kind === 'big' ? 'Big' : 'Little') + '</span>' +
-        '<span class="bl-name">' + m.name + '</span>' +
-        '<span class="bl-year">Class of ' + m.year + '</span>' +
+        '<span class="bl-name">' + esc(m.name) + '</span>' +
+        '<span class="bl-year">Class of ' + esc(m.year) + '</span>' +
+        (href ? '<a class="bl-doc" href="' + href + '" target="_blank" rel="noopener">About&nbsp;↗</a>' : '') +
       '</div>' +
     '</div>';
+  };
 
   const drawLinks = () => {
     paths.forEach(p => p.remove());
@@ -1536,21 +1735,23 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 
   const select = (idx) => {
     current = idx;
-    const fam = FAMILIES[idx];
-    Array.from(tabsEl.children).forEach((t, i) => {
-      const on = i === idx;
-      t.classList.toggle('active', on);
-      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    const fam = families[idx];
+    if (!fam) return;
+    Array.from(railEl.querySelectorAll('.blr-card')).forEach((c, i) => {
+      c.classList.toggle('active', i === idx);
+      c.setAttribute('aria-pressed', i === idx ? 'true' : 'false');
     });
     bigEl.innerHTML = nodeHTML(fam.big, 'big');
-    littlesEl.innerHTML = fam.littles.map(l => nodeHTML(l, 'little')).join('');
+    littlesEl.innerHTML = fam.littles.length
+      ? fam.littles.map(l => nodeHTML(l, 'little')).join('')
+      : '<div style="align-self:center;color:#8CA6C4;font-weight:300;font-size:.98rem;padding:26px 10px;border:2px dashed rgba(75,156,211,.3);border-radius:18px;">No littles yet — this line is recruiting.</div>';
     noteEl.innerHTML =
       '<div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:14px;">' +
         '<span style="width:24px;height:1.5px;background:#B9975B;display:block;"></span>' +
-        '<span style="color:#B9975B;font-weight:600;letter-spacing:2px;text-transform:uppercase;font-size:11.5px;">Est. ' + fam.founded + ' &middot; ' + fam.tag + '</span>' +
+        '<span style="color:#B9975B;font-weight:600;letter-spacing:2px;text-transform:uppercase;font-size:11.5px;">Est. ' + esc(fam.founded) + ' &middot; ' + esc(fam.tag) + '</span>' +
         '<span style="width:24px;height:1.5px;background:#B9975B;display:block;"></span>' +
       '</div>' +
-      '<p style="margin:0;color:#C7D6E6;font-weight:400;line-height:1.7;font-size:clamp(1rem,1.4vw,1.2rem);font-family:\'Lora\',serif;font-style:italic;">' + fam.note + '</p>';
+      '<p style="margin:0;color:#C7D6E6;font-weight:400;line-height:1.7;font-size:clamp(1rem,1.4vw,1.2rem);font-family:\'Lora\',serif;font-style:italic;">' + esc(fam.note) + '</p>';
     if (!REDUCED_MOTION) {
       root.querySelectorAll('.bl-node').forEach((n, i) => {
         n.style.opacity = '0'; n.style.transform = 'translateY(14px)';
@@ -1561,15 +1762,145 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     requestAnimationFrame(() => requestAnimationFrame(drawLinks));
   };
 
-  FAMILIES.forEach((fam, i) => {
-    const b = document.createElement('button');
-    b.className = 'bl-tab' + (i === 0 ? ' active' : '');
-    b.type = 'button';
-    b.setAttribute('role', 'tab');
-    b.textContent = fam.name;
-    b.addEventListener('click', () => select(i));
-    tabsEl.appendChild(b);
+  // -- family rail --
+  const renderRail = () => {
+    railEl.innerHTML = '';
+    families.forEach((fam, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'blr-wrap';
+      const href = linkHref(fam.big);
+      wrap.innerHTML =
+        '<div class="blr-back" aria-hidden="true">' +
+          '<span class="blr-eyebrow">Learn about this Big / Little</span>' +
+          '<span class="blr-backname">' + esc(fam.big.name) + ' &middot; ' + esc(fam.name) + '</span>' +
+          (href
+            ? '<a class="pb-btn" href="' + href + '" target="_blank" rel="noopener">Open Their PDF&nbsp;↗</a>'
+            : '<button class="pb-btn" type="button" data-attach="' + i + '" style="border:0;cursor:pointer;font-family:\'Montserrat\',sans-serif;">Add A Link&nbsp;+</button>') +
+        '</div>' +
+        '<button class="blr-card" type="button" data-fam="' + i + '" aria-label="' + esc(fam.name) + ' — view family tree">' +
+          '<img src="' + fam.big.photo + '" alt="" onerror="this.style.opacity=0">' +
+          '<div class="blr-fam">' + esc(fam.name) + '</div>' +
+          '<div class="blr-sub">Big &middot; ' + esc(fam.big.name) + ' ' + esc(fam.big.year) + '</div>' +
+          '<div class="blr-sub" style="margin-top:3px;color:#B9975B;">' + (fam.littles.length ? fam.littles.length + ' little' + (fam.littles.length > 1 ? 's' : '') : 'Recruiting littles') + '</div>' +
+        '</button>';
+      railEl.appendChild(wrap);
+    });
+    const add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'blr-add';
+    add.setAttribute('data-blm-open','');
+    add.setAttribute('aria-label','Add yourself as a big or little');
+    add.innerHTML = '<span class="blr-plus">+</span><span class="blr-addlbl">Add a Big<br>or Little</span>';
+    railEl.appendChild(add);
+  };
+
+  railEl.addEventListener('click', (e) => {
+    const attach = e.target.closest('[data-attach]');
+    if (attach) { openModal({ mode:'attach', famIdx: parseInt(attach.getAttribute('data-attach'), 10) }); return; }
+    if (e.target.closest('[data-blm-open]')) { openModal({ mode:'add' }); return; }
+    const card = e.target.closest('[data-fam]');
+    if (card) select(parseInt(card.getAttribute('data-fam'), 10));
   });
+
+  // -- add-yourself modal --
+  const modal = document.querySelector('[data-blm]');
+  const mName = modal.querySelector('[data-blm-name]');
+  const mYear = modal.querySelector('[data-blm-year]');
+  const mFamily = modal.querySelector('[data-blm-family]');
+  const mFamWrap = modal.querySelector('[data-blm-famwrap]');
+  const mNewFamWrap = modal.querySelector('[data-blm-newfamwrap]');
+  const mNewFam = modal.querySelector('[data-blm-newfam]');
+  const mLink = modal.querySelector('[data-blm-link]');
+  const mFile = modal.querySelector('[data-blm-file]');
+  const mErr = modal.querySelector('[data-blm-err]');
+  const mSub = modal.querySelector('[data-blm-sub]');
+  const roleBtns = Array.from(modal.querySelectorAll('[data-blm-toggle] button'));
+  let role = 'big', attachTarget = null;
+
+  const setRole = (r) => {
+    role = r;
+    roleBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-role') === r));
+    mFamWrap.hidden = (r === 'big');
+    mNewFamWrap.hidden = (r === 'little');
+  };
+  roleBtns.forEach(b => b.addEventListener('click', () => setRole(b.getAttribute('data-role'))));
+
+  const showErr = (msg) => { mErr.textContent = msg; mErr.classList.add('show'); };
+
+  function openModal(opts){
+    attachTarget = null;
+    mErr.classList.remove('show');
+    mName.value = ''; mYear.value = ''; mNewFam.value = ''; mLink.value = ''; mFile.value = '';
+    mFamily.innerHTML = families.map(f => '<option value="' + esc(f.name) + '">' + esc(f.name) + '</option>').join('');
+    if (opts && opts.mode === 'attach') {
+      attachTarget = opts.famIdx;
+      const fam = families[opts.famIdx];
+      mSub.textContent = 'Attach a PDF or link to ' + fam.big.name + ' (' + fam.name + ') so rushees can learn about this big.';
+      mName.value = fam.big.name; mYear.value = fam.big.year || '';
+      setRole('big'); mNewFam.value = fam.name;
+    } else {
+      mSub.textContent = 'Add yourself as a potential big or little. Attach a PDF or link that tells your future family who you are.';
+      setRole('big');
+    }
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    setTimeout(() => (attachTarget != null ? mLink : mName).focus(), 90);
+  }
+  const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); };
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  modal.querySelector('[data-blm-close]').addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+  const finish = (link) => {
+    const list = loadSaved();
+    let famName;
+    if (attachTarget != null) {
+      if (!link) { showErr('Add a link or upload a PDF to attach.'); return; }
+      famName = families[attachTarget].name;
+      list.push({ role:'link', family: famName, link: link });
+    } else {
+      const name = mName.value.trim(), year = mYear.value.trim();
+      if (!name) { showErr('Please enter your name.'); return; }
+      if (!year) { showErr("Please enter your class year (e.g. '27)."); return; }
+      if (role === 'big') {
+        famName = mNewFam.value.trim();
+        if (!famName) { showErr('Give your new family line a name.'); return; }
+        if (families.some(f => f.name.toLowerCase() === famName.toLowerCase())) { showErr('That family name already exists — pick another, or join it as a little.'); return; }
+        list.push({ role:'big', name: name, year: year, family: famName, link: link || null });
+      } else {
+        famName = mFamily.value;
+        list.push({ role:'little', name: name, year: year, family: famName, link: link || null });
+      }
+    }
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); }
+    catch(e) { showErr('That PDF is too large to save in this browser — link to it instead (Google Drive works great).'); return; }
+    closeModal();
+    buildFamilies();
+    renderRail();
+    const idx = families.findIndex(f => f.name === famName);
+    select(idx >= 0 ? idx : 0);
+    const cardEl = railEl.querySelectorAll('.blr-wrap')[idx];
+    if (cardEl) cardEl.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+  };
+
+  modal.querySelector('[data-blm-submit]').addEventListener('click', () => {
+    mErr.classList.remove('show');
+    const url = mLink.value.trim();
+    const f = mFile.files && mFile.files[0];
+    if (f) {
+      if (f.size > 2 * 1024 * 1024) { showErr('PDF is over 2 MB — upload a smaller file or paste a link instead.'); return; }
+      const reader = new FileReader();
+      reader.onload = () => finish(reader.result);
+      reader.onerror = () => showErr('Could not read that file — try again or paste a link.');
+      reader.readAsDataURL(f);
+    } else {
+      if (url && !/^https?:\/\//i.test(url)) { showErr('Links should start with http:// or https://'); return; }
+      finish(url || null);
+    }
+  });
+
+  buildFamilies();
+  renderRail();
   select(0);
   window.addEventListener('resize', drawLinks, {passive:true});
   window.addEventListener('load', () => setTimeout(drawLinks, 120));
