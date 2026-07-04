@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UNC Delta Delta Sigma</title>
+    <meta name="description" content="UNC Delta Delta Sigma chapter experience with leadership, service, and sisterhood." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: '#11202b',
+              parchment: '#f6efe7',
+              blush: '#e7c8b4',
+              moss: '#6a7b58',
+              gold: '#b5904b',
+              slate: '#425261'
+            },
+            fontFamily: {
+              display: ['Cormorant Garamond', 'serif'],
+              sans: ['Inter', 'sans-serif']
+            },
+            boxShadow: {
+              soft: '0 18px 45px -24px rgba(17, 32, 43, 0.35)'
+            }
+          }
+        }
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        background: linear-gradient(135deg, #fdf9f2 0%, #f5e9dc 100%);
+      }
+
+      .grain::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+        pointer-events: none;
+        mix-blend-mode: multiply;
+      }
+    </style>
+  </head>
+  <body class="font-sans text-ink antialiased">
+    <div class="relative isolate overflow-hidden">
+      <div class="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top_left,_rgba(181,144,75,0.28),_transparent_58%)]"></div>
+      <header class="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 sm:px-8 lg:px-10">
+        <a href="#top" class="text-lg font-semibold tracking-[0.24em] text-ink uppercase">Delta Delta Sigma</a>
+        <nav class="hidden items-center gap-8 text-sm font-medium text-slate md:flex">
+          <a href="#about" class="transition hover:text-gold">About</a>
+          <a href="#values" class="transition hover:text-gold">Values</a>
+          <a href="#events" class="transition hover:text-gold">Events</a>
+          <a href="#contact" class="transition hover:text-gold">Contact</a>
+        </nav>
+      </header>
+
+      <main id="top" class="mx-auto max-w-7xl px-6 pb-20 sm:px-8 lg:px-10">
+        <section class="grid items-center gap-10 rounded-[2rem] border border-white/70 bg-white/70 px-6 py-8 shadow-soft backdrop-blur md:grid-cols-[1.1fr_0.9fr] md:px-8 lg:px-10 lg:py-12">
+          <div class="relative z-10">
+            <p class="mb-4 text-sm font-semibold uppercase tracking-[0.32em] text-gold">University of North Carolina</p>
+            <h1 class="font-display text-4xl leading-none text-ink sm:text-5xl lg:text-6xl">
+              A chapter built on grace, leadership, and lasting sisterhood.
+            </h1>
+            <p class="mt-6 max-w-xl text-lg leading-8 text-slate">
+              Delta Delta Sigma at UNC creates space for women to grow through service, scholarship, and community connection while uplifting one another with purpose.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-4">
+              <a href="#contact" class="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-parchment transition hover:-translate-y-0.5 hover:bg-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold active:translate-y-0">
+                Connect with the chapter
+              </a>
+              <a href="#values" class="rounded-full border border-ink/15 px-6 py-3 text-sm font-semibold text-ink transition hover:-translate-y-0.5 hover:border-gold hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold active:translate-y-0">
+                Explore our values
+              </a>
+            </div>
+            <div class="mt-10 grid gap-4 sm:grid-cols-3">
+              <div class="rounded-2xl border border-ink/10 bg-parchment/70 p-4">
+                <p class="text-2xl font-semibold text-ink">120+</p>
+                <p class="mt-1 text-sm text-slate">Women in our circle</p>
+              </div>
+              <div class="rounded-2xl border border-ink/10 bg-parchment/70 p-4">
+                <p class="text-2xl font-semibold text-ink">45</p>
+                <p class="mt-1 text-sm text-slate">Service hours each term</p>
+              </div>
+              <div class="rounded-2xl border border-ink/10 bg-parchment/70 p-4">
+                <p class="text-2xl font-semibold text-ink">4</p>
+                <p class="mt-1 text-sm text-slate">Core pillars of impact</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative grain">
+            <div class="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-gold/20 via-transparent to-moss/10"></div>
+            <img src="https://placehold.co/900x1100/11202b/f6efe7?text=UNC+Delta+Delta+Sigma" alt="UNC Delta Delta Sigma members gathering" class="relative h-full w-full rounded-[2rem] object-cover shadow-soft" />
+          </div>
+        </section>
+
+        <section id="about" class="mt-16 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+          <div class="rounded-[2rem] border border-ink/10 bg-[#fdf8f2] p-8 shadow-soft">
+            <p class="text-sm font-semibold uppercase tracking-[0.32em] text-gold">Our story</p>
+            <h2 class="mt-4 font-display text-3xl text-ink sm:text-4xl">A sisterhood rooted in purpose and belonging.</h2>
+            <p class="mt-5 text-lg leading-8 text-slate">
+              We celebrate women who lead with confidence, care deeply for the communities around them, and believe in showing up for one another through every season of campus life.
+            </p>
+            <p class="mt-4 text-lg leading-8 text-slate">
+              From mentorship and philanthropy to campus leadership and celebration, our chapter is dedicated to building a home that is both elevated and grounded.
+            </p>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <article class="rounded-[2rem] border border-ink/10 bg-white/80 p-6 shadow-soft">
+              <h3 class="font-display text-2xl text-ink">Scholarship</h3>
+              <p class="mt-3 text-base leading-7 text-slate">We support academic growth through study circles, peer mentorship, and shared accountability.</p>
+            </article>
+            <article class="rounded-[2rem] border border-ink/10 bg-white/80 p-6 shadow-soft">
+              <h3 class="font-display text-2xl text-ink">Service</h3>
+              <p class="mt-3 text-base leading-7 text-slate">We partner with local organizations and campus initiatives to make a visible impact.</p>
+            </article>
+            <article class="rounded-[2rem] border border-ink/10 bg-white/80 p-6 shadow-soft">
+              <h3 class="font-display text-2xl text-ink">Leadership</h3>
+              <p class="mt-3 text-base leading-7 text-slate">We cultivate confident voices across student government, philanthropy, and campus experiences.</p>
+            </article>
+            <article class="rounded-[2rem] border border-ink/10 bg-white/80 p-6 shadow-soft">
+              <h3 class="font-display text-2xl text-ink">Community</h3>
+              <p class="mt-3 text-base leading-7 text-slate">We create traditions, rituals, and friendships that stay with our members long after graduation.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="values" class="mt-16 rounded-[2rem] border border-ink/10 bg-ink p-8 text-parchment shadow-soft sm:p-10 lg:p-12">
+          <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.32em] text-[#f1c78f]">Values</p>
+              <h2 class="mt-3 font-display text-3xl sm:text-4xl">The pillars that guide our chapter.</h2>
+            </div>
+            <p class="max-w-2xl text-lg leading-8 text-parchment/80">
+              Our work is guided by a commitment to excellence, compassion, and connection that strengthens both the chapter and the campus community.
+            </p>
+          </div>
+          <div class="mt-8 grid gap-4 md:grid-cols-3">
+            <div class="rounded-[1.5rem] border border-white/10 bg-white/10 p-6">
+              <h3 class="font-display text-2xl">Grace</h3>
+              <p class="mt-3 text-base leading-7 text-parchment/80">We meet life with poise, empathy, and a steady sense of purpose.</p>
+            </div>
+            <div class="rounded-[1.5rem] border border-white/10 bg-white/10 p-6">
+              <h3 class="font-display text-2xl">Courage</h3>
+              <p class="mt-3 text-base leading-7 text-parchment/80">We lead with confidence and speak for what matters with conviction.</p>
+            </div>
+            <div class="rounded-[1.5rem] border border-white/10 bg-white/10 p-6">
+              <h3 class="font-display text-2xl">Service</h3>
+              <p class="mt-3 text-base leading-7 text-parchment/80">We believe care becomes meaningful when it is shared generously.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="events" class="mt-16 grid gap-8 lg:grid-cols-[1fr_0.9fr]">
+          <div class="rounded-[2rem] border border-ink/10 bg-white/80 p-8 shadow-soft">
+            <p class="text-sm font-semibold uppercase tracking-[0.32em] text-gold">Upcoming moments</p>
+            <h2 class="mt-4 font-display text-3xl text-ink sm:text-4xl">Events and traditions that bring us together.</h2>
+            <div class="mt-8 space-y-4">
+              <div class="flex items-center justify-between rounded-2xl border border-ink/10 bg-parchment/60 px-4 py-4">
+                <div>
+                  <p class="font-semibold text-ink">Fall Welcome Dinner</p>
+                  <p class="text-sm text-slate">September 12 • Chapel Hill</p>
+                </div>
+                <span class="rounded-full bg-gold/15 px-3 py-1 text-sm font-medium text-gold">Open invite</span>
+              </div>
+              <div class="flex items-center justify-between rounded-2xl border border-ink/10 bg-parchment/60 px-4 py-4">
+                <div>
+                  <p class="font-semibold text-ink">Community Service Day</p>
+                  <p class="text-sm text-slate">October 5 • Local nonprofit</p>
+                </div>
+                <span class="rounded-full bg-moss/10 px-3 py-1 text-sm font-medium text-moss">Volunteer</span>
+              </div>
+              <div class="flex items-center justify-between rounded-2xl border border-ink/10 bg-parchment/60 px-4 py-4">
+                <div>
+                  <p class="font-semibold text-ink">Founders’ Celebration</p>
+                  <p class="text-sm text-slate">November 18 • Formal evening</p>
+                </div>
+                <span class="rounded-full bg-slate/10 px-3 py-1 text-sm font-medium text-slate">Special event</span>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-[2rem] border border-ink/10 bg-[#fdf8f2] p-8 shadow-soft">
+            <img src="https://placehold.co/900x700/6a7b58/f6efe7?text=UNC+Campus+Community" alt="UNC campus community gathering" class="h-56 w-full rounded-[1.5rem] object-cover" />
+            <h3 class="mt-6 font-display text-2xl text-ink">A home for women who value connection.</h3>
+            <p class="mt-3 text-lg leading-8 text-slate">
+              Whether it is a study night, a service initiative, or a shared celebration, our chapter remains centered on building a community that feels welcoming, meaningful, and enduring.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer id="contact" class="border-t border-ink/10 bg-white/70">
+        <div class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-10">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.32em] text-gold">Contact</p>
+            <h2 class="mt-2 font-display text-3xl text-ink">Interested in learning more?</h2>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a href="mailto:membership@uncdeltadeltasigma.org" class="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-parchment transition hover:bg-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold active:translate-y-0">
+              Email the chapter
+            </a>
+            <a href="#top" class="rounded-full border border-ink/15 px-6 py-3 text-sm font-semibold text-ink transition hover:border-gold hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold active:translate-y-0">
+              Back to top
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
