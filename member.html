@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Member Profile — UNC Delta Delta Sigma</title>
+<meta name="description" content="Private member profile page for Delta Delta Sigma, UNC-Chapel Hill's pre-dental honor society.">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" type="image/png" href="logo-dds.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+[hidden]{display:none !important;}
+html{scroll-behavior:smooth;overflow-x:clip;}
+body{margin:0;background:#0A1A30;-webkit-font-smoothing:antialiased;font-family:'Montserrat',sans-serif;color:#fff;}
+::selection{background:#4B9CD3;color:#0A1A30;}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #4B9CD3;outline-offset:3px;}
+
+/* Sub-page nav */
+.subnav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px clamp(20px,4vw,48px);background:rgba(9,20,38,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(75,156,211,.18);}
+.subnav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;}
+.subnav-brand img{width:40px;height:40px;border-radius:50%;display:block;box-shadow:0 4px 16px -5px rgba(0,0,0,.6);}
+.subnav-brand span{font-weight:700;font-size:14px;letter-spacing:2px;color:#D7E2EA;white-space:nowrap;}
+.subnav-links{display:flex;align-items:center;gap:clamp(14px,2.4vw,30px);}
+.subnav-links a{color:#D7E2EA;font-weight:600;font-size:12.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;white-space:nowrap;}
+.subnav-links a:hover{opacity:.62;}
+@media(max-width:560px){.subnav-hide{display:none;}}
+
+/* Page header */
+.prof-hero{padding:clamp(120px,17vh,170px) clamp(20px,4vw,48px) clamp(120px,14vw,170px);text-align:center;background:radial-gradient(125% 95% at 50% -12%,#214a7e 0%,#16315a 34%,#0c2042 64%,#0A1A30 100%);}
+.prof-eyebrow{display:inline-flex;align-items:center;gap:14px;margin-bottom:20px;}
+.prof-eyebrow .rule{width:34px;height:1.5px;background:#B9975B;display:block;}
+.prof-eyebrow span:nth-child(2){color:#B9975B;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;}
+.prof-hero h1{margin:0;font-weight:900;text-transform:uppercase;line-height:.88;letter-spacing:-0.02em;font-size:clamp(2.4rem,8vw,5.5rem);background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+.prof-hero p{margin:22px auto 0;max-width:560px;font-family:'Lora',serif;font-style:italic;font-size:clamp(1rem,1.6vw,1.2rem);line-height:1.7;color:#C5D6E8;}
+
+/* Paper profile sheet */
+.sheet-wrap{max-width:820px;margin:clamp(-90px,-10vw,-120px) auto clamp(70px,9vw,110px);padding:0 clamp(16px,3vw,32px);position:relative;z-index:5;}
+.sheet{position:relative;background:#FBF8F1;color:#13294B;border-radius:14px;box-shadow:0 50px 110px -40px rgba(0,0,0,.85);padding:clamp(26px,4.5vw,52px);}
+.sheet::after{content:"";position:absolute;inset:0;border-radius:14px;background:url('grain.png') repeat;opacity:.13;mix-blend-mode:multiply;pointer-events:none;}
+.sheet>*{position:relative;z-index:2;}
+.sh-head{display:flex;align-items:center;gap:20px;flex-wrap:wrap;border-bottom:2.5px solid #13294B;padding-bottom:22px;margin-bottom:26px;}
+.sh-avatar{flex:none;width:88px;height:88px;border-radius:50%;background:#13294B;color:#B9975B;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.7rem;letter-spacing:1px;border:2.5px solid #B9975B;overflow:hidden;box-shadow:0 12px 30px -14px rgba(19,41,75,.7);}
+.sh-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.sh-id{flex:1;min-width:200px;}
+.sh-name{margin:0;font-family:'Lora',serif;font-weight:600;font-size:clamp(1.4rem,3vw,1.9rem);color:#13294B;}
+.sh-mail{margin:4px 0 0;color:#5A7798;font-size:.9rem;}
+.sh-meta{margin:8px 0 0;display:flex;gap:8px;flex-wrap:wrap;}
+.sh-chip{font-weight:700;letter-spacing:1.2px;font-size:9.5px;text-transform:uppercase;color:#8a6d38;border:1px solid rgba(185,151,91,.6);border-radius:999px;padding:3px 10px;}
+.sh-signout{background:none;border:1px solid rgba(190,70,70,.45);border-radius:999px;padding:10px 20px;color:#A03030;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;font-size:10.5px;cursor:pointer;transition:background .2s;}
+.sh-signout:hover{background:rgba(190,60,60,.09);}
+.sh-lede{margin:0 0 24px;color:#5A7798;font-size:.95rem;line-height:1.7;}
+
+.sheet label{display:block;margin-bottom:16px;color:#33719F;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:10.5px;}
+.sheet input[type=text],.sheet textarea{display:block;width:100%;margin-top:6px;padding:12px 14px;border-radius:11px;border:1px solid rgba(19,41,75,.28);background:#fff;color:#13294B;font-family:'Montserrat',sans-serif;font-size:14px;letter-spacing:normal;text-transform:none;font-weight:500;transition:border-color .2s,box-shadow .2s;resize:vertical;}
+.sheet textarea{min-height:76px;line-height:1.6;}
+.sheet input:focus,.sheet textarea:focus{outline:none;border-color:#4B9CD3;box-shadow:0 0 0 3px rgba(75,156,211,.22);}
+.sheet input[type=file]{margin-top:6px;padding:9px;font-size:12.5px;color:#5A7798;display:block;width:100%;border:1px solid rgba(19,41,75,.28);border-radius:11px;background:#fff;}
+.sh-hint{display:block;margin-top:5px;color:#8296AE;font-weight:500;font-size:10px;letter-spacing:.6px;text-transform:none;}
+.sh-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;}
+@media(max-width:600px){.sh-grid{grid-template-columns:1fr;}}
+.sh-photo-row{display:flex;align-items:center;gap:16px;margin:-2px 0 18px;padding:12px;border:1px solid rgba(19,41,75,.2);border-radius:12px;background:#fff;}
+.sh-photo-row[hidden]{display:none;}
+.sh-photo-row img{width:64px;height:64px;border-radius:50%;object-fit:cover;display:block;background:#0c2042;}
+.sh-photo-meta{display:flex;flex-direction:column;gap:6px;color:#5A7798;font-size:11.5px;line-height:1.4;}
+.sh-photo-clear{align-self:flex-start;background:none;border:0;padding:0;color:#A03030;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;}
+.sh-photo-clear:hover{text-decoration:underline;}
+.sh-save{display:block;width:100%;margin-top:8px;padding:15px;border-radius:999px;border:0;background:#B9975B;color:#0A1A30;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:12.5px;cursor:pointer;transition:transform .2s,background .2s;box-shadow:0 14px 30px -12px rgba(185,151,91,.75);}
+.sh-save:hover{transform:translateY(-2px);}
+.sh-save.saved{background:#2e7d4f;color:#fff;}
+.sh-note{margin:16px 0 0;color:#8296AE;font-size:11.5px;line-height:1.6;text-align:center;}
+.sh-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px;border-top:1px solid rgba(19,41,75,.15);padding-top:22px;}
+.sh-link{flex:1;min-width:180px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-radius:12px;text-decoration:none;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;font-size:10.5px;border:1px solid rgba(19,41,75,.22);color:#13294B;background:rgba(19,41,75,.03);transition:transform .2s,background .2s;}
+.sh-link:hover{transform:translateY(-2px);background:rgba(75,156,211,.1);}
+.sh-link span{color:#B9975B;}
+
+@media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
+</style>
+</head>
+<body>
+
+<nav class="subnav">
+  <a class="subnav-brand" href="index.html"><img src="logo-dds.png" alt="DDS" onerror="this.src='https://placehold.co/40x40/13294B/4B9CD3'"><span>UNC DDS</span></a>
+  <div class="subnav-links">
+    <a href="newsletter.html" class="subnav-hide">The Bite</a>
+    <a href="index.html">&larr; Back to the site</a>
+  </div>
+</nav>
+
+<header class="prof-hero">
+  <div class="prof-eyebrow"><span class="rule"></span><span>ΔΔΣ Member Profile</span><span class="rule"></span></div>
+  <h1>Make It<br>Yours</h1>
+  <p>Tell the chapter who you are — your profile powers the member community directory we’re building next.</p>
+</header>
+
+<main class="sheet-wrap">
+  <div class="sheet">
+    <div class="sh-head">
+      <div class="sh-avatar" id="sh-avatar">··</div>
+      <div class="sh-id">
+        <h2 class="sh-name" id="sh-name">Member</h2>
+        <p class="sh-mail" id="sh-mail"></p>
+        <div class="sh-meta" id="sh-meta"></div>
+      </div>
+      <button type="button" class="sh-signout" id="sh-signout">Sign Out</button>
+    </div>
+    <p class="sh-lede">Everything here is optional — fill in what you’d want a future big, little, or study buddy to know. You can come back and update it any time.</p>
+    <form id="sh-form" novalidate>
+      <label>Profile photo<input type="file" id="sh-photo" accept="image/*"><span class="sh-hint">Square-cropped automatically — faces work best.</span></label>
+      <div class="sh-photo-row" id="sh-photo-row" hidden>
+        <img id="sh-photo-img" alt="Profile photo preview">
+        <div class="sh-photo-meta"><span>Looking sharp. This shows in the nav and the future member directory.</span>
+          <button type="button" class="sh-photo-clear" id="sh-photo-clear">Remove photo ✕</button>
+        </div>
+      </div>
+      <label>Major(s)<input type="text" id="sh-major" placeholder="e.g. Biology, Chemistry minor" maxlength="80"></label>
+      <label>Interests<textarea id="sh-interests" maxlength="400" placeholder="Pediatric dentistry, public health, research…"></textarea></label>
+      <label>Hobbies<textarea id="sh-hobbies" maxlength="400" placeholder="Intramural soccer, ceramics, Sunday hikes at Occoneechee…"></textarea></label>
+      <div class="sh-grid">
+        <label>Favorite classes<textarea id="sh-classes" maxlength="300" placeholder="BIOL 252, CHEM 430…"></textarea></label>
+        <label>Favorite professors<textarea id="sh-profs" maxlength="300" placeholder="Dr. Marsh, Prof. Nguyen…"></textarea></label>
+      </div>
+      <button type="submit" class="sh-save" id="sh-save">Save My Profile</button>
+    </form>
+    <p class="sh-note">Saved to your member record in this browser — when the community directory launches, this is the card other members will see.</p>
+    <div class="sh-links">
+      <a class="sh-link" href="newsletter.html#write">Write for The Bite<span>→</span></a>
+      <a class="sh-link" href="index.html#big-little">Join the Big / Little tree<span>→</span></a>
+      <a class="sh-link" href="login.html">Account &amp; access<span>→</span></a>
+    </div>
+  </div>
+</main>
+
+<script src="dds-auth.js"></script>
+<script>
+(function(){
+'use strict';
+
+var me = DDSAuth.current();
+if (!me) { DDSAuth.requireLogin('member.html'); return; }
+
+var photoData = me.photo || null;
+
+function initials(name){
+  return name.trim().split(/\s+/).map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase() || 'ΔΣ';
+}
+function renderHead(){
+  var av = document.getElementById('sh-avatar');
+  av.innerHTML = photoData ? '<img src="' + photoData + '" alt="">' : initials(me.name);
+  document.getElementById('sh-name').textContent = me.name;
+  document.getElementById('sh-mail').textContent = me.email;
+  document.getElementById('sh-meta').innerHTML =
+    '<span class="sh-chip">Class of ' + (me.gradYear || '—') + '</span>' +
+    '<span class="sh-chip">' + (me.role === 'exec' ? 'Exec Board' : 'Member') + '</span>';
+}
+function setPhotoRow(){
+  var row = document.getElementById('sh-photo-row');
+  row.hidden = !photoData;
+  if (photoData) document.getElementById('sh-photo-img').src = photoData;
+  else document.getElementById('sh-photo').value = '';
+}
+
+renderHead();
+setPhotoRow();
+document.getElementById('sh-major').value = me.major || '';
+document.getElementById('sh-interests').value = me.interests || '';
+document.getElementById('sh-hobbies').value = me.hobbies || '';
+document.getElementById('sh-classes').value = me.favClasses || '';
+document.getElementById('sh-profs').value = me.favProfs || '';
+
+// Square center-crop to 480px, JPEG — same treatment as big/little photos
+document.getElementById('sh-photo').addEventListener('change', function(){
+  var file = this.files && this.files[0];
+  if (!file) return;
+  var img = new Image();
+  var url = URL.createObjectURL(file);
+  img.onload = function(){
+    var s = Math.min(img.naturalWidth, img.naturalHeight);
+    var sx = (img.naturalWidth - s) / 2, sy = (img.naturalHeight - s) / 2;
+    var c = document.createElement('canvas'); c.width = 480; c.height = 480;
+    c.getContext('2d').drawImage(img, sx, sy, s, s, 0, 0, 480, 480);
+    photoData = c.toDataURL('image/jpeg', .84);
+    URL.revokeObjectURL(url);
+    renderHead(); setPhotoRow();
+  };
+  img.onerror = function(){ URL.revokeObjectURL(url); };
+  img.src = url;
+});
+document.getElementById('sh-photo-clear').addEventListener('click', function(){
+  photoData = null; renderHead(); setPhotoRow();
+});
+
+document.getElementById('sh-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  var res = DDSAuth.updateProfile({
+    photo: photoData,
+    major: document.getElementById('sh-major').value.trim(),
+    interests: document.getElementById('sh-interests').value.trim(),
+    hobbies: document.getElementById('sh-hobbies').value.trim(),
+    favClasses: document.getElementById('sh-classes').value.trim(),
+    favProfs: document.getElementById('sh-profs').value.trim()
+  });
+  if (!res.ok) { DDSAuth.requireLogin('member.html'); return; }
+  me = res.member;
+  var btn = document.getElementById('sh-save');
+  btn.textContent = 'Saved ✓';
+  btn.classList.add('saved');
+  setTimeout(function(){ btn.textContent = 'Save My Profile'; btn.classList.remove('saved'); }, 2200);
+});
+
+document.getElementById('sh-signout').addEventListener('click', function(){
+  DDSAuth.signOut();
+  location.href = 'index.html';
+});
+})();
+</script>
+</body>
+</html>
