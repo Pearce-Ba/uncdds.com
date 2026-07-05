@@ -144,7 +144,8 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .blr-add .blr-addlbl{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;line-height:1.5;}
 .bl-doc{display:inline-flex;align-items:center;gap:5px;margin-top:2px;color:#B9975B;font-weight:700;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none;}
 .bl-doc:hover{text-decoration:underline;}
-@media(max-width:560px){.blr-wrap{width:74vw;}}
+.bl-edit{display:inline-flex;align-items:center;gap:5px;margin-top:4px;padding:4px 12px;border-radius:999px;border:1px solid rgba(75,156,211,.45);background:rgba(75,156,211,.1);color:#7FB2E0;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s;}
+.bl-edit:hover{background:rgba(75,156,211,.24);color:#EAF1F8;}
 /* Add-yourself modal */
 .blm-overlay{position:fixed;inset:0;z-index:300;background:rgba(4,10,22,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s;}
 .blm-overlay.open{opacity:1;visibility:visible;}
@@ -167,6 +168,15 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .blm-submit{display:block;width:100%;padding:14px;border-radius:999px;border:0;background:#B9975B;color:#0A1A30;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:12.5px;cursor:pointer;transition:transform .2s;}
 .blm-submit:hover{transform:translateY(-2px);}
 .blm-note{margin:14px 0 0;color:#6E89A6;font-size:11.5px;line-height:1.55;text-align:center;}
+.blm-photoprev{display:flex;align-items:center;gap:14px;margin:-4px 0 16px;padding:10px;border:1px solid rgba(75,156,211,.3);border-radius:14px;background:rgba(9,20,38,.55);}
+.blm-photoprev[hidden]{display:none;}
+.blm-photoprev img{display:block;width:56px;height:70px;object-fit:cover;border-radius:10px;background:#0c2042;}
+.blm-photoprev-meta{display:flex;flex-direction:column;gap:6px;color:#8CA6C4;font-size:11.5px;line-height:1.4;}
+.blm-photoclear{align-self:flex-start;background:none;border:0;padding:0;color:#E08585;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;}
+.blm-photoclear:hover{text-decoration:underline;}
+.blm-delete{display:block;width:100%;margin-top:10px;padding:12px;border-radius:999px;border:1px solid rgba(220,90,90,.45);background:rgba(200,60,60,.1);color:#F3B8B8;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:11.5px;cursor:pointer;transition:background .2s;}
+.blm-delete:hover{background:rgba(200,60,60,.22);}
+.blm-delete[hidden]{display:none;}
 .bl-stage{position:relative;max-width:880px;margin:0 auto;min-height:clamp(430px,52vw,560px);}
 .bl-links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible;}
 .bl-links path{transition:stroke-width .25s ease,opacity .25s ease;}
@@ -235,7 +245,14 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   [data-hpin-stage]{position:static !important;height:auto !important;overflow:visible !important;}
   [data-hpin-track]{position:static !important;flex-direction:column !important;transform:none !important;}
   [data-officer-panel]{width:100% !important;height:auto !important;min-height:0 !important;padding:clamp(52px,11vw,92px) 18px 40px !important;perspective:none !important;}
-  .op-grid{grid-template-columns:1fr !important;}
+  .op-grid{grid-template-columns:minmax(0,1fr) !important;}
+  #officers-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+  /* Big/Little: horizontal rail becomes a wrapped grid — no sideways scrolling on touch */
+  .bl-rail-shell{display:block;}
+  .bl-rail{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;overflow:visible;padding:6px 2px 8px;scroll-snap-type:none;}
+  .blr-wrap{width:auto;}
+  .blr-back{display:none;}
+  .bl-add-dock{border-left:0;justify-content:center;padding:18px 0 0;margin:0;}
 }
 @media(max-width:640px){
   #gal-grid{grid-template-columns:1fr !important;}
@@ -653,12 +670,21 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       </div>
       <label>Your name<input type="text" data-blm-name placeholder="First Last" maxlength="40"></label>
       <label>Class year<input type="text" data-blm-year placeholder="'27" maxlength="4"></label>
+      <label data-blm-photowrap>Your photo (optional)<input type="file" accept="image/*" data-blm-photo></label>
+      <div class="blm-photoprev" data-blm-photoprev hidden>
+        <img alt="Photo preview" data-blm-photoimg>
+        <div class="blm-photoprev-meta">
+          <span>Cropped to fit your card.</span>
+          <button type="button" class="blm-photoclear" data-blm-photoclear>Remove photo ✕</button>
+        </div>
+      </div>
       <label data-blm-famwrap hidden>Join a family<select data-blm-family></select></label>
       <label data-blm-newfamwrap>Name your new family line<input type="text" data-blm-newfam placeholder="e.g. The Milk Teeth" maxlength="40"></label>
       <label>Link to your PDF or page<input type="url" data-blm-link placeholder="https://…"></label>
       <label>Or upload a PDF (max 2 MB)<input type="file" accept="application/pdf" data-blm-file></label>
       <div class="blm-err" data-blm-err></div>
       <button type="button" class="blm-submit" data-blm-submit>Add Me To The Tree&nbsp;→</button>
+      <button type="button" class="blm-delete" data-blm-delete hidden>Remove me from the tree</button>
       <p class="blm-note">Additions are saved in this browser and appear on the page instantly. The exec board publishes them for everyone in the next site update.</p>
     </div>
   </div>
@@ -760,7 +786,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 </section>
 
 <!-- CALENDAR -->
-<section id="calendar" style="background:#08172B;color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;padding:clamp(64px,9vw,120px) clamp(20px,5vw,64px) clamp(36px,4vw,56px);position:relative;z-index:11;">
+<section id="calendar" style="background:#08172B;color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;padding:clamp(64px,9vw,120px) clamp(20px,5vw,64px) clamp(36px,4vw,56px);position:relative;z-index:11;overflow:clip;">
   <div style="max-width:1200px;margin:0 auto;width:100%;">
     <div data-reveal="0" style="text-align:center;margin-bottom:clamp(40px,5vw,64px);">
       <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">Stay In The Loop</div>
@@ -930,7 +956,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
           </div>
           <a href="#join" class="connect-btn" style="flex:none;display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;background:rgba(255,255,255,.04);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 1px rgba(255,255,255,.12);color:#fff;font-weight:500;font-size:13px;text-decoration:none;transition:background .2s;">Connect&nbsp;↗</a>
         </div>
-        <div class="op-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.2vw,18px);align-items:stretch;">
+        <div class="op-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.2vw,18px);align-items:stretch;">
           <!-- Col 1: background -->
           <div data-tilt data-depth="1.35" style="position:relative;border-radius:20px;overflow:hidden;background:#16181d;min-height:clamp(380px,42vw,540px);box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.45);will-change:transform;">
             <img src="${o.bgPhoto}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;">
@@ -1644,6 +1670,8 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const loadSaved = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch(e){ return []; } };
+  const saveList = (list) => localStorage.setItem(STORE_KEY, JSON.stringify(list));
+  const uid = () => 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
   // Generated initials portrait for self-added members
   const avatar = (name) => {
@@ -1667,18 +1695,24 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     return m._blobUrl;
   };
 
-  // Base families + everything saved in this browser, merged
+  // Base families + everything saved in this browser, merged.
+  // Saved entries carry an id — that's how we know a card was created in this
+  // browser and can be edited/removed here.
   const buildFamilies = () => {
     families = FAMILIES.map(f => ({
       name:f.name, founded:f.founded, tag:f.tag, note:f.note, custom:false,
       big:Object.assign({}, f.big), littles:f.littles.map(l => Object.assign({}, l))
     }));
-    loadSaved().forEach(entry => {
+    const saved = loadSaved();
+    let migrated = false;
+    saved.forEach(e => { if (e.role !== 'link' && !e.id) { e.id = uid(); migrated = true; } });
+    if (migrated) { try { saveList(saved); } catch(e){} }
+    saved.forEach(entry => {
       if (entry.role === 'big') {
         families.push({
           name: entry.family, founded: new Date().getFullYear(), tag: 'Newest branch', custom: true,
           note: entry.name + ' just planted this line and is looking for littles — say hi at the next meeting.',
-          big: { name: entry.name, year: entry.year, photo: avatar(entry.name), pdf: entry.link || null },
+          big: { name: entry.name, year: entry.year, photo: entry.photo || avatar(entry.name), pdf: entry.link || null, editId: entry.id },
           littles: []
         });
       } else if (entry.role === 'link') {
@@ -1686,12 +1720,12 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
         if (fam) fam.big.pdf = entry.link;
       } else {
         const fam = families.find(f => f.name === entry.family);
-        if (fam) fam.littles.push({ name: entry.name, year: entry.year, photo: avatar(entry.name), pdf: entry.link || null });
+        if (fam) fam.littles.push({ name: entry.name, year: entry.year, photo: entry.photo || avatar(entry.name), pdf: entry.link || null, editId: entry.id });
       }
     });
   };
 
-  const nodeHTML = (m, kind) => {
+  const nodeHTML = (m, kind, famIdx) => {
     const href = linkHref(m);
     return '<div class="bl-node bl-node-' + kind + '">' +
       '<div class="bl-photo"><img src="' + m.photo + '" alt="' + esc(m.name) + '" onerror="this.style.opacity=0"></div>' +
@@ -1700,6 +1734,9 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
         '<span class="bl-name">' + esc(m.name) + '</span>' +
         '<span class="bl-year">Class of ' + esc(m.year) + '</span>' +
         (href ? '<a class="bl-doc" href="' + href + '" target="_blank" rel="noopener">About&nbsp;↗</a>' : '') +
+        (!href && kind === 'big' && !m.editId && famIdx != null
+          ? '<button class="bl-doc" type="button" data-attach="' + famIdx + '" style="background:none;border:0;padding:0;cursor:pointer;font-family:inherit;">Add a link&nbsp;+</button>' : '') +
+        (m.editId ? '<button class="bl-edit" type="button" data-edit="' + esc(m.editId) + '" aria-label="Edit ' + esc(m.name) + '\'s card">✎&nbsp;Edit</button>' : '') +
       '</div>' +
     '</div>';
   };
@@ -1757,7 +1794,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
       c.classList.toggle('active', i === idx);
       c.setAttribute('aria-pressed', i === idx ? 'true' : 'false');
     });
-    bigEl.innerHTML = nodeHTML(fam.big, 'big');
+    bigEl.innerHTML = nodeHTML(fam.big, 'big', idx);
     littlesEl.innerHTML = fam.littles.length
       ? fam.littles.map(l => nodeHTML(l, 'little')).join('')
       : '<div style="align-self:center;color:#8CA6C4;font-weight:300;font-size:.98rem;padding:26px 10px;border:2px dashed rgba(75,156,211,.3);border-radius:18px;">No littles yet — this line is recruiting.</div>';
@@ -1785,13 +1822,15 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
       const wrap = document.createElement('div');
       wrap.className = 'blr-wrap';
       const href = linkHref(fam.big);
+      let backBtns = '';
+      if (href) backBtns += '<a class="pb-btn" href="' + href + '" target="_blank" rel="noopener">Open Their PDF&nbsp;↗</a>';
+      if (fam.big.editId) backBtns += '<button class="pb-btn" type="button" data-edit="' + esc(fam.big.editId) + '" style="border:0;cursor:pointer;font-family:\'Montserrat\',sans-serif;">Edit My Card&nbsp;✎</button>';
+      else if (!href) backBtns += '<button class="pb-btn" type="button" data-attach="' + i + '" style="border:0;cursor:pointer;font-family:\'Montserrat\',sans-serif;">Add A Link&nbsp;+</button>';
       wrap.innerHTML =
         '<div class="blr-back" aria-hidden="true">' +
           '<span class="blr-eyebrow">Learn about this Big / Little</span>' +
           '<span class="blr-backname">' + esc(fam.big.name) + ' &middot; ' + esc(fam.name) + '</span>' +
-          (href
-            ? '<a class="pb-btn" href="' + href + '" target="_blank" rel="noopener">Open Their PDF&nbsp;↗</a>'
-            : '<button class="pb-btn" type="button" data-attach="' + i + '" style="border:0;cursor:pointer;font-family:\'Montserrat\',sans-serif;">Add A Link&nbsp;+</button>') +
+          backBtns +
         '</div>' +
         '<button class="blr-card" type="button" data-fam="' + i + '" aria-label="' + esc(fam.name) + ' — view family tree">' +
           '<img src="' + fam.big.photo + '" alt="" onerror="this.style.opacity=0">' +
@@ -1804,9 +1843,12 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     updateArrows();
   };
 
-  railEl.addEventListener('click', (e) => {
+  // Delegated: covers the rail cards AND the tree nodes below (attach/edit live in both)
+  root.addEventListener('click', (e) => {
     const attach = e.target.closest('[data-attach]');
     if (attach) { openModal({ mode:'attach', famIdx: parseInt(attach.getAttribute('data-attach'), 10) }); return; }
+    const edit = e.target.closest('[data-edit]');
+    if (edit) { openModal({ mode:'edit', entryId: edit.getAttribute('data-edit') }); return; }
     const card = e.target.closest('[data-fam]');
     if (card) select(parseInt(card.getAttribute('data-fam'), 10));
   });
@@ -1843,8 +1885,54 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   const mFile = modal.querySelector('[data-blm-file]');
   const mErr = modal.querySelector('[data-blm-err]');
   const mSub = modal.querySelector('[data-blm-sub]');
+  const mPhoto = modal.querySelector('[data-blm-photo]');
+  const mPhotoWrap = modal.querySelector('[data-blm-photowrap]');
+  const mPhotoPrev = modal.querySelector('[data-blm-photoprev]');
+  const mPhotoImg = modal.querySelector('[data-blm-photoimg]');
+  const mToggle = modal.querySelector('[data-blm-toggle]');
+  const mSubmit = modal.querySelector('[data-blm-submit]');
+  const mDelete = modal.querySelector('[data-blm-delete]');
   const roleBtns = Array.from(modal.querySelectorAll('[data-blm-toggle] button'));
-  let role = 'big', attachTarget = null;
+  let role = 'big', attachTarget = null, editTarget = null;
+  let photoData = null;  // freshly uploaded photo (dataURL)
+  let photoKept = null;  // photo already on the entry being edited
+
+  const setPhotoPreview = (src) => {
+    if (src) { mPhotoImg.src = src; mPhotoPrev.hidden = false; }
+    else { mPhotoImg.removeAttribute('src'); mPhotoPrev.hidden = true; }
+  };
+
+  // Downscale + center-crop to the card's 4:5 ratio so any photo fits the
+  // frame and stays small enough for localStorage
+  const processPhoto = (file, cb) => {
+    if (!/^image\//.test(file.type)) { showErr('That file is not an image — upload a JPG, PNG, or similar.'); return; }
+    if (file.size > 10 * 1024 * 1024) { showErr('That image is over 10 MB — pick a smaller one.'); return; }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const TW = 480, TH = 600;
+      const c = document.createElement('canvas');
+      c.width = TW; c.height = TH;
+      const scale = Math.max(TW / img.naturalWidth, TH / img.naturalHeight);
+      const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+      c.getContext('2d').drawImage(img, (TW - dw) / 2, (TH - dh) / 2, dw, dh);
+      cb(c.toDataURL('image/jpeg', 0.84));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); showErr('Could not read that image — try a different file.'); };
+    img.src = url;
+  };
+
+  mPhoto.addEventListener('change', () => {
+    mErr.classList.remove('show');
+    const f = mPhoto.files && mPhoto.files[0];
+    if (!f) return;
+    processPhoto(f, (dataUrl) => { photoData = dataUrl; setPhotoPreview(dataUrl); });
+  });
+  modal.querySelector('[data-blm-photoclear]').addEventListener('click', () => {
+    photoData = null; photoKept = null; mPhoto.value = '';
+    setPhotoPreview(null);
+  });
 
   const setRole = (r) => {
     role = r;
@@ -1857,16 +1945,37 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   const showErr = (msg) => { mErr.textContent = msg; mErr.classList.add('show'); };
 
   function openModal(opts){
-    attachTarget = null;
+    attachTarget = null; editTarget = null;
+    photoData = null; photoKept = null;
     mErr.classList.remove('show');
-    mName.value = ''; mYear.value = ''; mNewFam.value = ''; mLink.value = ''; mFile.value = '';
+    mName.value = ''; mYear.value = ''; mNewFam.value = ''; mLink.value = ''; mFile.value = ''; mPhoto.value = '';
+    setPhotoPreview(null);
     mFamily.innerHTML = families.map(f => '<option value="' + esc(f.name) + '">' + esc(f.name) + '</option>').join('');
+    mToggle.style.display = '';
+    mPhotoWrap.hidden = false;
+    mDelete.hidden = true;
+    mSubmit.innerHTML = 'Add Me To The Tree&nbsp;→';
     if (opts && opts.mode === 'attach') {
       attachTarget = opts.famIdx;
       const fam = families[opts.famIdx];
       mSub.textContent = 'Attach a PDF or link to ' + fam.big.name + ' (' + fam.name + ') so rushees can learn about this big.';
       mName.value = fam.big.name; mYear.value = fam.big.year || '';
       setRole('big'); mNewFam.value = fam.name;
+      mPhotoWrap.hidden = true;
+      mSubmit.innerHTML = 'Attach It&nbsp;→';
+    } else if (opts && opts.mode === 'edit') {
+      const entry = loadSaved().find(e => e.id === opts.entryId);
+      if (!entry) return;
+      editTarget = entry.id;
+      mSub.textContent = 'Update your card — changes save to this browser instantly.';
+      mName.value = entry.name || ''; mYear.value = entry.year || '';
+      setRole(entry.role === 'big' ? 'big' : 'little');
+      mToggle.style.display = 'none';
+      mFamWrap.hidden = true; mNewFamWrap.hidden = true;
+      if (entry.link && entry.link.slice(0,5) !== 'data:') mLink.value = entry.link;
+      if (entry.photo) { photoKept = entry.photo; setPhotoPreview(entry.photo); }
+      mSubmit.innerHTML = 'Save Changes&nbsp;→';
+      mDelete.hidden = false;
     } else {
       mSub.textContent = 'Add yourself as a potential big or little. Attach a PDF or link that tells your future family who you are.';
       setRole('big');
@@ -1883,7 +1992,17 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   const finish = (link) => {
     const list = loadSaved();
     let famName;
-    if (attachTarget != null) {
+    if (editTarget != null) {
+      const entry = list.find(e => e.id === editTarget);
+      if (!entry) { closeModal(); return; }
+      const name = mName.value.trim(), year = mYear.value.trim();
+      if (!name) { showErr('Please enter your name.'); return; }
+      if (!year) { showErr("Please enter your class year (e.g. '27)."); return; }
+      entry.name = name; entry.year = year;
+      if (link) entry.link = link;
+      entry.photo = photoData || photoKept || null;
+      famName = entry.family;
+    } else if (attachTarget != null) {
       if (!link) { showErr('Add a link or upload a PDF to attach.'); return; }
       famName = families[attachTarget].name;
       list.push({ role:'link', family: famName, link: link });
@@ -1895,14 +2014,14 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
         famName = mNewFam.value.trim();
         if (!famName) { showErr('Give your new family line a name.'); return; }
         if (families.some(f => f.name.toLowerCase() === famName.toLowerCase())) { showErr('That family name already exists — pick another, or join it as a little.'); return; }
-        list.push({ role:'big', name: name, year: year, family: famName, link: link || null });
+        list.push({ id: uid(), role:'big', name: name, year: year, family: famName, link: link || null, photo: photoData || null });
       } else {
         famName = mFamily.value;
-        list.push({ role:'little', name: name, year: year, family: famName, link: link || null });
+        list.push({ id: uid(), role:'little', name: name, year: year, family: famName, link: link || null, photo: photoData || null });
       }
     }
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); }
-    catch(e) { showErr('That PDF is too large to save in this browser — link to it instead (Google Drive works great).'); return; }
+    try { saveList(list); }
+    catch(e) { showErr('That file is too large to save in this browser — try a smaller photo, or link to your PDF instead (Google Drive works great).'); return; }
     closeModal();
     buildFamilies();
     renderRail();
@@ -1911,6 +2030,17 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     const cardEl = railEl.querySelectorAll('.blr-wrap')[idx];
     if (cardEl) cardEl.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
   };
+
+  mDelete.addEventListener('click', () => {
+    if (editTarget == null) return;
+    if (!confirm('Remove this card from the tree? (Only affects this browser.)')) return;
+    const list = loadSaved().filter(e => e.id !== editTarget);
+    try { saveList(list); } catch(e){}
+    closeModal();
+    buildFamilies();
+    renderRail();
+    select(0);
+  });
 
   modal.querySelector('[data-blm-submit]').addEventListener('click', () => {
     mErr.classList.remove('show');
