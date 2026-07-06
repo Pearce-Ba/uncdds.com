@@ -65,6 +65,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .portal-form input,.portal-form select{display:block;width:100%;margin-top:6px;padding:12px 14px;border-radius:11px;border:1px solid rgba(19,41,75,.28);background:#fff;color:#13294B;font-family:'Montserrat',sans-serif;font-size:14px;letter-spacing:normal;text-transform:none;font-weight:500;transition:border-color .2s,box-shadow .2s;}
 .portal-form input:focus,.portal-form select:focus{outline:none;border-color:#4B9CD3;box-shadow:0 0 0 3px rgba(75,156,211,.22);}
 .pf-hint{display:block;margin-top:5px;color:#8296AE;font-weight:500;font-size:10px;letter-spacing:.6px;text-transform:none;}
+.pf-passwrap{position:relative;display:block;}
+.pf-passwrap input{padding-right:48px;}
+.pf-eye{position:absolute;right:7px;top:50%;transform:translateY(-50%);margin-top:3px;width:34px;height:34px;border:0;border-radius:9px;background:none;color:#8296AE;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:color .2s,background .2s;}
+.pf-eye:hover{color:#33719F;background:rgba(75,156,211,.12);}
+.pf-forgot{display:block;margin:-6px 0 16px;margin-left:auto;background:none;border:0;padding:0;color:#33719F;font-family:'Montserrat',sans-serif;font-weight:600;font-size:11.5px;letter-spacing:.4px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.pf-forgot:hover{color:#13294B;}
 .pf-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:520px){.pf-row2{grid-template-columns:1fr;gap:0;}}
 .portal-form label.pf-remember{display:flex;align-items:center;gap:10px;margin:2px 0 18px;cursor:pointer;color:#3E5F87;font-weight:600;font-size:12.5px;letter-spacing:.4px;text-transform:none;}
@@ -93,6 +99,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .acct-export{margin:14px 0 0;text-align:center;}
 .acct-export button{background:none;border:0;padding:0;color:#8296AE;font-family:'Montserrat',sans-serif;font-weight:600;font-size:11px;letter-spacing:.8px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
 .acct-export button:hover{color:#33719F;}
+
+/* Exec board access note — request flow is a plain email to the president */
+.pf-exec{margin:18px 0 0;padding:14px 16px;border-radius:12px;border:1px dashed rgba(185,151,91,.55);background:rgba(185,151,91,.07);}
+.pf-exec b{display:block;color:#8A6A2F;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:5px;}
+.pf-exec p{margin:0;color:#5A7798;font-size:11.5px;line-height:1.65;}
+.pf-exec a{color:#33719F;font-weight:700;text-decoration:underline;text-underline-offset:3px;}
+.pf-exec a:hover{color:#13294B;}
 
 @media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
 </style>
@@ -135,7 +148,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
         <form id="pf-form" novalidate>
           <label id="f-name-w" hidden>Full name<input type="text" id="f-name" autocomplete="name" placeholder="First Last" maxlength="60"></label>
           <label>UNC email<input type="email" id="f-email" autocomplete="username" placeholder="onyen@unc.edu" maxlength="80"></label>
-          <label>Password<input type="password" id="f-pass" autocomplete="current-password" placeholder="••••••••" maxlength="80"><span class="pf-hint" id="f-pass-hint" hidden>At least 8 characters — it’s hashed before it’s stored, so make it a good one.</span></label>
+          <label><span id="f-pass-label">Password</span><span class="pf-passwrap"><input type="password" id="f-pass" autocomplete="current-password" placeholder="••••••••" maxlength="80"><button type="button" class="pf-eye" data-eye="f-pass" aria-label="Show password" aria-pressed="false"></button></span><span class="pf-hint" id="f-pass-hint" hidden>At least 8 characters — it’s hashed before it’s stored, so make it a good one.</span></label>
+          <label id="f-pass2-w" hidden>Retype password<span class="pf-passwrap"><input type="password" id="f-pass2" autocomplete="new-password" placeholder="••••••••" maxlength="80"><button type="button" class="pf-eye" data-eye="f-pass2" aria-label="Show password" aria-pressed="false"></button></span><span class="pf-hint" id="f-pass2-hint" hidden>Type it again so a typo doesn’t lock you out.</span></label>
+          <button type="button" class="pf-forgot" id="pf-forgot">Forgot your password?</button>
           <div class="pf-row2" id="f-extra" hidden>
             <label>Graduation year<select id="f-year">
               <option value="">Select…</option>
@@ -149,6 +164,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
           <button type="submit" class="pf-submit" id="pf-submit">Sign In&nbsp;→</button>
         </form>
         <p class="pf-note" id="pf-note">Your details stay in this browser’s member table — passwords are salted and hashed, never stored as text.</p>
+        <div class="pf-exec">
+          <b>Exec board access</b>
+          <p>Serving on the exec board this year? Request exec access by emailing the president at
+            <a href="mailto:pjbarnes@unc.edu?subject=DDS%20exec%20board%20access%20request">pjbarnes@unc.edu</a>
+            from your UNC address with your position. This is only for current members of the DDS exec board.</p>
+        </div>
       </div>
 
       <!-- Account view -->
@@ -166,6 +187,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
           <div class="acct-row"><span class="k">Access</span><span class="v" id="a-role">Member</span></div>
         </div>
         <div class="acct-actions">
+          <a class="acct-btn" href="dashboard.html">Open your dashboard<span>→</span></a>
           <a class="acct-btn" href="member.html">Set up your member profile<span>→</span></a>
           <a class="acct-btn" href="newsletter.html#write">Write for The Bite<span>→</span></a>
           <a class="acct-btn" href="index.html#big-little">Join the Big / Little tree<span>→</span></a>
@@ -173,6 +195,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
         </div>
         <button type="button" class="acct-signout" id="a-signout">Sign Out</button>
         <div class="acct-export"><button type="button" id="a-export" title="Download the member table as a spreadsheet">Exec: export the member table (.csv for Excel)</button></div>
+        <div class="pf-exec">
+          <b>Exec board access</b>
+          <p id="a-exec-p"></p>
+        </div>
       </div>
     </section>
 
@@ -198,9 +224,29 @@ var passHint = document.getElementById('f-pass-hint');
 var fName = document.getElementById('f-name');
 var fEmail = document.getElementById('f-email');
 var fPass = document.getElementById('f-pass');
+var fPass2 = document.getElementById('f-pass2');
+var pass2W = document.getElementById('f-pass2-w');
+var pass2Hint = document.getElementById('f-pass2-hint');
+var passLabel = document.getElementById('f-pass-label');
+var forgotBtn = document.getElementById('pf-forgot');
 var fYear = document.getElementById('f-year');
 var fMajor = document.getElementById('f-major');
 var fRemember = document.getElementById('f-remember');
+
+/* Eye toggles — show/hide the password fields */
+var EYE_OPEN = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+var EYE_OFF = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 8 10 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3.5 8 10 8a9.74 9.74 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="m2 2 20 20"/></svg>';
+document.querySelectorAll('.pf-eye').forEach(function(btn){
+  btn.innerHTML = EYE_OPEN;
+  btn.addEventListener('click', function(){
+    var input = document.getElementById(btn.getAttribute('data-eye'));
+    var show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.innerHTML = show ? EYE_OFF : EYE_OPEN;
+    btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    btn.setAttribute('aria-pressed', String(show));
+  });
+});
 
 function nextUrl(){
   var m = /[?&]next=([^&]+)/.exec(location.search);
@@ -212,22 +258,31 @@ function nextUrl(){
 
 function setMode(m){
   mode = m;
-  var up = (m === 'up');
-  tabIn.classList.toggle('active', !up); tabIn.setAttribute('aria-selected', String(!up));
+  var up = (m === 'up'), forgot = (m === 'forgot');
+  tabIn.classList.toggle('active', m === 'in'); tabIn.setAttribute('aria-selected', String(m === 'in'));
   tabUp.classList.toggle('active', up); tabUp.setAttribute('aria-selected', String(up));
   nameW.hidden = !up;
   extra.hidden = !up;
   passHint.hidden = !up;
-  fPass.setAttribute('autocomplete', up ? 'new-password' : 'current-password');
-  document.getElementById('pf-title').textContent = up ? 'Join the member roster.' : 'Welcome back.';
+  pass2W.hidden = !(up || forgot);
+  pass2Hint.hidden = !forgot;
+  forgotBtn.hidden = m !== 'in';
+  passLabel.textContent = forgot ? 'New password' : 'Password';
+  fPass.setAttribute('autocomplete', m === 'in' ? 'current-password' : 'new-password');
+  document.getElementById('pf-title').textContent =
+    up ? 'Join the member roster.' : forgot ? 'Reset your password.' : 'Welcome back.';
   document.getElementById('pf-sub').textContent = up
     ? 'Create your account with your UNC email — it unlocks posting, the family tree, and gallery uploads.'
-    : 'Sign in with your UNC email to pick up where you left off.';
-  document.getElementById('pf-submit').innerHTML = up ? 'Create My Account&nbsp;→' : 'Sign In&nbsp;→';
+    : forgot
+      ? 'Accounts live in this browser’s member table, so the reset happens right here — enter your UNC email and choose a new password.'
+      : 'Sign in with your UNC email to pick up where you left off.';
+  document.getElementById('pf-submit').innerHTML =
+    up ? 'Create My Account&nbsp;→' : forgot ? 'Reset &amp; Sign In&nbsp;→' : 'Sign In&nbsp;→';
   errBox.classList.remove('show');
 }
 tabIn.addEventListener('click', function(){ setMode('in'); });
 tabUp.addEventListener('click', function(){ setMode('up'); });
+forgotBtn.addEventListener('click', function(){ setMode('forgot'); fEmail.focus(); });
 
 function showErr(msg){ errBox.textContent = msg; errBox.classList.add('show'); }
 
@@ -239,10 +294,17 @@ form.addEventListener('submit', function(e){
     location.href = nextUrl();
   };
   if (mode === 'up') {
+    if (fPass.value !== fPass2.value) { showErr('Those passwords don’t match — retype them the same way.'); return; }
     DDSAuth.signUp({
       name: fName.value, email: fEmail.value, password: fPass.value,
       gradYear: fYear.value, major: fMajor.value
     }, fRemember.checked).then(done);
+  } else if (mode === 'forgot') {
+    if (fPass.value !== fPass2.value) { showErr('Those passwords don’t match — retype them the same way.'); return; }
+    DDSAuth.resetPassword(fEmail.value, fPass.value).then(function(res){
+      if (!res.ok) { showErr(res.err); return; }
+      DDSAuth.signIn(fEmail.value, fPass.value, fRemember.checked).then(done);
+    });
   } else {
     DDSAuth.signIn(fEmail.value, fPass.value, fRemember.checked).then(done);
   }
@@ -259,7 +321,16 @@ function render(){
   document.getElementById('a-mail').textContent = m.email;
   document.getElementById('a-year').textContent = m.gradYear || '—';
   document.getElementById('a-major').textContent = m.major || '—';
-  document.getElementById('a-role').textContent = m.role === 'exec' ? 'Exec Board' : 'Member';
+  var exec = DDSAuth.isExec && DDSAuth.isExec(m);
+  document.getElementById('a-role').textContent = exec ? 'Exec Board' : 'Member';
+  var execP = document.getElementById('a-exec-p');
+  if (exec) {
+    execP.textContent = 'You have exec access on this account — resource editing and the roster export are unlocked.';
+  } else {
+    var mail = 'mailto:pjbarnes@unc.edu?subject=' + encodeURIComponent('DDS exec board access request') +
+      '&body=' + encodeURIComponent('Hi Pearce,\n\nI currently serve on the DDS exec board as [your position] and would like exec access on the site.\n\nName: ' + m.name + '\nUNC email: ' + m.email + '\n\nThanks!');
+    execP.innerHTML = 'Serving on the exec board this year? <a href="' + mail + '">Email the president</a> at pjbarnes@unc.edu to request exec access. This is only for current members of the DDS exec board.';
+  }
 }
 document.getElementById('a-signout').addEventListener('click', function(){ DDSAuth.signOut(); });
 document.getElementById('a-export').addEventListener('click', function(){ DDSAuth.exportCsv(); });

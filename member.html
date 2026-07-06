@@ -122,6 +122,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
         <label>Favorite classes<textarea id="sh-classes" maxlength="300" placeholder="BIOL 252, CHEM 430…"></textarea></label>
         <label>Favorite professors<textarea id="sh-profs" maxlength="300" placeholder="Dr. Marsh, Prof. Nguyen…"></textarea></label>
       </div>
+      <div class="sh-grid">
+        <label>Instagram<input type="text" id="sh-instagram" maxlength="120" placeholder="@yourhandle or full link"><span class="sh-hint">Handle or full link — either works, we build the URL for you.</span></label>
+        <label>LinkedIn<input type="text" id="sh-linkedin" maxlength="160" placeholder="your-name or full link"><span class="sh-hint">Same deal — paste the profile URL or just the username.</span></label>
+      </div>
       <button type="submit" class="sh-save" id="sh-save">Save My Profile</button>
     </form>
     <p class="sh-note">Saved to your member record in this browser — when the community directory launches, this is the card other members will see.</p>
@@ -169,6 +173,30 @@ document.getElementById('sh-interests').value = me.interests || '';
 document.getElementById('sh-hobbies').value = me.hobbies || '';
 document.getElementById('sh-classes').value = me.favClasses || '';
 document.getElementById('sh-profs').value = me.favProfs || '';
+document.getElementById('sh-instagram').value = me.instagram || '';
+document.getElementById('sh-linkedin').value = me.linkedin || '';
+
+/* Accept a handle ("@pearcebarnes05", "pearcebarnes05") or any pasted link
+   ("instagram.com/pearcebarnes05", full https URL) and normalize it to a
+   working profile URL. Returns '' for an empty field. */
+function normInstagram(v){
+  v = String(v || '').trim();
+  if (!v) return '';
+  var m = /instagram\.com\/([^\/?#\s]+)/i.exec(v);
+  var handle = m ? m[1] : v.replace(/^@+/, '');
+  handle = handle.replace(/\/+$/, '');
+  if (!handle) return '';
+  return 'https://www.instagram.com/' + handle + '/';
+}
+function normLinkedIn(v){
+  v = String(v || '').trim();
+  if (!v) return '';
+  var m = /linkedin\.com\/([^?#\s]+)/i.exec(v);
+  if (m) return 'https://www.linkedin.com/' + m[1].replace(/\/+$/, '') + '/';
+  var handle = v.replace(/^@+/, '').replace(/\/+$/, '');
+  if (!handle) return '';
+  return 'https://www.linkedin.com/in/' + handle + '/';
+}
 
 // Square center-crop to 480px, JPEG — same treatment as big/little photos
 document.getElementById('sh-photo').addEventListener('change', function(){
@@ -200,10 +228,14 @@ document.getElementById('sh-form').addEventListener('submit', function(e){
     interests: document.getElementById('sh-interests').value.trim(),
     hobbies: document.getElementById('sh-hobbies').value.trim(),
     favClasses: document.getElementById('sh-classes').value.trim(),
-    favProfs: document.getElementById('sh-profs').value.trim()
+    favProfs: document.getElementById('sh-profs').value.trim(),
+    instagram: normInstagram(document.getElementById('sh-instagram').value),
+    linkedin: normLinkedIn(document.getElementById('sh-linkedin').value)
   });
   if (!res.ok) { DDSAuth.requireLogin('member.html'); return; }
   me = res.member;
+  document.getElementById('sh-instagram').value = me.instagram || '';
+  document.getElementById('sh-linkedin').value = me.linkedin || '';
   var btn = document.getElementById('sh-save');
   btn.textContent = 'Saved ✓';
   btn.classList.add('saved');

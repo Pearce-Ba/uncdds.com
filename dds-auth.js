@@ -10,6 +10,14 @@
   var SESSION_KEY = 'dds-session-v1';
   var listeners = [];
 
+  /* Exec board allow-list. The president keeps this current each year:
+     a member whose UNC email is listed here gets exec powers (resource
+     editing, roster export) the next time they load a page. Members
+     request access by emailing the president — see login.html. */
+  var EXEC_EMAILS = [
+    'pjbarnes@unc.edu'
+  ];
+
   function loadMembers() {
     try { return JSON.parse(localStorage.getItem(MEMBERS_KEY)) || []; }
     catch (e) { return []; }
@@ -69,7 +77,20 @@
         id: m.id, name: m.name, email: m.email, gradYear: m.gradYear, major: m.major, role: m.role,
         photo: m.photo || null,
         interests: m.interests || '', hobbies: m.hobbies || '',
-        favClasses: m.favClasses || '', favProfs: m.favProfs || ''
+        favClasses: m.favClasses || '', favProfs: m.favProfs || '',
+        instagram: m.instagram || '', linkedin: m.linkedin || ''
+      } : null;
+    },
+
+    /* Public-facing card for another member (chat popovers, directory).
+       Never exposes email, salt, or hash. */
+    profile: function (id) {
+      var m = loadMembers().find(function (r) { return r.id === id; });
+      return m ? {
+        id: m.id, name: m.name, gradYear: m.gradYear, major: m.major || '',
+        photo: m.photo || null,
+        interests: m.interests || '', hobbies: m.hobbies || '',
+        instagram: m.instagram || '', linkedin: m.linkedin || ''
       } : null;
     },
 
@@ -81,7 +102,7 @@
       var list = loadMembers();
       var m = list.find(function (r) { return r.id === sess.id; });
       if (!m) return { ok: false, err: 'Sign in first.' };
-      ['photo', 'interests', 'hobbies', 'major', 'favClasses', 'favProfs'].forEach(function (k) {
+      ['photo', 'interests', 'hobbies', 'major', 'favClasses', 'favProfs', 'instagram', 'linkedin'].forEach(function (k) {
         if (k in fields) m[k] = fields[k];
       });
       saveMembers(list);
@@ -130,6 +151,30 @@
 
     signOut: function () { clearSession(); notify(); },
 
+    /* True when the signed-in member is on the exec board — either the
+       row is marked role:'exec' or their email is on the allow-list. */
+    isExec: function (member) {
+      var m = member || api.current();
+      if (!m) return false;
+      return m.role === 'exec' || EXEC_EMAILS.indexOf(String(m.email || '').toLowerCase()) > -1;
+    },
+
+    /* Accounts live in this browser's member table, so a reset is local:
+       find the row by email, re-salt, re-hash. */
+    resetPassword: function (email, newPassword) {
+      email = String(email || '').trim().toLowerCase();
+      var list = loadMembers();
+      var m = list.find(function (r) { return r.email === email; });
+      if (!m) return Promise.resolve({ ok: false, err: 'No account with that email in this browser.' });
+      if (!newPassword || newPassword.length < 8) return Promise.resolve({ ok: false, err: 'Password needs at least 8 characters.' });
+      var salt = uid() + Math.random().toString(36).slice(2);
+      return hash(salt, newPassword).then(function (h) {
+        m.salt = salt; m.hash = h;
+        saveMembers(list);
+        return { ok: true };
+      });
+    },
+
     /* The member table as a spreadsheet — opens straight into Excel.
        Password hashes and salts are deliberately left out of the export. */
     exportCsv: function () {
@@ -159,10 +204,9 @@
       if (!el) return;
       var render = function (m) {
         if (m) {
-          var first = m.name.split(/\s+/)[0].replace(/[&<>"']/g, '');
-          el.innerHTML = '<a class="nav-auth-link is-in" href="member.html" title="Your member profile">' +
+          el.innerHTML = '<a class="nav-auth-link is-in" href="dashboard.html" title="Your member dashboard">' +
             (m.photo ? '<img class="nav-auth-photo" src="' + m.photo + '" alt="">' : '<span class="nav-auth-dot"></span>') +
-            first + '</a>';
+            'Dashboard</a>';
         } else {
           el.innerHTML = '<a class="nav-auth-link" href="login.html">' +
             '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
