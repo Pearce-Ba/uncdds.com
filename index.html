@@ -182,6 +182,43 @@ body.nav-open{overflow:hidden;}
   .nm-glass .upe-when{width:auto;}
   .nm-glass .upe-body{width:100%;min-width:0;overflow:hidden;}
 }
+/* Points system section — signature is the "good standing" meter that fills on scroll */
+#points{scroll-margin-top:64px;}
+.pts-glow{position:absolute;top:-140px;left:50%;transform:translateX(-50%);width:min(900px,120%);height:520px;pointer-events:none;background:radial-gradient(circle,rgba(75,156,211,.16) 0%,transparent 66%);z-index:0;}
+.pts-meter{position:relative;max-width:840px;margin:clamp(30px,4.5vw,54px) auto 0;}
+.pts-goalrow{display:flex;justify-content:flex-end;margin-bottom:10px;}
+.pts-goal{display:inline-flex;align-items:center;gap:6px;color:#E3C27C;font-weight:700;letter-spacing:1.6px;font-size:11px;text-transform:uppercase;background:rgba(185,151,91,.14);border:1px solid rgba(185,151,91,.42);padding:5px 12px;border-radius:999px;}
+.pts-track{position:relative;display:flex;height:clamp(50px,7vw,70px);border-radius:15px;background:rgba(4,11,24,.66);border:1px solid rgba(127,178,224,.22);box-shadow:inset 0 2px 12px rgba(0,0,0,.55);overflow:hidden;}
+.pts-track::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(255,255,255,.05) calc(10% - 1px),rgba(255,255,255,.05) 10%);}
+.pts-fill{width:0;height:100%;flex:none;position:relative;transition:width 1.15s cubic-bezier(.22,.61,.36,1);}
+.pts-fill::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 58%);}
+.pts-meter.is-filled .pts-fill{width:var(--w);}
+.pts-fill-1{background:linear-gradient(180deg,#63b0e0,#3f8dc4);}
+.pts-fill-2{background:linear-gradient(180deg,#ccab6a,#ab8b45);transition-delay:.16s;}
+.pts-fill-3{background:linear-gradient(180deg,#d17aa9,#b85e91);transition-delay:.32s;}
+.pts-scale{display:flex;margin-top:12px;}
+.pts-scale span{flex:none;text-align:center;font-weight:700;letter-spacing:1px;font-size:clamp(9px,2.4vw,11.5px);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;}
+.pts-cap{margin:clamp(16px,2.2vw,22px) auto 0;max-width:600px;text-align:center;color:#8FA8C4;font-weight:300;font-size:clamp(.86rem,1.15vw,.98rem);line-height:1.6;}
+.pts-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2vw,22px);margin-top:clamp(34px,4.5vw,58px);}
+.pts-cat{position:relative;background:rgba(255,255,255,.032);border:1px solid rgba(127,178,224,.16);border-radius:18px;padding:clamp(22px,2.6vw,30px);overflow:hidden;transition:transform .32s ease,border-color .32s ease,background .32s ease;}
+.pts-cat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc);opacity:.85;}
+.pts-cat:hover{transform:translateY(-5px);background:rgba(255,255,255,.055);border-color:rgba(127,178,224,.4);}
+.pts-cat-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent);margin-bottom:16px;}
+.pts-cat h3{margin:0 0 8px;font-weight:800;font-size:clamp(1.1rem,1.6vw,1.3rem);letter-spacing:.3px;color:#EAF1F8;}
+.pts-cat p{margin:0;color:#9FB6CE;font-weight:300;line-height:1.6;font-size:clamp(.9rem,1.2vw,1rem);}
+.pts-cta{display:flex;flex-wrap:wrap;gap:clamp(12px,1.6vw,16px);justify-content:center;align-items:center;margin-top:clamp(36px,4.6vw,58px);}
+.pts-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:15px clamp(24px,3vw,34px);border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -14px rgba(185,151,91,.8);transition:transform .2s ease;}
+.pts-btn:hover{transform:translateY(-3px);}
+.pts-btn-ghost{display:inline-flex;align-items:center;justify-content:center;padding:15px clamp(24px,3vw,34px);border-radius:999px;border:1.5px solid rgba(127,178,224,.5);color:#EAF1F8;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s ease,border-color .2s ease;background:rgba(75,156,211,.08);}
+.pts-btn-ghost:hover{background:rgba(75,156,211,.18);border-color:rgba(127,178,224,.75);}
+.pts-sub{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:center;align-items:center;margin-top:clamp(20px,2.6vw,28px);}
+.pts-link{color:#9FB6CE;font-weight:600;font-size:12.5px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;transition:color .2s ease;}
+.pts-link:hover{color:#EAF1F8;}
+.pts-link-blue{color:#7FB2E0;}
+.pts-link-blue:hover{color:#BFE0FF;}
+.pts-dot{color:#3A567A;font-weight:700;}
+@media(max-width:760px){.pts-cats{grid-template-columns:1fr;}}
+@media(prefers-reduced-motion:reduce){.pts-fill{transition:none;}}
 #about,#pillars,#offers,#officers,#join,#calendar,#gallery,#pillar-stories{scroll-margin-top:64px;}
 a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px solid #4B9CD3;outline-offset:3px;}
 /* Pillar photo rows (full-width tiles) */
@@ -435,6 +472,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <a href="#offers" class="nav-dd-link" role="menuitem">Offers<span>&rarr;</span></a>
         <a href="#big-little" class="nav-dd-link" role="menuitem">Big Little<span>&rarr;</span></a>
         <a href="#meeting-notes" class="nav-dd-link" role="menuitem">Meeting Notes<span>&rarr;</span></a>
+        <a href="#points" class="nav-dd-link" role="menuitem">Points<span>&rarr;</span></a>
         <a href="newsletter.html" class="nav-dd-link" role="menuitem">Newsletter<span>&rarr;</span></a>
         <a href="newsletter.html?tag=blog-post" class="nav-dd-link" role="menuitem">Blog<span>&rarr;</span></a>
       </div>
@@ -458,6 +496,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <a href="#big-little">Big Little</a>
     <a href="#officers">Officers</a>
     <a href="#meeting-notes">Meeting Notes</a>
+    <a href="#points">Points</a>
     <a href="#calendar">Calendar</a>
     <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener">Instagram</a>
     <a href="login.html">Member Login</a>
@@ -970,6 +1009,67 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   </div>
 </section>
 
+<!-- POINTS SYSTEM -->
+<section id="points" style="position:relative;background:radial-gradient(120% 85% at 50% -12%,#123458 0%,#0c2145 46%,#0A1A30 100%);color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;z-index:11;padding:clamp(90px,12vw,160px) clamp(20px,4vw,48px) clamp(80px,11vw,140px);overflow:clip;">
+  <div class="pts-glow"></div>
+  <div style="position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.13;mix-blend-mode:overlay;z-index:0;"></div>
+  <div style="max-width:1080px;margin:0 auto;position:relative;z-index:1;">
+    <div data-reveal="0" style="text-align:center;margin-bottom:clamp(18px,2.6vw,26px);">
+      <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">Earn · Track · Recognized</div>
+      <h2 style="margin:0 0 22px;font-weight:900;text-transform:uppercase;line-height:.86;letter-spacing:-0.02em;font-size:clamp(2.6rem,9vw,7rem);background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Earn Your Points</h2>
+      <p style="margin:0 auto;max-width:600px;color:#A9C0D8;font-weight:300;line-height:1.65;font-size:clamp(.98rem,1.4vw,1.18rem);">Service, professional development, and chapter life each earn points toward good standing. Log what you show up for, watch your total climb, and get recognized at year's end.</p>
+    </div>
+
+    <!-- Signature: the "good standing" meter fills across all three categories on scroll -->
+    <div class="pts-meter" data-pts-meter data-reveal="0.05">
+      <div class="pts-goalrow"><span class="pts-goal">Good Standing ✓</span></div>
+      <div class="pts-track" role="img" aria-label="Points from service, professional, and social categories combine toward good standing.">
+        <div class="pts-fill pts-fill-1" style="--w:40%"></div>
+        <div class="pts-fill pts-fill-2" style="--w:33%"></div>
+        <div class="pts-fill pts-fill-3" style="--w:27%"></div>
+      </div>
+      <div class="pts-scale">
+        <span style="flex-basis:40%;color:#8FC0EA;">Service</span>
+        <span style="flex-basis:33%;color:#D8B877;">Professional</span>
+        <span style="flex-basis:27%;color:#DE93B7;">Social</span>
+      </div>
+      <div class="pts-cap">Every event you show up for adds to your total — reach the semester minimum to stay in good standing and earn year-end honors.</div>
+    </div>
+
+    <!-- Ways to earn -->
+    <div class="pts-cats" data-reveal="0.06">
+      <article class="pts-cat" style="--acc:#4B9CD3">
+        <div class="pts-cat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+        <h3>Service</h3>
+        <p>Volunteer in dental clinics and across the Chapel Hill community.</p>
+      </article>
+      <article class="pts-cat" style="--acc:#B9975B">
+        <div class="pts-cat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <h3>Professional</h3>
+        <p>Panels, DAT prep, conferences, and guest speaker events.</p>
+      </article>
+      <article class="pts-cat" style="--acc:#C95E97">
+        <div class="pts-cat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Social</h3>
+        <p>Socials, family nights, and the chapter traditions in between.</p>
+      </article>
+    </div>
+
+    <!-- Log & track -->
+    <div class="pts-cta" data-reveal="0.08">
+      <a class="pts-btn" href="#">Members: Submit Points&nbsp;→</a>
+      <a class="pts-btn-ghost" href="#">Rushees: Submit Points</a>
+    </div>
+    <div class="pts-sub" data-reveal="0.1">
+      <a class="pts-link" href="#">Member points sheet&nbsp;↗</a>
+      <span class="pts-dot">·</span>
+      <a class="pts-link" href="#">Rushee points sheet&nbsp;↗</a>
+      <span class="pts-dot">·</span>
+      <a class="pts-link pts-link-blue" href="dashboard.html">Track live in your dashboard&nbsp;→</a>
+    </div>
+  </div>
+</section>
+
 <!-- CALENDAR -->
 <section id="calendar" style="background:#08172B;color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;padding:clamp(64px,9vw,120px) clamp(20px,5vw,64px) clamp(36px,4vw,56px);position:relative;z-index:12;overflow:clip;">
   <div style="max-width:1200px;margin:0 auto;width:100%;">
@@ -1335,6 +1435,20 @@ document.getElementById('yr').textContent = new Date().getFullYear();
     });
   }, {threshold:0, rootMargin:'0px 0px -8% 0px'});
   els.forEach(el => io.observe(el));
+})();
+
+// ---- Points "good standing" meter: fill the segments once it scrolls into view ----
+(function initPointsMeter(){
+  const meter = document.querySelector('[data-pts-meter]');
+  if (!meter) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(ent => {
+      if (!ent.isIntersecting) return;
+      meter.classList.add('is-filled');
+      io.unobserve(ent.target);
+    });
+  }, {threshold:0.35});
+  io.observe(meter);
 })();
 
 // ---- Scroll effects: marquee parallax + char reveal + sticky scale ----
