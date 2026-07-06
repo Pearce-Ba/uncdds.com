@@ -10,13 +10,30 @@
   var SESSION_KEY = 'dds-session-v1';
   var listeners = [];
 
-  /* Exec board allow-list. The president keeps this current each year:
-     a member whose UNC email is listed here gets exec powers (resource
-     editing, roster export) the next time they load a page. Members
-     request access by emailing the president — see login.html. */
-  var EXEC_EMAILS = [
-    'pjbarnes@unc.edu'
-  ];
+  /* Exec board roster. The president keeps this current each year: a
+     member whose UNC email is listed here gets exec powers (resource
+     editing, roster export) — and their real title — the next time they
+     sign up or sign in. Members request access by emailing the
+     president — see login.html. */
+  var EXEC_BOARD = {
+    'pjbarnes@unc.edu': 'President',
+    'ltellez@unc.edu': 'Vice President',
+    'bjgroth@unc.edu': 'Secretary',
+    'aapatel5@email.unc.edu': 'Treasurer',
+    'emillian@unc.edu': 'Service Coordinator',
+    'breeh@unc.edu': 'Student Ambassador',
+    'yunahkim@unc.edu': 'Website/Social Media',
+    'zackphan@unc.edu': 'Social Chair'
+  };
+
+  /* If this email is on the board, stamp the member row with role:'exec'
+     and their title so it survives into the roster export. Called on
+     every successful sign-up/sign-in so a title change (new year, new
+     board) picks up next time that member logs in — no manual migration. */
+  function syncExecStatus(m) {
+    var title = EXEC_BOARD[String(m.email || '').toLowerCase()];
+    if (title) { m.role = 'exec'; m.execTitle = title; }
+  }
 
   function loadMembers() {
     try { return JSON.parse(localStorage.getItem(MEMBERS_KEY)) || []; }
@@ -75,6 +92,7 @@
       var m = loadMembers().find(function (r) { return r.id === sess.id; });
       return m ? {
         id: m.id, name: m.name, email: m.email, gradYear: m.gradYear, major: m.major, role: m.role,
+        execTitle: m.execTitle || null,
         photo: m.photo || null,
         interests: m.interests || '', hobbies: m.hobbies || '',
         favClasses: m.favClasses || '', favProfs: m.favProfs || '',
@@ -88,6 +106,7 @@
       var m = loadMembers().find(function (r) { return r.id === id; });
       return m ? {
         id: m.id, name: m.name, gradYear: m.gradYear, major: m.major || '',
+        role: m.role, execTitle: m.execTitle || null,
         photo: m.photo || null,
         interests: m.interests || '', hobbies: m.hobbies || '',
         instagram: m.instagram || '', linkedin: m.linkedin || ''
@@ -129,6 +148,7 @@
           gradYear: rec.gradYear, major: String(rec.major).trim(),
           role: 'member', joined: new Date().toISOString()
         };
+        syncExecStatus(member);
         list.push(member);
         saveMembers(list);
         writeSession({ id: member.id, ts: Date.now() }, !!remember);
@@ -143,6 +163,9 @@
       if (!m) return Promise.resolve({ ok: false, err: 'No account with that email — create one below.' });
       return hash(m.salt, password || '').then(function (h) {
         if (h !== m.hash) return { ok: false, err: 'Wrong password. Try again.' };
+        var before = m.role + '|' + (m.execTitle || '');
+        syncExecStatus(m);
+        if (before !== m.role + '|' + (m.execTitle || '')) saveMembers(loadMembers().map(function (r) { return r.id === m.id ? m : r; }));
         writeSession({ id: m.id, ts: Date.now() }, !!remember);
         notify();
         return { ok: true, member: api.current() };
@@ -152,11 +175,19 @@
     signOut: function () { clearSession(); notify(); },
 
     /* True when the signed-in member is on the exec board — either the
-       row is marked role:'exec' or their email is on the allow-list. */
+       row is marked role:'exec' or their email is on the current roster. */
     isExec: function (member) {
       var m = member || api.current();
       if (!m) return false;
-      return m.role === 'exec' || EXEC_EMAILS.indexOf(String(m.email || '').toLowerCase()) > -1;
+      return m.role === 'exec' || !!EXEC_BOARD[String(m.email || '').toLowerCase()];
+    },
+
+    /* The member's real board title ("President", "Treasurer", ...), or
+       null for members / exec rows without a roster match. */
+    execTitle: function (member) {
+      var m = member || api.current();
+      if (!m) return null;
+      return EXEC_BOARD[String(m.email || '').toLowerCase()] || m.execTitle || (m.role === 'exec' ? 'Exec Board' : null);
     },
 
     /* Accounts live in this browser's member table, so a reset is local:
@@ -178,10 +209,10 @@
     /* The member table as a spreadsheet — opens straight into Excel.
        Password hashes and salts are deliberately left out of the export. */
     exportCsv: function () {
-      var cols = ['Name', 'UNC Email', 'Graduation Year', 'Major', 'Role', 'Joined'];
+      var cols = ['Name', 'UNC Email', 'Graduation Year', 'Major', 'Role', 'Exec Title', 'Joined'];
       var q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
       var rows = loadMembers().map(function (m) {
-        return [m.name, m.email, m.gradYear, m.major, m.role, (m.joined || '').slice(0, 10)].map(q).join(',');
+        return [m.name, m.email, m.gradYear, m.major, m.role, api.execTitle(m) || '', (m.joined || '').slice(0, 10)].map(q).join(',');
       });
       var csv = cols.map(q).join(',') + '\n' + rows.join('\n');
       var a = document.createElement('a');

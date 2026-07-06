@@ -322,10 +322,12 @@ function render(){
   document.getElementById('a-year').textContent = m.gradYear || '—';
   document.getElementById('a-major').textContent = m.major || '—';
   var exec = DDSAuth.isExec && DDSAuth.isExec(m);
-  document.getElementById('a-role').textContent = exec ? 'Exec Board' : 'Member';
+  var title = DDSAuth.execTitle ? DDSAuth.execTitle(m) : null;
+  document.getElementById('a-role').textContent = exec ? (title || 'Exec Board') : 'Member';
   var execP = document.getElementById('a-exec-p');
   if (exec) {
-    execP.textContent = 'You have exec access on this account — resource editing and the roster export are unlocked.';
+    execP.textContent = 'You’re signed in as ' + (title || 'a member of the exec board') +
+      ' — resource editing and the roster export are unlocked.';
   } else {
     var mail = 'mailto:pjbarnes@unc.edu?subject=' + encodeURIComponent('DDS exec board access request') +
       '&body=' + encodeURIComponent('Hi Pearce,\n\nI currently serve on the DDS exec board as [your position] and would like exec access on the site.\n\nName: ' + m.name + '\nUNC email: ' + m.email + '\n\nThanks!');

@@ -155,9 +155,10 @@ function renderHead(){
   av.innerHTML = photoData ? '<img src="' + photoData + '" alt="">' : initials(me.name);
   document.getElementById('sh-name').textContent = me.name;
   document.getElementById('sh-mail').textContent = me.email;
+  var execTitle = DDSAuth.isExec(me) ? (DDSAuth.execTitle(me) || 'Exec Board') : null;
   document.getElementById('sh-meta').innerHTML =
     '<span class="sh-chip">Class of ' + (me.gradYear || '—') + '</span>' +
-    '<span class="sh-chip">' + (me.role === 'exec' ? 'Exec Board' : 'Member') + '</span>';
+    '<span class="sh-chip">' + (execTitle || 'Member') + '</span>';
 }
 function setPhotoRow(){
   var row = document.getElementById('sh-photo-row');

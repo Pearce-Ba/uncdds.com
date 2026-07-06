@@ -44,7 +44,8 @@
     var h = new Date().getHours();
     var greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
     $('hello-h1').innerHTML = greet + ', <em>' + esc(first) + '.</em>';
-    $('hello-date').textContent = 'Member dashboard — ' +
+    var meTitle = DDSAuth.isExec(ME) ? (DDSAuth.execTitle(ME) || 'Exec Board') : null;
+    $('hello-date').textContent = (meTitle ? meTitle + ' — ' : 'Member dashboard — ') +
       new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
 
     // scroll-spy for the top nav chips
@@ -1322,6 +1323,9 @@
   if (IS_EXEC) {
     $('res-add').hidden = false;
     $('res-note').hidden = false;
+    $('res-note').textContent = 'You’re seeing edit tools because you’re signed in as ' +
+      (DDSAuth.execTitle(ME) || 'a member of the exec board') +
+      '. Members can open every link; only exec can change them.';
 
     var openResModal = function (rec) {
       resEditing = rec ? rec.id : null;
