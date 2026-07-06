@@ -1,9 +1,11 @@
-/* DDS upcoming events — shared by index.html (#calendar) and dashboard.html.
+/* DDS upcoming events — shared by index.html (#calendar + hero) and dashboard.html.
    Reads the public UNC DDS Google Calendar through the same Calendar v3
    endpoint Google's own embed iframe uses (public calendars only, CORS open),
-   so the list updates live whenever the calendar itself changes. Shows at
-   most 5 events and never anything more than two weeks out; the last good
-   payload is cached so a flaky connection still paints something. */
+   so the list updates live whenever the calendar itself changes. Each mount
+   defaults to at most 5 events within two weeks, but {windowDays, maxItems,
+   cacheKey} can override that per mount (the hero shows just the next event up
+   to two months out). The last good payload is cached per cacheKey so a flaky
+   connection still paints something. */
 (function () {
   'use strict';
 
@@ -42,9 +44,13 @@
     return { day: day, time: t1 ? t0 + ' – ' + t1 : t0 };
   }
 
-  function fetchUpcoming() {
+  function fetchUpcoming(opts) {
+    opts = opts || {};
+    var windowDays = opts.windowDays || WINDOW_DAYS;
+    var maxItems = opts.maxItems || MAX_ITEMS;
+    var cacheKey = opts.cacheKey || CACHE_KEY;
     var now = new Date();
-    var max = new Date(now.getTime() + WINDOW_DAYS * 86400000);
+    var max = new Date(now.getTime() + windowDays * 86400000);
     var url = 'https://clients6.google.com/calendar/v3/calendars/' + encodeURIComponent(CAL_ID) +
       '/events?singleEvents=true&orderBy=startTime&maxResults=20' +
       '&timeZone=America%2FNew_York' +
@@ -69,9 +75,9 @@
           link: it.htmlLink || ''
         };
       }).filter(function (ev) { return ev.start && ev.start <= max; })
-        .slice(0, MAX_ITEMS);
+        .slice(0, maxItems);
       try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
+        localStorage.setItem(cacheKey, JSON.stringify({
           at: Date.now(),
           events: events.map(function (ev) {
             return Object.assign({}, ev, { start: ev.start.toISOString(), end: ev.end ? ev.end.toISOString() : null });
@@ -82,9 +88,9 @@
     });
   }
 
-  function readCache() {
+  function readCache(cacheKey) {
     try {
-      var c = JSON.parse(localStorage.getItem(CACHE_KEY));
+      var c = JSON.parse(localStorage.getItem(cacheKey || CACHE_KEY));
       if (!c || !c.events) return null;
       var now = Date.now();
       var evs = c.events.map(function (ev) {
@@ -140,12 +146,16 @@
      5 minutes while the tab is visible. */
   function mount(el, opts) {
     if (!el) return;
+    opts = opts || {};
+    var windowDays = opts.windowDays || WINDOW_DAYS;
+    var maxItems = opts.maxItems || MAX_ITEMS;
+    var cacheKey = opts.cacheKey || CACHE_KEY;
     wireSeeMore(el);
-    var cached = readCache();
-    if (cached) render(el, cached.events.slice(0, MAX_ITEMS), opts);
+    var cached = readCache(cacheKey);
+    if (cached) render(el, cached.events.slice(0, maxItems), opts);
     else el.innerHTML = '<div class="upe-empty">Checking the calendar…</div>';
     var refresh = function () {
-      fetchUpcoming().then(function (evs) { render(el, evs, opts); })
+      fetchUpcoming({ windowDays: windowDays, maxItems: maxItems, cacheKey: cacheKey }).then(function (evs) { render(el, evs, opts); })
         .catch(function () {
           if (!cached) render(el, [], Object.assign({}, opts, { empty: 'Couldn’t reach the calendar — see the full calendar for what’s coming up.' }));
         });
