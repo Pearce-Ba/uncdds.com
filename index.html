@@ -166,6 +166,8 @@ body.nav-open{overflow:hidden;}
 .nm-eyebrow h3{margin:0;color:#CFE0F2;font-weight:700;letter-spacing:3px;font-size:12.5px;text-transform:uppercase;text-shadow:0 1px 4px rgba(0,0,0,.5);}
 /* Recolor the shared .upe-* item for the dark lens surface + clamp desc to one line */
 .nm-glass .upe-item,.nm-glass .upe-item:first-child{border:0;padding:0;align-items:center;}
+/* Left-align the title/location/description so they all start at the same edge (the eyebrow above stays centered); the day/time column is vertically centered against this block via align-items:center */
+.nm-glass .upe-body{text-align:left;}
 .nm-glass .upe-day{color:#93C2EC;text-shadow:0 1px 3px rgba(0,0,0,.55);}
 .nm-glass .upe-time{color:#C6D6E8;text-shadow:0 1px 3px rgba(0,0,0,.5);}
 .nm-glass .upe-title{color:#FFFFFF;text-shadow:0 1px 6px rgba(0,0,0,.55);}
@@ -176,7 +178,7 @@ body.nav-open{overflow:hidden;}
 /* Mobile stacks the item to a column — pin widths so the one-line desc still clamps with an ellipsis instead of shrink-wrapping past the padding */
 @media(max-width:560px){
   .nm-glass .upe-list{width:100%;}
-  .nm-glass .upe-item{width:100%;min-width:0;}
+  .nm-glass .upe-item,.nm-glass .upe-item:first-child{width:100%;min-width:0;align-items:flex-start;}
   .nm-glass .upe-when{width:auto;}
   .nm-glass .upe-body{width:100%;min-width:0;overflow:hidden;}
 }
