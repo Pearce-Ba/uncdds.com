@@ -173,8 +173,10 @@
   if (!REDUCED) setTimeout(function () {
     G.dental.set(10); G.total.set(50); G.nondental.set(10);
     setTimeout(function () {
-      if (DATA) { G.dental.set(DATA.dental); G.total.set(DATA.total); G.nondental.set(DATA.nonDental); }
-      else { G.dental.set(0); G.total.set(0); G.nondental.set(0); }
+      var f = loggedSums(), b = DATA || { dental: 0, total: 0, nonDental: 0 };
+      G.dental.set(num(b.dental) + f.dental);
+      G.total.set((num(b.total) || 0) + f.dental + f.non);
+      G.nondental.set(num(b.nonDental) + f.non);
     }, 900);
   }, 350);
 
@@ -182,6 +184,7 @@
   var SHEET_ID = '1yXCL-EK5xeVeIATHolpgLdSzQcEDcndSCJL4bbnPFE4';
   var SHEET_GID = '1629504388';
   var CACHE_KEY = 'dds-sheet-cache-v1';
+  var HOURS_KEY = 'dds-hours-v1', HCATS_KEY = 'dds-hour-cats-v1';
   var DATA = null, cbN = 0, lastFetch = 0;
 
   function fetchSheet() {
@@ -266,7 +269,8 @@
     el.innerHTML = '<span class="st"></span>' + esc(label);
   }
 
-  function renderSheet(d) {
+  function renderSheet(dRaw) {
+    var d = foldLogged(dRaw);                 // fold in the member's self-logged hours
     G.total.set(d.total); G.dental.set(d.dental); G.nondental.set(d.nonDental);
 
     // fuel bar
@@ -304,13 +308,13 @@
     renderMeetings(d);
     renderService(d);
 
-    if (!d.found && !$('nf-note')) {
+    if (!d.sheetFound && !$('nf-note')) {
       var n = document.createElement('p');
       n.id = 'nf-note';
       n.style.cssText = 'margin:14px 0 0;color:#9FB6CE;font-size:12.5px;line-height:1.6;max-width:60ch;';
-      n.innerHTML = 'You&rsquo;re not on the chapter sheet yet — hours appear once the exec board adds <b style="color:#E3C27C;">' + esc(ME.name) + '</b> (' + esc(ME.email) + ') to it.';
+      n.innerHTML = 'You&rsquo;re not on the chapter sheet yet — official hours appear once the exec board adds <b style="color:#E3C27C;">' + esc(ME.name) + '</b> (' + esc(ME.email) + ') to it. Anything you log below counts toward your gauges in the meantime.';
       $('standing').after(n);
-    } else if (d.found && $('nf-note')) $('nf-note').remove();
+    } else if (d.sheetFound && $('nf-note')) $('nf-note').remove();
   }
 
   function setSync(state, msg) {
@@ -449,7 +453,8 @@
     var group = function (title, items, total) {
       var live = items.filter(function (c) { return c.hours > 0; });
       var rows = live.map(function (c) {
-        return '<div class="svc-row"><span class="svc-name">' + esc(c.name) + '</span>' +
+        return '<div class="svc-row"><span class="svc-name">' + esc(c.name) +
+          (c.logged ? ' <span class="svc-logged">you logged</span>' : '') + '</span>' +
           '<span class="svc-val">' + (Math.round(c.hours * 10) / 10) + ' hr' + (c.hours === 1 ? '' : 's') + '</span>' +
           '<span class="svc-bar"><i style="width:' + (max ? Math.max(6, c.hours / max * 100) : 0) + '%;"></i></span></div>';
       }).join('');
@@ -1874,9 +1879,230 @@
 
   renderResources();
 
+  /* ================= Log your hours =================
+     Members self-log service / volunteer hours here. Entries live in the shared
+     dds-hours-v1 store (synced across browsers via DDSCloud when Firebase is
+     configured) and fold straight into the gauges, odometer and service log
+     above — so what you log updates live, on top of whatever the exec board's
+     sheet already shows. The chapter Google Sheet stays the official record and
+     is one click away; set DDS_CLOUD.hourLogEndpoint to a Google Apps Script
+     Web-App URL to ALSO push each entry into that sheet automatically. */
+  var SHEET_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit';
+  var HOUR_LOG_ENDPOINT = (window.DDS_CLOUD && DDS_CLOUD.hourLogEndpoint) || '';
+  // service-type tags that autofill; each remembers whether it's dental or not
+  var HOUR_SEEDS = [
+    { name: 'Dental shadowing', kind: 'dental' },
+    { name: 'SHAC dental clinic', kind: 'dental' },
+    { name: 'Adams School of Dentistry event', kind: 'dental' },
+    { name: 'Oral-health outreach', kind: 'dental' },
+    { name: 'Give Kids A Smile', kind: 'dental' },
+    { name: 'Community service', kind: 'nondental' },
+    { name: 'Campus volunteering', kind: 'nondental' },
+    { name: 'Fundraiser / philanthropy', kind: 'nondental' },
+    { name: 'Tabling / recruitment', kind: 'nondental' },
+    { name: 'Tutoring / mentoring', kind: 'nondental' }
+  ];
+
+  function readHours() { var a = readLS(HOURS_KEY, []); return Array.isArray(a) ? a : []; }
+  function saveHours(list) { writeLS(HOURS_KEY, list); if (window.DDSCloud) DDSCloud.touch('hours'); }
+  function myHours() {
+    return readHours().filter(function (e) { return e && e.byId === ME.id; })
+      .sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')) || (b.at || 0) - (a.at || 0); });
+  }
+  function readCustomCats() { var a = readLS(HCATS_KEY, []); return Array.isArray(a) ? a : []; }
+  function saveCustomCats(list) { writeLS(HCATS_KEY, list); }
+
+  function loggedSums() {
+    var d = 0, n = 0, c = 0;
+    myHours().forEach(function (e) { var h = num(e.hours); if (e.kind === 'dental') d += h; else n += h; c++; });
+    return { dental: d, non: n, count: c };
+  }
+
+  // every tag we know: seeds + sheet categories + created + already-used
+  function allCats() {
+    var map = {};
+    var add = function (name, kind) {
+      if (name == null) return; var key = String(name).toLowerCase().trim(); if (!key) return;
+      if (!map[key]) map[key] = { name: String(name).trim(), kind: kind || 'nondental' };
+      else if (kind) map[key].kind = kind;
+    };
+    HOUR_SEEDS.forEach(function (c) { add(c.name, c.kind); });
+    if (DATA && DATA.svc) {
+      (DATA.svc.dental || []).forEach(function (c) { add(c.name, 'dental'); });
+      (DATA.svc.nondental || []).forEach(function (c) { add(c.name, 'nondental'); });
+    }
+    readCustomCats().forEach(function (c) { add(c.name, c.kind); });
+    readHours().forEach(function (e) { if (e && e.byId === ME.id) add(e.cat, e.kind); });
+    return Object.keys(map).map(function (k) { return map[k]; })
+      .sort(function (a, b) { return a.name.localeCompare(b.name); });
+  }
+  function catKind(name) {
+    var key = String(name || '').toLowerCase().trim();
+    var hit = allCats().filter(function (c) { return c.name.toLowerCase() === key; })[0];
+    return hit ? hit.kind : null;
+  }
+
+  // fold self-logged hours into a sheet-data object (returns a NEW object; never
+  // mutates DATA). Called at the top of renderSheet, so the gauges/odometer/
+  // service log all reflect logged hours the moment they change.
+  function foldLogged(dRaw) {
+    var base = dRaw || {}, sums = loggedSums();
+    var d = {
+      sheetFound: !!base.found,
+      found: !!base.found || sums.count > 0,
+      dental: num(base.dental) + sums.dental,
+      nonDental: num(base.nonDental) + sums.non,
+      meetingsN: num(base.meetingsN),
+      total: (num(base.total) || 0) + sums.dental + sums.non,
+      gpa: base.gpa, dues: base.dues, meetsReq: base.meetsReq,
+      meetings: base.meetings || [],
+      svc: {
+        dental: (base.svc && base.svc.dental ? base.svc.dental.slice() : []),
+        nondental: (base.svc && base.svc.nondental ? base.svc.nondental.slice() : [])
+      },
+      at: base.at || Date.now()
+    };
+    var merge = function (arr, name, hours) {
+      var key = name.toLowerCase();
+      for (var i = 0; i < arr.length; i++) if (String(arr[i].name).toLowerCase() === key) { arr[i] = { name: arr[i].name, hours: num(arr[i].hours) + hours, logged: true }; return; }
+      arr.push({ name: name, hours: hours, logged: true });
+    };
+    myHours().forEach(function (e) {
+      merge(e.kind === 'dental' ? d.svc.dental : d.svc.nondental, String(e.cat || 'Service').trim(), num(e.hours));
+    });
+    return d;
+  }
+  function blankData() {
+    return { found: false, dental: 0, nonDental: 0, meetingsN: 0, total: 0, gpa: null, dues: null, meetsReq: null, meetings: [], svc: { dental: [], nondental: [] }, at: Date.now() };
+  }
+  function repaint() { renderSheet(DATA || blankData()); }
+
+  (function initHourLog() {
+    var cta = $('log-cta'), wrap = $('log-wrap'), form = $('log-form');
+    if (!cta || !wrap || !form) return;
+    var catIn = $('log-cat'), dl = $('log-cats'), hrsIn = $('log-hours'),
+        dateIn = $('log-date'), noteIn = $('log-note'), list = $('log-list'),
+        addBtn = $('log-add'), cancelBtn = $('log-cancel'), formTitle = $('log-form-title'),
+        segBtns = Array.prototype.slice.call(form.querySelectorAll('.log-seg-btn'));
+    var logKind = 'dental', editId = null;
+
+    function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+    function setKind(k) { logKind = (k === 'dental') ? 'dental' : 'nondental'; segBtns.forEach(function (b) { var on = b.getAttribute('data-kind') === logKind; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
+    function niceDate(s) { var d = new Date(s + 'T00:00:00'); return isNaN(d) ? s : d.toLocaleDateString([], { month: 'short', day: 'numeric' }); }
+
+    function fillDatalist() {
+      dl.innerHTML = allCats().map(function (c) {
+        return '<option value="' + esc(c.name) + '">' + (c.kind === 'dental' ? 'Dental' : 'Non-dental') + '</option>';
+      }).join('');
+    }
+    function renderList() {
+      var mine = myHours();
+      var s = loggedSums(), tot = Math.round((s.dental + s.non) * 10) / 10;
+      $('log-cta-sub').textContent = mine.length
+        ? (mine.length + ' entr' + (mine.length === 1 ? 'y' : 'ies') + ' · ' + tot + ' hr' + (tot === 1 ? '' : 's') + ' logged')
+        : 'Add service & volunteer hours yourself';
+      if (!mine.length) { list.innerHTML = '<p class="log-empty">Nothing logged yet. Add your first service or volunteer hours above — they count toward your gauges right away.</p>'; return; }
+      list.innerHTML = mine.map(function (e) {
+        var h = Math.round(num(e.hours) * 10) / 10;
+        return '<div class="log-row" data-id="' + esc(e.id) + '">' +
+          '<div class="log-row-main"><span class="log-kind log-kind-' + (e.kind === 'dental' ? 'dental' : 'non') + '">' + (e.kind === 'dental' ? 'Dental' : 'Non-dental') + '</span>' +
+          '<span class="log-row-cat">' + esc(e.cat) + '</span>' +
+          (e.note ? '<span class="log-row-note">' + esc(e.note) + '</span>' : '') + '</div>' +
+          '<div class="log-row-side"><span class="log-row-hrs">' + h + ' hr' + (h === 1 ? '' : 's') + '</span>' +
+          '<span class="log-row-date">' + esc(niceDate(e.date)) + '</span>' +
+          '<button type="button" class="log-mini" data-log-edit="' + esc(e.id) + '">Edit</button>' +
+          '<button type="button" class="log-mini log-del" data-log-del="' + esc(e.id) + '">Delete</button></div>' +
+          '</div>';
+      }).join('');
+    }
+    function refresh() { fillDatalist(); renderList(); }
+
+    function resetForm() {
+      editId = null; form.reset(); dateIn.value = today(); setKind('dental');
+      addBtn.textContent = 'Add hours'; if (formTitle) formTitle.textContent = 'Log an activity';
+      if (cancelBtn) cancelBtn.hidden = true;
+    }
+    function loadForEdit(id) {
+      var e = readHours().filter(function (r) { return r.id === id; })[0]; if (!e) return;
+      editId = id; catIn.value = e.cat || ''; hrsIn.value = e.hours; dateIn.value = e.date || today();
+      noteIn.value = e.note || ''; setKind(e.kind);
+      addBtn.textContent = 'Save changes'; if (formTitle) formTitle.textContent = 'Edit this entry';
+      if (cancelBtn) cancelBtn.hidden = false;
+      catIn.focus();
+    }
+
+    function rememberCat(name, kind) {
+      var key = String(name).toLowerCase().trim();
+      var known = allCats().some(function (c) { return c.name.toLowerCase() === key; });
+      if (known) return;
+      var custom = readCustomCats(); custom.push({ name: String(name).trim(), kind: kind }); saveCustomCats(custom);
+    }
+    function pushToSheet(entry) {
+      if (!HOUR_LOG_ENDPOINT) return;
+      try {
+        fetch(HOUR_LOG_ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ name: ME.name, email: ME.email, category: entry.cat, kind: entry.kind, hours: entry.hours, date: entry.date, note: entry.note }) });
+      } catch (err) { /* best-effort; site store stays source of truth */ }
+    }
+
+    // autofill: choosing a known tag sets its service type for you
+    catIn.addEventListener('change', function () { var k = catKind(catIn.value); if (k) setKind(k); });
+    catIn.addEventListener('input', function () { var k = catKind(catIn.value); if (k) setKind(k); });
+    segBtns.forEach(function (b) { b.addEventListener('click', function () { setKind(b.getAttribute('data-kind')); }); });
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var cat = catIn.value.trim(), hours = Math.round(num(hrsIn.value) * 100) / 100, date = dateIn.value || today();
+      if (!cat) { catIn.focus(); return; }
+      if (!(hours > 0)) { hrsIn.focus(); return; }
+      var note = noteIn.value.trim();
+      var list0 = readHours();
+      if (editId) {
+        for (var i = 0; i < list0.length; i++) if (list0[i].id === editId) {
+          list0[i].cat = cat; list0[i].kind = logKind; list0[i].hours = hours; list0[i].date = date; list0[i].note = note; list0[i].up = Date.now();
+        }
+      } else {
+        var entry = { id: uid(), byId: ME.id, by: ME.name, cat: cat, kind: logKind, hours: hours, date: date, note: note, at: Date.now(), up: Date.now() };
+        list0.push(entry); pushToSheet(entry);
+      }
+      rememberCat(cat, logKind);
+      saveHours(list0); resetForm(); refresh(); repaint();
+    });
+
+    list.addEventListener('click', function (ev) {
+      var ed = ev.target.closest('[data-log-edit]'), de = ev.target.closest('[data-log-del]');
+      if (ed) { loadForEdit(ed.getAttribute('data-log-edit')); }
+      else if (de) {
+        var id = de.getAttribute('data-log-del');
+        if (!confirm('Delete this logged entry?')) return;
+        var list0 = readHours().filter(function (r) { return r.id !== id; });
+        saveHours(list0); if (window.DDSCloud) DDSCloud.tombstone('hours', id);
+        if (editId === id) resetForm();
+        refresh(); repaint();
+      }
+    });
+    if (cancelBtn) cancelBtn.addEventListener('click', resetForm);
+
+    function openLog(scroll) {
+      wrap.classList.add('open'); cta.setAttribute('aria-expanded', 'true');
+      if (scroll) setTimeout(function () { cta.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' }); }, 60);
+    }
+    function toggleLog() { if (wrap.classList.contains('open')) { wrap.classList.remove('open'); cta.setAttribute('aria-expanded', 'false'); } else openLog(false); }
+    cta.addEventListener('click', toggleLog);
+
+    resetForm(); refresh(); repaint();
+    // expose so cross-tab / cloud updates can refresh the list
+    window.__ddsHourRefresh = refresh;
+
+    // deep-link: point-submission buttons land here (?log=1 / ?submit=member|rushee / #log)
+    var qs = new URLSearchParams(location.search);
+    if (qs.has('log') || qs.has('submit') || location.hash === '#log') openLog(true);
+  })();
+
   /* ================= Cross-tab / cloud sync ================= */
   window.addEventListener('storage', function (e) {
-    if (e.key === MSG_KEY) { renderChat(false); renderRail(); }
+    if (e.key === HOURS_KEY) { if (window.__ddsHourRefresh) window.__ddsHourRefresh(); repaint(); }
+    else if (e.key === MSG_KEY) { renderChat(false); renderRail(); }
     else if (e.key === CHAN_KEY) { renderRail(); }
     else if (e.key === 'dds-members-v1') { renderMembers(); renderChat(false); renderRail(); }
     else if (e.key === DDSResources.KEY) renderResources();

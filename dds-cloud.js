@@ -74,6 +74,12 @@
       toRows: function (v) { return Array.isArray(v) ? v : []; },
       fromRows: function (rows) { return rows; }
     },
+    hours: {
+      key: 'dds-hours-v1', coll: 'hours', every: 40,
+      when: onDash,
+      toRows: function (v) { return Array.isArray(v) ? v : []; },
+      fromRows: function (rows) { return rows; }
+    },
     notes: {
       key: 'dds-notes-v1', coll: 'notes', every: 45,
       when: onDash,

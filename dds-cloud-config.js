@@ -31,5 +31,14 @@
 */
 window.DDS_CLOUD = {
   projectId: '',   // e.g. 'uncdds-site'
-  apiKey: ''       // e.g. 'AIzaSyC...'
+  apiKey: '',      // e.g. 'AIzaSyC...'
+
+  /* OPTIONAL — auto-push logged hours into the chapter Google Sheet.
+     Leave empty and the "Log your hours" tool still works: entries live in the
+     synced site store and count toward each member's gauges, and the sheet is
+     one click away as the official record. To also write entries straight into
+     the sheet, deploy a Google Apps Script Web App on it (Extensions → Apps
+     Script → a doPost(e) that appends JSON.parse(e.postData.contents) as a row
+     → Deploy → Web app → "Anyone" access) and paste its /exec URL here. */
+  hourLogEndpoint: ''
 };

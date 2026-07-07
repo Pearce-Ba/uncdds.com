@@ -287,6 +287,50 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .svc-bar{grid-column:1 / -1;height:4px;border-radius:4px;background:rgba(151,186,227,.1);overflow:hidden;}
 .svc-bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--orange),var(--orange-hi));box-shadow:0 0 10px rgba(255,158,87,.4);transition:width .9s cubic-bezier(.25,.6,.25,1);}
 .svc-empty{color:var(--ink3);font-family:'Lora',serif;font-style:italic;font-size:14px;line-height:1.65;padding:10px 0;}
+.svc-logged{display:inline-block;margin-left:6px;font-family:var(--mont);font-weight:700;font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--orange-hi);background:rgba(255,158,87,.13);border:1px solid rgba(255,158,87,.3);border-radius:999px;padding:1px 7px;vertical-align:middle;}
+
+/* ---------- Log your hours (in the requirement cluster) ---------- */
+.log-cta{width:100%;margin-top:clamp(14px,2vw,20px);display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;
+  background:linear-gradient(150deg,rgba(98,225,255,.12),rgba(151,186,227,.05));border:1px solid var(--acc-line,rgba(98,225,255,.3));border-radius:18px;
+  padding:16px clamp(16px,2.4vw,22px);color:var(--ink);font-family:var(--mont);box-shadow:0 14px 30px -18px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.12);
+  transition:transform .2s,border-color .2s,box-shadow .2s,background .2s;}
+.log-cta:hover{transform:translateY(-1.5px);border-color:var(--acc-hi,#62E1FF);box-shadow:0 20px 38px -18px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.18),0 0 0 1px var(--acc-soft,rgba(98,225,255,.12));}
+.log-cta-ic{flex:none;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#081120;background:linear-gradient(160deg,var(--acc-hi,#62E1FF),var(--acc,#2196C6));box-shadow:0 8px 18px -8px var(--acc-soft,rgba(98,225,255,.6));}
+.log-cta-tx{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.log-cta-tx b{font-weight:800;font-size:14px;letter-spacing:1.4px;text-transform:uppercase;}
+.log-cta-tx small{color:var(--ink2);font-size:12px;letter-spacing:.3px;}
+.log-cta-chev{flex:none;color:var(--ink2);transition:transform .3s cubic-bezier(.25,.1,.25,1);}
+.log-cta[aria-expanded="true"] .log-cta-chev{transform:rotate(180deg);}
+.log-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .42s cubic-bezier(.25,.6,.25,1);margin-top:0;}
+.log-wrap.open{grid-template-rows:1fr;margin-top:14px;}
+.log-wrap-in{overflow:hidden;min-height:0;}
+.log-panel{padding:clamp(18px,2.6vw,28px);}
+.log-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.log-head h3{margin:0 0 6px;font-family:var(--grotesk);font-weight:600;font-size:1.12rem;letter-spacing:-.01em;color:var(--ink);}
+.log-note{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.6;max-width:56ch;}
+.log-head .btn{flex:none;}
+.log-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+.log-opt{font-weight:500;color:var(--ink3);letter-spacing:.5px;text-transform:none;}
+.log-seg{display:flex;gap:8px;}
+.log-seg-btn{flex:1;padding:12px 10px;border-radius:13px;border:1px solid var(--line);background:rgba(6,14,29,.6);color:var(--ink2);font-family:var(--mont);font-weight:700;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;cursor:pointer;transition:border-color .2s,background .2s,color .2s;}
+.log-seg-btn.on{border-color:var(--acc-line,rgba(98,225,255,.5));background:var(--acc-soft,rgba(98,225,255,.12));color:var(--acc-hi,#62E1FF);box-shadow:inset 0 1px 0 rgba(255,255,255,.1);}
+.log-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+.log-list{margin-top:18px;display:flex;flex-direction:column;gap:8px;}
+.log-empty{margin:0;color:var(--ink3);font-family:'Lora',serif;font-style:italic;font-size:13.5px;line-height:1.6;}
+.log-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(151,186,227,.08),rgba(151,186,227,.02));}
+.log-row-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0;}
+.log-kind{flex:none;font-weight:700;font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;border-radius:999px;padding:3px 9px;}
+.log-kind-dental{color:var(--cyan-hi);background:rgba(98,225,255,.13);border:1px solid rgba(98,225,255,.3);}
+.log-kind-non{color:var(--orange-hi);background:rgba(255,158,87,.13);border:1px solid rgba(255,158,87,.3);}
+.log-row-cat{font-weight:600;font-size:13.5px;color:var(--ink);}
+.log-row-note{font-family:'Lora',serif;font-style:italic;font-size:12.5px;color:var(--ink3);}
+.log-row-side{display:flex;align-items:center;gap:12px;flex:none;}
+.log-row-hrs{font-family:var(--grotesk);font-weight:600;font-size:13.5px;color:var(--cyan-hi);}
+.log-row-date{color:var(--ink3);font-size:11.5px;letter-spacing:.3px;}
+.log-mini{border:0;background:none;color:var(--ink2);font-family:var(--mont);font-weight:700;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;padding:4px 2px;transition:color .2s;}
+.log-mini:hover{color:var(--ink);}
+.log-mini.log-del:hover{color:var(--red-hi);}
+@media (max-width:560px){.log-grid{grid-template-columns:1fr;}}
 
 /* ---------- Classes ---------- */
 .cls-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
@@ -682,6 +726,59 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
         </div>
       </div>
     </div>
+
+    <!-- Log your hours: collapsed by default so it takes no space until opened -->
+    <button class="log-cta" id="log-cta" type="button" aria-expanded="false" aria-controls="log-wrap">
+      <span class="log-cta-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      <span class="log-cta-tx"><b>Log your hours</b><small id="log-cta-sub">Add service &amp; volunteer hours yourself</small></span>
+      <svg class="log-cta-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="log-wrap" id="log-wrap"><div class="log-wrap-in">
+      <div class="glass log-panel">
+        <div class="log-head">
+          <div>
+            <h3 id="log-form-title">Log an activity</h3>
+            <p class="log-note">Log your own service &amp; volunteer hours — they count toward the gauges above right away and sync to your other devices. Pick a service type to autofill it, or type a new one to create a tag. The chapter sheet stays the official record.</p>
+          </div>
+          <a class="btn" href="https://docs.google.com/spreadsheets/d/1yXCL-EK5xeVeIATHolpgLdSzQcEDcndSCJL4bbnPFE4/edit" target="_blank" rel="noopener">Open the points sheet&nbsp;&#8599;</a>
+        </div>
+        <form id="log-form" autocomplete="off">
+          <div class="fld">
+            <label for="log-cat">Service or activity</label>
+            <input id="log-cat" list="log-cats" placeholder="e.g. Dental shadowing — start typing to search or add a new tag" autocomplete="off">
+            <datalist id="log-cats"></datalist>
+          </div>
+          <div class="log-grid">
+            <div class="fld">
+              <label>Type</label>
+              <div class="log-seg" role="group" aria-label="Service type">
+                <button type="button" class="log-seg-btn on" data-kind="dental" aria-pressed="true">Dental</button>
+                <button type="button" class="log-seg-btn" data-kind="nondental" aria-pressed="false">Non-dental</button>
+              </div>
+            </div>
+            <div class="fld">
+              <label for="log-hours">Hours</label>
+              <input id="log-hours" type="number" min="0" step="0.5" inputmode="decimal" placeholder="2.5">
+            </div>
+          </div>
+          <div class="log-grid">
+            <div class="fld">
+              <label for="log-date">Date</label>
+              <input id="log-date" type="date">
+            </div>
+            <div class="fld">
+              <label for="log-note">Note <span class="log-opt">(optional)</span></label>
+              <input id="log-note" placeholder="Where / who with">
+            </div>
+          </div>
+          <div class="log-actions">
+            <button type="submit" class="btn btn-solid" id="log-add">Add hours</button>
+            <button type="button" class="btn" id="log-cancel" hidden>Cancel</button>
+          </div>
+        </form>
+        <div class="log-list" id="log-list"></div>
+      </div>
+    </div></div>
   </section>
 
   <!-- ======== Upcoming events ======== -->
