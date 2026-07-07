@@ -268,6 +268,29 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 @media(max-width:980px){.pdc-back{display:none;}}
 .stories-intro{color:#A9C0D8;}
 .op-glowtext{color:transparent;background-image:radial-gradient(circle 320px at var(--px,-999px) var(--py,-999px),#B9975B 0%,#B9975B 30%,#C7D6E6 70%);-webkit-background-clip:text;background-clip:text;}
+/* Officer profile: description ("Get to know me") box that pulls from the dashboard profile */
+.op-desc{position:relative;overflow:hidden;border-radius:20px;background:radial-gradient(120% 120% at 30% 18%,#20242d 0%,#16181d 66%);padding:22px;display:flex;flex-direction:column;box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.45);will-change:transform;}
+.op-desc-frame{position:absolute;inset:0;border:1px solid rgba(185,151,91,.25);border-radius:20px;pointer-events:none;}
+.op-desc-lead{margin:0;color:rgba(255,255,255,.9);line-height:1.62;font-size:14px;font-weight:300;}
+.op-desc-lead b{color:#B9975B;font-weight:600;}
+.op-desc-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;}
+.op-desc-chip{font-size:11px;letter-spacing:.02em;color:#EAF1F8;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px 11px;}
+.op-desc-cta{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;background:linear-gradient(180deg,#C9A867,#B9975B);color:#1a1408;font-weight:700;font-size:12px;letter-spacing:.04em;text-decoration:none;box-shadow:0 12px 26px -12px rgba(185,151,91,.8);transition:transform .2s ease,box-shadow .2s ease;}
+.op-desc-cta:hover{transform:translateY(-2px);box-shadow:0 16px 32px -12px rgba(185,151,91,.95);}
+/* Officer profile: Photos box (was Involvement) — rows of little tiles that drift and cross-fade */
+.op-ph-rows{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding-bottom:2px;overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent);}
+.op-ph-row{display:flex;gap:8px;width:max-content;}
+.op-ph-tile{flex:none;width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 1px rgba(255,255,255,.12);background-size:cover;background-position:center;transition:opacity .5s ease;}
+/* Officer profile: Reach Me cubes (LinkedIn / Instagram / Phone) in the right half */
+.op-reach{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;}
+.op-reach-cubes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.op-cube{position:relative;aspect-ratio:1;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 1px rgba(255,255,255,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#fff;text-decoration:none;cursor:pointer;font:inherit;padding:6px;transition:background .2s ease,border-color .2s ease,transform .2s ease;}
+.op-cube:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.32);transform:translateY(-2px);}
+.op-cube svg{width:20px;height:20px;}
+.op-cube-lbl{font-size:9.5px;letter-spacing:.03em;text-transform:uppercase;color:rgba(255,255,255,.78);}
+.op-cube.is-copied{background:rgba(185,151,91,.22);border-color:rgba(185,151,91,.55);color:#EBD9AF;}
+.op-cube.is-copied .op-cube-lbl{color:#EBD9AF;}
+@media(max-width:520px){.op-reach{grid-template-columns:1fr;} .op-reach-cubes{max-width:230px;}}
 /* Big Little family tree */
 #big-little{position:relative;overflow:clip;}
 /* Family rail — horizontal scroll of family cards with fan-out back cards.
@@ -1528,22 +1551,62 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
 })();
 
 // ---- Data ----
+// Per-officer content. FORMAT is identical for everyone (built from one template
+// below); only the text/assets differ. Fields:
+//   quote/quoteBy  → the "Voice" box (a favorite quote + who said it)
+//   email/phone    → "Reach Me" (phone copies to clipboard; '' hides the cube)
+//   instagram/linkedin → "Reach Me" cubes link out ('' = placeholder, no link yet)
+//   photos[]       → the "Photos" box tiles (cross-fade every 5s, lazy-loaded in view;
+//                    empty = falls back to plain decorative tiles)
+//   major          → fallback for the "Get to know me" box when no dashboard profile is found
 const OFFICERS = [
-  { idx:0, name:'Pearce Barnes',  role:'President',            bio:'Junior studying Biology. Serves as president of the 2026–27 executive board, leading DDS toward its most ambitious year yet.',
+  { idx:0, name:'Pearce Barnes',  role:'President',            major:'Biology & Business',
+    bio:'Junior studying Biology and Business. I currently serve as president of the 2026–27 executive board, and I served as the secretary for the 2025–26 year. I am a photographer for the DTH and a member of the UNC Men’s Volleyball team. I can’t wait to meet ya!',
+    quote:'To succeed in life, you need three things: a wishbone, a backbone and a funnybone.', quoteBy:'Reba McEntire',
+    email:'pjbarnes@unc.edu', phone:'469-512-5950', instagram:'@pearcebarnes05', linkedin:'https://www.linkedin.com/in/pearce-barnes/',
+    photos:[],
     photo:'slot-officer-photo-1.webp', bgPhoto:'slot-prof-1-bg.webp',   softPhoto:'slot-prof-1-soft.webp' },
-  { idx:1, name:'Leila Tellez',   role:'Vice President',       bio:'Passionate about community and mentorship, working closely with the president to advance the society\'s programs and goals.',
+  { idx:1, name:'Leila Tellez',   role:'Vice President',       major:'',
+    bio:'Passionate about community and mentorship, working closely with the president to advance the society\'s programs and goals.',
+    quote:'Here to help you find your people in DDS.', quoteBy:'Leila',
+    email:'ltellez@unc.edu', phone:'', instagram:'', linkedin:'',
+    photos:[],
     photo:'slot-officer-photo-2.webp', bgPhoto:'slot-officer-photo-2.webp', softPhoto:'slot-officer-photo-2.webp' },
-  { idx:2, name:'Brandon Groth',  role:'Secretary',            bio:'Keeps the chapter organized and running smoothly — managing records, communications, and keeping everyone on the same page.',
+  { idx:2, name:'Brandon Groth',  role:'Secretary',            major:'',
+    bio:'Keeps the chapter organized and running smoothly — managing records, communications, and keeping everyone on the same page.',
+    quote:'Here to help you find your people in DDS.', quoteBy:'Brandon',
+    email:'bjgroth@unc.edu', phone:'', instagram:'', linkedin:'',
+    photos:[],
     photo:'slot-officer-photo-3.webp', bgPhoto:'slot-officer-photo-3.webp', softPhoto:'slot-officer-photo-3.webp' },
-  { idx:3, name:'Aaryan Patel',   role:'Treasurer',            bio:'Oversees chapter finances, ensuring resources are allocated effectively to maximize member value and experiences.',
+  { idx:3, name:'Aaryan Patel',   role:'Treasurer',            major:'',
+    bio:'Oversees chapter finances, ensuring resources are allocated effectively to maximize member value and experiences.',
+    quote:'Here to help you find your people in DDS.', quoteBy:'Aaryan',
+    email:'aapatel5@email.unc.edu', phone:'', instagram:'', linkedin:'',
+    photos:[],
     photo:'slot-officer-photo-4.webp', bgPhoto:'slot-officer-photo-4.webp', softPhoto:'slot-officer-photo-4.webp' },
-  { idx:4, name:'Emily Lian',     role:'Service Coordinator',  bio:'Designs and coordinates service opportunities both within the dental field and the broader Chapel Hill community.',
+  { idx:4, name:'Emily Lian',     role:'Service Coordinator',  major:'',
+    bio:'Designs and coordinates service opportunities both within the dental field and the broader Chapel Hill community.',
+    quote:'Here to help you find your people in DDS.', quoteBy:'Emily',
+    email:'emillian@unc.edu', phone:'', instagram:'', linkedin:'',
+    photos:[],
     photo:'slot-officer-photo-5.webp', bgPhoto:'slot-officer-photo-5.webp', softPhoto:'slot-officer-photo-5.webp' },
-  { idx:5, name:'Bree Harris',    role:'Student Ambassador',   bio:'The welcoming face of DDS — representing the chapter at campus events and connecting prospective members to the community.',
+  { idx:5, name:'Bree Harris',    role:'Student Ambassador',   major:'',
+    bio:'The welcoming face of DDS — representing the chapter at campus events and connecting prospective members to the community.',
+    quote:'Here to help you find your people in DDS.', quoteBy:'Bree',
+    email:'breeh@unc.edu', phone:'', instagram:'', linkedin:'',
+    photos:[],
     photo:'slot-officer-photo-6.webp', bgPhoto:'slot-officer-photo-6.webp', softPhoto:'slot-officer-photo-6.webp' },
-  { idx:6, name:'Yunah Kim',      role:'Social Media Manager', bio:'Brings DDS to life online, capturing chapter moments and building the society\'s digital presence and voice.',
+  { idx:6, name:'Yunah Kim',      role:'Social Media Manager', major:'',
+    bio:'Brings DDS to life online, capturing chapter moments and building the society\'s digital presence and voice.',
+    quote:'Here to help you find your people in DDS.', quoteBy:'Yunah',
+    email:'yunahkim@unc.edu', phone:'', instagram:'', linkedin:'',
+    photos:[],
     photo:'slot-officer-photo-7.webp', bgPhoto:'slot-officer-photo-7.webp', softPhoto:'slot-officer-photo-7.webp' },
-  { idx:7, name:'Zack Phan',      role:'Social Chair',         bio:'Orchestrates the social calendar, creating the events and community moments that define a DDS semester.',
+  { idx:7, name:'Zack Phan',      role:'Social Chair',         major:'',
+    bio:'Orchestrates the social calendar, creating the events and community moments that define a DDS semester.',
+    quote:'Here to help you find your people in DDS.', quoteBy:'Zack',
+    email:'zackphan@unc.edu', phone:'', instagram:'', linkedin:'',
+    photos:[],
     photo:'slot-officer-photo-8.webp', bgPhoto:'slot-officer-photo-8.webp', softPhoto:'slot-officer-photo-8.webp' },
 ];
 
@@ -1606,73 +1669,242 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 (function buildProfilePanels(){
   const track = document.getElementById('hpin-track');
   if (!track) return;
-  OFFICERS.forEach((o) => {
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const ICON_LI = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0zM.5 8h4V24h-4V8zM8 8h3.8v2.2h.05c.53-1 1.83-2.2 3.77-2.2 4.03 0 4.78 2.65 4.78 6.1V24h-4v-6.9c0-1.65-.03-3.77-2.3-3.77-2.3 0-2.65 1.8-2.65 3.65V24H8V8z"/></svg>';
+  const ICON_IG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>';
+  const ICON_PH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+  const phTiles = Array(12).fill(0).map(() => '<span class="op-ph-tile"></span>').join('');
+
+  // --- helpers shared by build + live hydration ---
+  const urlLI = v => v ? (/^https?:/i.test(v) ? v : 'https://www.linkedin.com/in/' + v.replace(/^@/, '') + '/') : '';
+  const urlIG = v => v ? (/^https?:/i.test(v) ? v : 'https://www.instagram.com/' + v.replace(/^@/, '') + '/') : '';
+  const handleIG = v => { if (!v) return ''; v = String(v).trim(); const mm = v.match(/instagram\.com\/([^\/?#]+)/i); return mm ? ('@' + mm[1]) : (v.charAt(0) === '@' ? v : '@' + v.replace(/^https?:\/\//, '')); };
+  const cube = (url, icon, label) => url
+    ? `<a class="op-cube" href="${esc(url)}" target="_blank" rel="noopener" aria-label="${label}">${icon}<span class="op-cube-lbl">${label}</span></a>`
+    : `<span class="op-cube" style="opacity:.5;cursor:default;" aria-label="${label} (coming soon)">${icon}<span class="op-cube-lbl">${label}</span></span>`;
+  function reachInner(o){
+    const phCube = o.phone
+      ? `<button type="button" class="op-cube" data-copy-phone="${esc(o.phone)}" title="Copy ${esc(o.phone)}" aria-label="Copy phone number ${esc(o.phone)}">${ICON_PH}<span class="op-cube-lbl">Phone</span></button>`
+      : `<span class="op-cube" style="opacity:.5;cursor:default;" aria-label="Phone (coming soon)">${ICON_PH}<span class="op-cube-lbl">Phone</span></span>`;
+    return `<div>
+                  <div style="letter-spacing:.22em;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,.78);margin-bottom:14px;">✦ Reach Me ✦</div>
+                  <div style="font-size:14px;margin-bottom:6px;"><a href="mailto:${esc(o.email)}" style="color:#fff;text-decoration:none;">${esc(o.email)}</a></div>
+                  <div style="font-size:14px;color:rgba(255,255,255,.7);margin-bottom:6px;">${esc(handleIG(o.instagram) || '@your-handle')}</div>
+                  <div style="font-size:14px;color:rgba(255,255,255,.7);">${esc(o.phone || '—')}</div>
+                </div>
+                <div class="op-reach-cubes">${cube(urlLI(o.linkedin), ICON_LI, 'LinkedIn')}${cube(urlIG(o.instagram), ICON_IG, 'Instagram')}${phCube}</div>`;
+  }
+  // Find the member row for an officer by email; officer-card content the officer
+  // fills in their dashboard profile overrides the hard-coded defaults below.
+  function memberFor(email){
+    email = String(email || '').toLowerCase();
+    if (!email) return null;
+    try { if (window.DDSAuth && DDSAuth.members) return DDSAuth.members().find(r => String(r.email || '').toLowerCase() === email) || null; } catch (e) {}
+    return null;
+  }
+  const has = v => typeof v === 'string' ? v.trim() !== '' : !!v;
+  function merged(base){
+    const m = memberFor(base.email);
+    if (!m) return base;
+    return Object.assign({}, base, {
+      bio:       has(m.bio)       ? m.bio       : base.bio,
+      quote:     has(m.quote)     ? m.quote     : base.quote,
+      quoteBy:   has(m.quoteBy)   ? m.quoteBy   : base.quoteBy,
+      phone:     has(m.phone)     ? m.phone     : base.phone,
+      instagram: has(m.instagram) ? m.instagram : base.instagram,
+      linkedin:  has(m.linkedin)  ? m.linkedin  : base.linkedin,
+      photos:    (Array.isArray(m.photos) && m.photos.length) ? m.photos : (base.photos || [])
+    });
+  }
+
+  OFFICERS.forEach((base) => {
+    const o = merged(base);
     const panel = document.createElement('div');
     panel.setAttribute('data-officer-panel','');
+    panel._base = base;
     panel.style.cssText = 'flex:none;width:100vw;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:clamp(80px,10vh,128px) clamp(20px,4vw,48px) clamp(46px,7vh,84px);perspective:1300px;';
     panel.innerHTML = `
       <div style="width:100%;max-width:1500px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:clamp(16px,2vw,26px);">
           <div style="max-width:680px;">
-            <h3 class="op-glowtext" style="margin:0;font-weight:500;font-size:clamp(1.5rem,2.6vw,2.4rem);line-height:1.15;letter-spacing:-0.01em;">Hi, I'm ${o.name}!</h3>
-            <p class="op-glowtext" style="margin:12px 0 0;font-weight:300;line-height:1.6;font-size:clamp(.88rem,1.05vw,1rem);">${o.bio}</p>
+            <h3 class="op-glowtext" style="margin:0;font-weight:500;font-size:clamp(1.5rem,2.6vw,2.4rem);line-height:1.15;letter-spacing:-0.01em;">Hi, I'm ${esc(o.name)}!</h3>
+            <p class="op-glowtext" data-op-bio style="margin:12px 0 0;font-weight:300;line-height:1.6;font-size:clamp(.88rem,1.05vw,1rem);">${esc(o.bio)}</p>
           </div>
           <a href="#join" class="connect-btn" style="flex:none;display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;background:rgba(255,255,255,.04);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 1px rgba(255,255,255,.12);color:#fff;font-weight:500;font-size:13px;text-decoration:none;transition:background .2s;">Connect&nbsp;↗</a>
         </div>
         <div class="op-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.2vw,18px);align-items:stretch;">
-          <!-- Col 1: background -->
+          <!-- Col 1: background (defines the height the other columns fill down to) -->
           <div data-tilt data-depth="1.35" style="position:relative;border-radius:20px;overflow:hidden;background:#16181d;min-height:clamp(380px,42vw,540px);box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.45);will-change:transform;">
             <img src="${o.bgPhoto}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;">
             <div style="position:relative;z-index:2;height:100%;min-height:clamp(380px,42vw,540px);display:flex;flex-direction:column;justify-content:space-between;padding:18px;pointer-events:none;">
               <div style="text-align:center;letter-spacing:.22em;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,.78);">✦&nbsp;&nbsp;Background&nbsp;&nbsp;✦</div>
               <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(to top,rgba(0,0,0,.78),transparent);margin:0 -18px -18px;padding:46px 18px 18px;">
-                <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.88);"><span>2024–Now</span><span style="opacity:.65;">✦ ${o.role}</span><span style="opacity:.65;">DDS</span></div>
+                <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.88);"><span>2024–Now</span><span style="opacity:.65;">✦ ${esc(o.role)}</span><span style="opacity:.65;">DDS</span></div>
                 <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.88);"><span>2023–24</span><span style="opacity:.65;">✦ Member</span><span style="opacity:.65;">DDS</span></div>
                 <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.88);"><span>UNC</span><span style="opacity:.65;">✦ Chapel Hill</span><span style="opacity:.65;">2027</span></div>
               </div>
             </div>
           </div>
-          <!-- Col 2: voice + stat -->
+          <!-- Col 2: voice + get-to-know-me (fills down to the background's bottom) -->
           <div style="display:flex;flex-direction:column;gap:clamp(12px,1.2vw,18px);">
             <div data-tilt data-depth="0.85" style="position:relative;overflow:hidden;border-radius:20px;background:#33474a;padding:22px;box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.4);will-change:transform;">
               <div style="letter-spacing:.22em;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,.78);margin-bottom:14px;">✦ Voice ✦</div>
-              <p style="margin:0;color:rgba(255,255,255,.88);line-height:1.6;font-size:13.5px;">"A dedicated officer who brings genuine care and enthusiasm to everything DDS does. A true asset to our chapter."</p>
-              <div style="margin-top:16px;font-size:13px;color:#fff;"><strong>Chapter Member</strong><span style="color:rgba(255,255,255,.6);"> — DDS '26</span></div>
+              <p data-op-voice style="margin:0;color:rgba(255,255,255,.88);line-height:1.6;font-size:13.5px;">“${esc(o.quote)}”</p>
+              <div data-op-voiceby style="margin-top:16px;font-size:13px;color:#fff;"><span style="color:rgba(255,255,255,.6);">— </span><strong>${esc(o.quoteBy)}</strong></div>
             </div>
-            <div data-tilt data-depth="1.1" style="position:relative;overflow:hidden;border-radius:20px;background:radial-gradient(120% 120% at 30% 20%,#20242d 0%,#16181d 62%);min-height:clamp(150px,16vw,210px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:18px;box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.45);will-change:transform;">
-              <div style="position:absolute;inset:0;border:1px solid rgba(185,151,91,.25);border-radius:20px;pointer-events:none;"></div>
-              <div style="position:relative;z-index:2;pointer-events:none;color:#B9975B;">
-                <div style="font-weight:300;letter-spacing:-0.02em;font-size:clamp(2.4rem,4vw,3.6rem);text-shadow:0 4px 24px rgba(0,0,0,.7);">3.0+</div>
-                <div style="margin-top:6px;color:rgba(255,255,255,.85);font-size:12.5px;">GPA Community</div>
-              </div>
+            <div class="op-desc" data-tilt data-depth="1.1" data-op-desc data-name="${esc(o.name)}" data-role="${esc(o.role)}" data-major="${esc(o.major || '')}" data-email="${esc(o.email || '')}" style="flex:1;min-height:clamp(160px,17vw,220px);">
+              <div class="op-desc-frame"></div>
+              <div style="letter-spacing:.22em;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,.78);">✦ Get To Know Me ✦</div>
+              <div class="op-desc-lead" data-op-desc-lead style="margin-top:14px;"></div>
+              <div class="op-desc-chips" data-op-desc-chips></div>
+              <a class="op-desc-cta" data-op-desc-cta href="dashboard.html#members">See my full profile&nbsp;→</a>
             </div>
           </div>
-          <!-- Col 3: toolkit + reach -->
+          <!-- Col 3: photos + reach (photos fills the top; reach sits on the bottom line) -->
           <div style="display:flex;flex-direction:column;gap:clamp(12px,1.2vw,18px);">
-            <div data-tilt data-depth="1.2" style="position:relative;overflow:hidden;border-radius:20px;background:#16181d;min-height:clamp(200px,23vw,310px);box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.45);will-change:transform;">
-              <img src="${o.softPhoto}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;">
-              <div style="position:relative;z-index:2;padding:16px;pointer-events:none;display:flex;flex-direction:column;gap:14px;height:100%;min-height:clamp(200px,23vw,310px);">
-                <div style="text-align:center;letter-spacing:.22em;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,.78);">✦ Involvement ✦</div>
-                <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px;overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent);">
-                  <div style="display:flex;gap:8px;width:max-content;animation:mq-left 24s linear infinite;">${Array(10).fill(0).map(()=>`<span style="flex:none;width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 1px rgba(255,255,255,.12);display:block;"></span>`).join('')}</div>
-                  <div style="display:flex;gap:8px;width:max-content;animation:mq-right 28s linear infinite;">${Array(10).fill(0).map(()=>`<span style="flex:none;width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 1px rgba(255,255,255,.12);display:block;"></span>`).join('')}</div>
+            <div class="op-ph-box" data-tilt data-depth="1.2" data-op-photos data-photos='${esc(JSON.stringify(o.photos || []))}' style="flex:1;position:relative;overflow:hidden;border-radius:20px;background:radial-gradient(120% 120% at 72% 8%,#20242d 0%,#141519 68%);min-height:clamp(210px,24vw,320px);box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.45);will-change:transform;">
+              <div style="position:relative;z-index:2;padding:16px;display:flex;flex-direction:column;gap:14px;height:100%;">
+                <div style="text-align:center;letter-spacing:.22em;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,.78);">✦ Photos ✦</div>
+                <div class="op-ph-rows">
+                  <div class="op-ph-row" data-op-ph-row style="animation:mq-left 26s linear infinite;">${phTiles}</div>
+                  <div class="op-ph-row" data-op-ph-row style="animation:mq-right 30s linear infinite;">${phTiles}</div>
                 </div>
               </div>
             </div>
             <div data-tilt data-depth="0.85" style="position:relative;overflow:hidden;border-radius:20px;background:#33474a;padding:22px;box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.4);will-change:transform;">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-                <div>
-                  <div style="letter-spacing:.22em;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,.78);margin-bottom:14px;">✦ Reach Me ✦</div>
-                  <div style="font-size:14px;color:#fff;margin-bottom:6px;">[ onyen@unc.edu ]</div>
-                  <div style="font-size:14px;color:rgba(255,255,255,.7);">@unc_dds</div>
-                </div>
-                <a href="#join" style="flex:none;width:36px;height:36px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);display:inline-flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:15px;">↗</a>
-              </div>
+              <div class="op-reach" data-op-reach>${reachInner(o)}</div>
             </div>
           </div>
         </div>
       </div>`;
     track.appendChild(panel);
+  });
+
+  // Re-apply merged (defaults ⊕ the officer's dashboard profile) whenever member
+  // data changes — the officer edits their profile and this updates in place, no
+  // full re-render (keeps the tilt bindings and the photo cross-fade state).
+  function hydrate(panel){
+    const base = panel._base; if (!base) return;
+    const o = merged(base);
+    const bioEl = panel.querySelector('[data-op-bio]'); if (bioEl) bioEl.textContent = o.bio;
+    const vEl = panel.querySelector('[data-op-voice]'); if (vEl) vEl.textContent = '“' + o.quote + '”';
+    const vbEl = panel.querySelector('[data-op-voiceby]'); if (vbEl) vbEl.innerHTML = '<span style="color:rgba(255,255,255,.6);">— </span><strong>' + esc(o.quoteBy) + '</strong>';
+    const rEl = panel.querySelector('[data-op-reach]'); if (rEl) rEl.innerHTML = reachInner(o);
+    const phEl = panel.querySelector('[data-op-photos]'); if (phEl) phEl.setAttribute('data-photos', JSON.stringify(o.photos || []));
+  }
+  function refreshOfficers(){
+    Array.from(track.querySelectorAll('[data-officer-panel]')).forEach(hydrate);
+    if (window.__opPhotosRescan) window.__opPhotosRescan();
+  }
+  window.__opRefresh = refreshOfficers;
+  try { if (window.DDSAuth && DDSAuth.onChange) DDSAuth.onChange(refreshOfficers); } catch (e) {}
+  window.addEventListener('storage', (e) => { if (!e.key || e.key === 'dds-members-v1') refreshOfficers(); });
+})();
+
+// ---- Officer "Get to know me" box: pull the officer's dashboard profile (if present) ----
+(function initOfficerDesc(){
+  const els = Array.from(document.querySelectorAll('[data-op-desc]'));
+  if (!els.length) return;
+  const cut = (s, n) => { const a = String(s || '').split(/\s*,\s*/).filter(Boolean); return a.slice(0, n); };
+  function memberFor(email){
+    email = String(email || '').toLowerCase();
+    if (!email) return null;
+    try { if (window.DDSAuth && DDSAuth.members) return DDSAuth.members().find(r => String(r.email || '').toLowerCase() === email) || null; } catch (e) {}
+    return null;
+  }
+  function fill(el){
+    const email = el.getAttribute('data-email');
+    const role  = el.getAttribute('data-role') || '';
+    const major = el.getAttribute('data-major') || '';
+    const first = (el.getAttribute('data-name') || '').split(' ')[0];
+    const leadEl = el.querySelector('[data-op-desc-lead]');
+    const chipEl = el.querySelector('[data-op-desc-chips]');
+    const ctaEl  = el.querySelector('[data-op-desc-cta]');
+    if (!leadEl) return;
+    const m = memberFor(email);
+    let lead = '', chips = [];
+    if (m) {
+      if (ctaEl) ctaEl.setAttribute('href', 'dashboard.html?member=' + encodeURIComponent(m.id) + '#members');
+      const mj = m.major || major;
+      const parts = ['<b>Beyond the title.</b>'];
+      if (mj) parts.push('I’m a ' + mj + ' major' + (m.gradYear ? ', Class of ' + m.gradYear : '') + '.');
+      if (m.interests) parts.push('Lately I’m into ' + cut(m.interests, 3).join(', ') + '.');
+      if (m.hobbies)   parts.push('Off the clock you’ll catch me ' + cut(m.hobbies, 2).join(' and ') + '.');
+      chips = cut(m.interests, 4);
+      lead = (parts.length > 1) ? parts.join(' ') : '';
+    }
+    if (!lead) {
+      // Public visitors (and officers who haven’t filled a profile yet) get an
+      // inviting teaser — the real details live behind the member login.
+      lead = '<b>There’s more to me than a title.</b> My favorite classes, the professors who shaped me, and what I get up to outside DDS all live on my member profile — come take a look.';
+      chips = [];
+    }
+    leadEl.innerHTML = lead;
+    if (chipEl) chipEl.innerHTML = chips.map(c => '<span class="op-desc-chip">' + c.replace(/[<>&]/g, '') + '</span>').join('');
+  }
+  const refresh = () => els.forEach(fill);
+  refresh();
+  try { if (window.DDSAuth && DDSAuth.onChange) DDSAuth.onChange(refresh); } catch (e) {}
+  window.addEventListener('storage', (e) => { if (!e.key || e.key === 'dds-members-v1') refresh(); });
+})();
+
+// ---- Officer "Photos" box: cross-fade tiles every 5s, lazily, only while in view ----
+(function initOfficerPhotos(){
+  const UNIQ = 6, SWAP = 5000;
+  const offsets = new WeakMap(), timers = new WeakMap(), photosMap = new WeakMap(), observed = new WeakSet();
+  const readPhotos = box => { try { const p = JSON.parse(box.getAttribute('data-photos') || '[]'); return Array.isArray(p) ? p : []; } catch (e) { return []; } };
+  function paint(box, fade){
+    const photos = photosMap.get(box); if (!photos || !photos.length) return;
+    const off = offsets.get(box) || 0;
+    box.querySelectorAll('[data-op-ph-row]').forEach((row, r) => {
+      row.querySelectorAll('.op-ph-tile').forEach((t, i) => {
+        // tiles 0..5 and 6..11 share a slot so the -50% marquee loop stays seamless
+        const url = photos[(off + r * 2 + (i % UNIQ)) % photos.length];
+        if (fade) { t.style.opacity = '.12'; setTimeout(() => { t.style.backgroundImage = 'url("' + url + '")'; t.style.opacity = '1'; }, 260); }
+        else { t.style.backgroundImage = 'url("' + url + '")'; t.style.opacity = '1'; }
+      });
+    });
+  }
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    const box = e.target;
+    if (e.isIntersecting && (photosMap.get(box) || []).length) {
+      if (!offsets.has(box)) { offsets.set(box, 0); paint(box, false); }      // lazy first render
+      if (!timers.get(box)) timers.set(box, setInterval(() => { offsets.set(box, (offsets.get(box) || 0) + 1); paint(box, true); }, SWAP));
+    } else {
+      const id = timers.get(box); if (id) { clearInterval(id); timers.set(box, null); }
+    }
+  }), { threshold: 0.15 });
+  // Re-read every box's data-photos. New/changed photo sets (e.g. an officer just
+  // saved them in their profile) get observed + repainted; empty boxes keep the
+  // plain decorative tiles. Exposed so officer hydration can call it.
+  function scan(){
+    document.querySelectorAll('[data-op-photos]').forEach(box => {
+      const photos = readPhotos(box);
+      const changed = JSON.stringify(photos) !== JSON.stringify(photosMap.get(box) || null);
+      photosMap.set(box, photos);
+      if (photos.length && !observed.has(box)) { observed.add(box); io.observe(box); }
+      if (photos.length && offsets.has(box) && changed) paint(box, false); // already live → refresh in place
+    });
+  }
+  window.__opPhotosRescan = scan;
+  scan();
+})();
+
+// ---- Officer "Reach Me": phone cube copies the number to the clipboard ----
+(function initReachCopy(){
+  const sec = document.getElementById('officer-profiles');
+  if (!sec) return;
+  function fallbackCopy(text){ try { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;'; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); } catch (e) {} }
+  sec.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-copy-phone]');
+    if (!b) return;
+    const num = b.getAttribute('data-copy-phone');
+    if (!num) return;
+    const lbl = b.querySelector('.op-cube-lbl');
+    const prev = lbl ? lbl.textContent : '';
+    const done = () => { b.classList.add('is-copied'); if (lbl) lbl.textContent = 'Copied!'; setTimeout(() => { b.classList.remove('is-copied'); if (lbl) lbl.textContent = prev; }, 1700); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(num).then(done, () => { fallbackCopy(num); done(); });
+    else { fallbackCopy(num); done(); }
   });
 })();
 
@@ -2378,6 +2610,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   const sec = document.getElementById('toolkit');
   if (!sec) return;
   const wrap = sec.querySelector('.tk-wrap');
+  const stage = sec.querySelector('.tk-stage');   // the pinned (sticky) box the glow lives in
   const scene = document.getElementById('tk-scene');
   const ring = document.getElementById('tk-ring');
   const orbit = document.getElementById('tk-orbit');
@@ -2616,8 +2849,13 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     tMx = ((e.clientX - r.left) / r.width - 0.5) * 2;
     tMy = ((e.clientY - r.top) / r.height - 0.5) * 2;
     if (glow) {
+      // The glow is absolutely positioned inside .tk-stage, which is sticky and
+      // stays pinned to the viewport while you scroll the tall section. Position
+      // it against the STAGE rect (not the 660vh #toolkit rect) so it tracks the
+      // cursor instead of sliding off-screen as sec.top runs increasingly negative.
+      const sr = (stage || sec).getBoundingClientRect();
       glow.style.opacity = '1';
-      glow.style.transform = 'translate3d(' + (e.clientX - r.left - 310) + 'px,' + (e.clientY - r.top - 310) + 'px,0)';
+      glow.style.transform = 'translate3d(' + (e.clientX - sr.left - 310) + 'px,' + (e.clientY - sr.top - 310) + 'px,0)';
     }
     start();
   }, { passive: true });

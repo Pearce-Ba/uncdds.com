@@ -1496,8 +1496,8 @@
     renderAlbums();
   });
 
-  /* --- upload --- */
-  var upData = null;
+  /* --- upload (batch: pick several, one title + caption applies to all) --- */
+  var upData = [];
   function photoProcess(file) {
     return new Promise(function (resolve, reject) {
       var r = new FileReader();
@@ -1515,32 +1515,52 @@
       r.onerror = reject; r.readAsDataURL(file);
     });
   }
+  function renderUpStrip() {
+    $('up-strip').innerHTML = upData.map(function (d, i) {
+      return '<div class="up-thumb"><img src="' + d.u + '" alt=""><button type="button" data-uprm="' + i + '" aria-label="Remove photo ' + (i + 1) + '">✕</button></div>';
+    }).join('');
+    $('up-count').textContent = upData.length
+      ? (upData.length === 1 ? '1 photo ready' : upData.length + ' photos ready — title & caption apply to all')
+      : '';
+  }
   $('gal-upload').addEventListener('click', function () {
-    upData = null;
+    upData = [];
     $('up-err').textContent = ''; $('up-title').value = ''; $('up-cap').value = ''; $('up-file').value = '';
     $('up-preview').style.display = 'none';
-    $('up-sub').textContent = 'It joins “' + curAlb.title + '” here and in the homepage gallery.';
+    renderUpStrip();
+    $('up-sub').textContent = 'They join “' + curAlb.title + '” here and in the homepage gallery.';
     $('up-modal').hidden = false;
   });
+  $('up-strip').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-uprm]'); if (!b) return;
+    upData.splice(+b.getAttribute('data-uprm'), 1); renderUpStrip();
+  });
   $('up-file').addEventListener('change', function () {
-    var f = this.files && this.files[0]; if (!f) return;
+    var files = Array.prototype.slice.call(this.files || []); this.value = '';
+    if (!files.length) return;
     $('up-err').textContent = '';
-    photoProcess(f).then(function (d) {
-      upData = d;
-      $('up-preview').src = d.u; $('up-preview').style.display = 'block';
-    }).catch(function () { $('up-err').textContent = 'That image didn’t load — try another file.'; });
+    files.reduce(function (chain, f) {
+      return chain.then(function () {
+        return photoProcess(f).then(function (d) { upData.push(d); renderUpStrip(); }, function () {});
+      });
+    }, Promise.resolve()).then(function () {
+      if (!upData.length) $('up-err').textContent = 'Those images didn’t load — try different files.';
+    });
   });
   $('up-save').addEventListener('click', function () {
-    if (!upData) return $('up-err').textContent = 'Pick an image first.';
-    var title = $('up-title').value.trim();
-    if (!title) return $('up-err').textContent = 'Give the photo a title.';
+    if (!upData.length) return $('up-err').textContent = 'Pick at least one image first.';
+    var title = $('up-title').value.trim();     // optional — same title on each
+    var cap = $('up-cap').value.trim();          // one caption applied to the whole batch
     var extras = galExtras();
     extras.collections = extras.collections || [];
     var col = extras.collections.find(function (c) { return c.id === curAlb.id; });
     if (!col) { col = { id: curAlb.id, title: curAlb.title, photos: [] }; extras.collections.push(col); }
-    col.photos.push({ id: uid(), u: upData.u, w: upData.w, h: upData.h, title: title, cap: $('up-cap').value.trim(), by: ME.name, byId: ME.id, at: Date.now() });
+    var now = Date.now();
+    upData.forEach(function (d, i) {
+      col.photos.push({ id: uid(), u: d.u, w: d.w, h: d.h, title: title, cap: cap, by: ME.name, byId: ME.id, at: now + i });
+    });
     try { writeLS(GAL_KEY, extras); }
-    catch (e) { return $('up-err').textContent = 'This browser’s storage is full — try a smaller image or clear an older upload.'; }
+    catch (e) { return $('up-err').textContent = 'This browser’s storage is full — add fewer or smaller images and try again.'; }
     $('up-modal').hidden = true;
     var keep = curAlb.id;
     renderAlbums();

@@ -135,12 +135,15 @@
         quote: m.quote || '',
         interests: m.interests || '', hobbies: m.hobbies || '',
         favClasses: m.favClasses || '', favProfs: m.favProfs || '',
-        instagram: m.instagram || '', linkedin: m.linkedin || ''
+        instagram: m.instagram || '', linkedin: m.linkedin || '',
+        bio: m.bio || '', quoteBy: m.quoteBy || '', phone: m.phone || '',
+        photos: Array.isArray(m.photos) ? m.photos : []
       } : null;
     },
 
     /* Public-facing card for another member (chat popovers, directory).
-       Never exposes email, salt, or hash. */
+       Never exposes email, salt, or hash. (phone is intentionally omitted — it's
+       only surfaced on the officer's own homepage panel, read from members().) */
     profile: function (id) {
       var m = loadMembers().find(function (r) { return r.id === id; });
       return m ? {
@@ -148,7 +151,9 @@
         role: m.role, execTitle: m.execTitle || null,
         photo: m.photo || null, quote: m.quote || '',
         interests: m.interests || '', hobbies: m.hobbies || '',
-        instagram: m.instagram || '', linkedin: m.linkedin || ''
+        instagram: m.instagram || '', linkedin: m.linkedin || '',
+        bio: m.bio || '', quoteBy: m.quoteBy || '',
+        photos: Array.isArray(m.photos) ? m.photos : []
       } : null;
     },
 
@@ -160,7 +165,8 @@
       var list = loadMembers();
       var m = list.find(function (r) { return r.id === sess.id; });
       if (!m) return { ok: false, err: 'Sign in first.' };
-      ['photo', 'quote', 'interests', 'hobbies', 'major', 'favClasses', 'favProfs', 'instagram', 'linkedin'].forEach(function (k) {
+      ['photo', 'quote', 'interests', 'hobbies', 'major', 'favClasses', 'favProfs', 'instagram', 'linkedin',
+       'bio', 'quoteBy', 'phone', 'photos'].forEach(function (k) {
         if (k in fields) m[k] = fields[k];
       });
       saveMembers(list);

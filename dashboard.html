@@ -635,6 +635,14 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .seg button{flex:1;padding:11px 10px;border-radius:13px;border:1px solid var(--line);background:rgba(151,186,227,.05);color:var(--ink2);font-family:var(--mont);font-weight:700;letter-spacing:1.4px;text-transform:uppercase;font-size:10.5px;cursor:pointer;transition:all .2s;}
 .seg button.on{border-color:var(--acc-line,rgba(227,194,124,.5));color:var(--acc-hi,#E3C27C);background:var(--acc-soft,rgba(227,194,124,.09));}
 .up-preview{display:none;width:100%;max-height:240px;object-fit:cover;border-radius:14px;margin-bottom:15px;border:1px solid var(--line);box-shadow:0 16px 34px -18px rgba(0,0,0,.8);}
+.up-strip{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.up-strip:empty{display:none;}
+.up-thumb{position:relative;width:66px;height:66px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:rgba(98,225,255,.05);}
+.up-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.up-thumb button{position:absolute;top:3px;right:3px;width:19px;height:19px;border-radius:50%;border:0;background:rgba(201,68,68,.94);color:#fff;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.up-thumb button:hover{background:#a52c2c;}
+.up-count{margin:-4px 0 12px;font-size:11.5px;color:var(--ink3);}
+.up-count:empty{display:none;}
 .file-drop{display:flex;flex-direction:column;align-items:center;gap:8px;padding:26px 16px;border:2px dashed rgba(98,225,255,.28);border-radius:16px;background:rgba(98,225,255,.03);color:var(--ink2);cursor:pointer;text-align:center;font-size:12.5px;transition:background .2s,border-color .2s;margin-bottom:15px;}
 .file-drop:hover{background:rgba(98,225,255,.07);}
 .file-drop b{color:var(--cyan-hi);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;font-size:11px;}
@@ -1082,20 +1090,22 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
   <div class="glass dmodal-card" data-acc="cyan">
     <div class="dmodal-head">
       <div>
-        <h3>Add a photo</h3>
-        <p id="up-sub">It joins the album here and in the homepage gallery.</p>
+        <h3>Add photos</h3>
+        <p id="up-sub">They join the album here and in the homepage gallery.</p>
       </div>
       <button class="btn-x" data-close="up-modal" type="button" aria-label="Close">&#10005;</button>
     </div>
     <label class="file-drop" id="up-drop">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#62E1FF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-      <b>Choose an image</b>
-      <span id="up-drop-hint">JPG or PNG &middot; it&rsquo;s resized to stay quick</span>
-      <input type="file" id="up-file" accept="image/*" hidden>
+      <b>Choose images</b>
+      <span id="up-drop-hint">JPG or PNG &middot; pick several at once &middot; resized to stay quick</span>
+      <input type="file" id="up-file" accept="image/*" multiple hidden>
     </label>
     <img class="up-preview" id="up-preview" alt="Preview of the photo you picked">
-    <div class="fld"><label for="up-title">Title</label><input id="up-title" type="text" maxlength="64" placeholder="e.g. Spring formal, golden hour"></div>
-    <div class="fld"><label for="up-cap">Caption <span style="color:var(--ink3);text-transform:none;letter-spacing:0;">(optional)</span></label><textarea id="up-cap" maxlength="280" placeholder="Who, where, and why it mattered."></textarea></div>
+    <div class="up-strip" id="up-strip"></div>
+    <div class="up-count" id="up-count"></div>
+    <div class="fld"><label for="up-title">Title <span style="color:var(--ink3);text-transform:none;letter-spacing:0;">(optional &middot; applies to all)</span></label><input id="up-title" type="text" maxlength="64" placeholder="e.g. Spring formal, golden hour"></div>
+    <div class="fld"><label for="up-cap">Caption <span style="color:var(--ink3);text-transform:none;letter-spacing:0;">(optional &middot; applies to all)</span></label><textarea id="up-cap" maxlength="280" placeholder="Who, where, and why it mattered — added to every photo in this batch."></textarea></div>
     <div class="dmodal-foot">
       <span class="err" id="up-err"></span>
       <button class="btn" data-close="up-modal" type="button">Cancel</button>

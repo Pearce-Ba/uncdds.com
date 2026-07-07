@@ -67,6 +67,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .sh-photo-meta{display:flex;flex-direction:column;gap:6px;color:#5A7798;font-size:11.5px;line-height:1.4;}
 .sh-photo-clear{align-self:flex-start;background:none;border:0;padding:0;color:#A03030;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;}
 .sh-photo-clear:hover{text-decoration:underline;}
+/* Exec officer-profile block (bio / quote attribution / phone / batch photos) */
+.sh-exec-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sh-exec-eyebrow .rule{width:26px;height:1.5px;background:#B9975B;display:block;}
+.sh-exec-eyebrow span:last-child{color:#8a6d38;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;font-size:11px;}
+.sh-photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px;margin:-4px 0 18px;}
+.sh-photos-grid:empty{display:none;}
+.sh-pthumb{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid rgba(19,41,75,.2);background:#0c2042;}
+.sh-pthumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.sh-pthumb button{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(160,48,48,.94);color:#fff;font-size:12px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.4);}
+.sh-pthumb button:hover{background:#8a2020;}
 .sh-save{display:block;width:100%;margin-top:8px;padding:15px;border-radius:999px;border:0;background:#B9975B;color:#0A1A30;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:12.5px;cursor:pointer;transition:transform .2s,background .2s;box-shadow:0 14px 30px -12px rgba(185,151,91,.75);}
 .sh-save:hover{transform:translateY(-2px);}
 .sh-save.saved{background:#2e7d4f;color:#fff;}
@@ -126,6 +136,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
       <div class="sh-grid">
         <label>Instagram<input type="text" id="sh-instagram" maxlength="120" placeholder="@yourhandle or full link"><span class="sh-hint">Handle or full link — either works, we build the URL for you.</span></label>
         <label>LinkedIn<input type="text" id="sh-linkedin" maxlength="160" placeholder="your-name or full link"><span class="sh-hint">Same deal — paste the profile URL or just the username.</span></label>
+      </div>
+      <div id="sh-exec-fields" hidden style="margin-top:6px;border-top:1px solid rgba(19,41,75,.15);padding-top:24px;">
+        <div class="sh-exec-eyebrow"><span class="rule"></span><span>Your Officer Card</span></div>
+        <p class="sh-lede" style="margin-bottom:18px;">You hold an exec position, so this fills your public officer card on the homepage — the intro under your name, your “Voice” quote, how to reach you, and a set of photos that drift across your card. It saves to your member record and syncs to the chapter.</p>
+        <label>Officer bio<textarea id="sh-bio" maxlength="600" placeholder="Junior studying Biology and Business. I currently serve as…"></textarea><span class="sh-hint">The intro paragraph shown under “Hi, I’m [you]!” on your officer card.</span></label>
+        <label>Quote attribution<input type="text" id="sh-quoteby" maxlength="80" placeholder="e.g. Reba McEntire"><span class="sh-hint">Who said your quote above — shown on your Voice card as “— Name.”</span></label>
+        <label>Phone<input type="text" id="sh-phone" maxlength="24" placeholder="469-512-5950"><span class="sh-hint">Shown on your Reach Me card; visitors copy it with one tap. Leave blank to hide it.</span></label>
+        <label>Officer photos<input type="file" id="sh-photos" accept="image/*" multiple><span class="sh-hint">Add several at once — they tile and cross-fade across your officer card. Up to 8.</span></label>
+        <div class="sh-photos-grid" id="sh-photos-grid"></div>
       </div>
       <button type="submit" class="sh-save" id="sh-save">Save My Profile</button>
     </form>
@@ -195,6 +214,56 @@ document.getElementById('sh-profs').value = me.favProfs || '';
 document.getElementById('sh-instagram').value = me.instagram || '';
 document.getElementById('sh-linkedin').value = me.linkedin || '';
 
+/* --- Exec officer-card fields (bio / quote attribution / phone / batch photos).
+   Only shown to members who hold an exec position; feeds the homepage officer card. --- */
+var isExec = false;
+try { isExec = DDSAuth.isExec(me); } catch (e) {}
+var photosData = Array.isArray(me.photos) ? me.photos.slice() : [];
+var PHOTOS_MAX = 8;
+function renderPhotosGrid(){
+  document.getElementById('sh-photos-grid').innerHTML = photosData.map(function(u,i){
+    return '<div class="sh-pthumb"><img src="' + u + '" alt="Officer photo ' + (i+1) + '"><button type="button" data-rm="' + i + '" aria-label="Remove photo ' + (i+1) + '">✕</button></div>';
+  }).join('');
+}
+if (isExec) {
+  document.getElementById('sh-exec-fields').hidden = false;
+  document.getElementById('sh-bio').value = me.bio || '';
+  document.getElementById('sh-quoteby').value = me.quoteBy || '';
+  document.getElementById('sh-phone').value = me.phone || '';
+  renderPhotosGrid();
+}
+document.getElementById('sh-photos-grid').addEventListener('click', function(e){
+  var b = e.target.closest('[data-rm]'); if (!b) return;
+  photosData.splice(+b.getAttribute('data-rm'), 1); renderPhotosGrid();
+});
+// Downscale each picked image (longest side 720px, JPEG) so a set of them stays
+// small enough to live in the member row and sync cleanly.
+function processOfficerPhoto(file){
+  return new Promise(function(resolve, reject){
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function(){
+      var maxD = 720, s = Math.min(1, maxD / Math.max(img.naturalWidth, img.naturalHeight));
+      var c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.naturalWidth * s));
+      c.height = Math.max(1, Math.round(img.naturalHeight * s));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); reject(); };
+    img.src = url;
+  });
+}
+document.getElementById('sh-photos').addEventListener('change', function(){
+  var files = Array.prototype.slice.call(this.files || []);
+  this.value = '';
+  var room = PHOTOS_MAX - photosData.length;
+  if (!files.length || room <= 0) return;
+  files.slice(0, room).reduce(function(chain, f){
+    return chain.then(function(){ return processOfficerPhoto(f).then(function(u){ photosData.push(u); renderPhotosGrid(); }, function(){}); });
+  }, Promise.resolve());
+});
+
 /* Accept a handle ("@pearcebarnes05", "pearcebarnes05") or any pasted link
    ("instagram.com/pearcebarnes05", full https URL) and normalize it to a
    working profile URL. Returns '' for an empty field. */
@@ -241,7 +310,7 @@ document.getElementById('sh-photo-clear').addEventListener('click', function(){
 
 document.getElementById('sh-form').addEventListener('submit', function(e){
   e.preventDefault();
-  var res = DDSAuth.updateProfile({
+  var payload = {
     photo: photoData,
     major: document.getElementById('sh-major').value.trim(),
     quote: words(document.getElementById('sh-quote').value).slice(0, QUOTE_MAX_WORDS).join(' '),
@@ -251,7 +320,14 @@ document.getElementById('sh-form').addEventListener('submit', function(e){
     favProfs: document.getElementById('sh-profs').value.trim(),
     instagram: normInstagram(document.getElementById('sh-instagram').value),
     linkedin: normLinkedIn(document.getElementById('sh-linkedin').value)
-  });
+  };
+  if (isExec) {
+    payload.bio = document.getElementById('sh-bio').value.trim();
+    payload.quoteBy = document.getElementById('sh-quoteby').value.trim();
+    payload.phone = document.getElementById('sh-phone').value.trim();
+    payload.photos = photosData;
+  }
+  var res = DDSAuth.updateProfile(payload);
   if (!res.ok) { DDSAuth.requireLogin('member.html'); return; }
   me = res.member;
   document.getElementById('sh-instagram').value = me.instagram || '';
