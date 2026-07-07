@@ -807,9 +807,18 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 #toolkit{position:relative;z-index:5;background:radial-gradient(125% 90% at 50% -8%,#14345c 0%,#0d2144 46%,#0A1A30 100%);color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;overflow:clip;}
 .tk-wrap{position:relative;height:660vh;}
 .tk-stage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3vh,40px);padding:clamp(36px,6vh,80px) 16px;overflow:hidden;}
-.tk-grain{position:absolute;inset:0;background:url('grain.png') repeat;opacity:.34;mix-blend-mode:overlay;pointer-events:none;}
-.tk-glow{position:absolute;top:0;left:0;width:700px;height:700px;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:screen;will-change:transform,opacity;transition:opacity .5s ease;z-index:4;
-  background:radial-gradient(circle,rgba(90,168,224,.4) 0%,rgba(127,178,224,.12) 44%,transparent 68%);}
+/* three coloured auroras (orange · pink · light-blue) give this section its
+   own depth, with grain over the top for texture */
+.tk-aurora{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.tk-aurora i{position:absolute;border-radius:50%;filter:blur(84px);opacity:.5;mix-blend-mode:screen;animation:tkdrift 22s ease-in-out infinite;}
+.tk-aurora i:nth-child(1){width:540px;height:540px;left:-9%;top:-16%;background:radial-gradient(circle,#CC6F2E,transparent 66%);}
+.tk-aurora i:nth-child(2){width:580px;height:580px;right:-11%;bottom:-20%;background:radial-gradient(circle,#C95E97,transparent 66%);animation-delay:-8s;}
+.tk-aurora i:nth-child(3){width:500px;height:500px;right:14%;top:6%;background:radial-gradient(circle,#7FB2E0,transparent 68%);animation-delay:-14s;}
+@keyframes tkdrift{0%,100%{transform:translate(0,0)}50%{transform:translate(26px,-22px)}}
+@media (prefers-reduced-motion: reduce){.tk-aurora i{animation:none;}}
+.tk-grain{position:absolute;inset:0;background:url('grain.png') repeat;opacity:.42;mix-blend-mode:overlay;pointer-events:none;z-index:1;}
+.tk-glow{position:absolute;top:0;left:0;width:620px;height:620px;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:screen;will-change:transform,opacity;transition:opacity .4s ease;z-index:4;
+  background:radial-gradient(circle,rgba(210,232,255,.6) 0%,rgba(140,190,240,.34) 26%,rgba(96,168,224,.12) 52%,transparent 70%);}
 .tk-head{text-align:center;position:relative;z-index:3;max-width:640px;}
 .tk-eyebrow{display:inline-flex;align-items:center;gap:8px;color:#7FB2E0;font-weight:700;letter-spacing:3px;font-size:11px;text-transform:uppercase;margin-bottom:12px;}
 .tk-eyebrow::before,.tk-eyebrow::after{content:"";width:24px;height:1px;background:rgba(127,178,224,.5);}
@@ -817,9 +826,11 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .tk-head p{margin:14px auto 0;color:#9FB6CE;font-size:clamp(.9rem,1.3vw,1.05rem);line-height:1.6;max-width:460px;}
 .tk-3d{position:relative;z-index:2;width:min(1080px,98vw);height:clamp(320px,52vh,520px);perspective:1700px;}
 .tk-scene{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(calc(var(--my,0)*-6deg)) rotateY(calc(var(--mx,0)*9deg)) translate3d(calc(var(--mx,0)*14px),calc(var(--my,0)*10px),0);will-change:transform;}
-.tk-orbit{position:absolute;inset:0;transform-style:preserve-3d;transform:translate3d(var(--mox,0px),var(--moy,0px),0) rotateZ(var(--moz,0deg));}
+.tk-orbit{position:absolute;inset:0;transform-style:preserve-3d;}
+/* links glide straight in along one radial path (no varied/wobbly routes);
+   the deceleration lives in the eased --p the script feeds them */
 .tk-sat{position:absolute;left:50%;top:50%;width:clamp(146px,15vw,178px);
-  transform:translate(-50%,-50%) translate3d(calc(var(--ex,0px)*(1 - var(--p,0)) + var(--rx,0px)*var(--p,0)),calc(var(--ey,0px)*(1 - var(--p,0)) + var(--ry2,0px)*var(--p,0)),calc(var(--rz,0px)*var(--p,0) - 260px*(1 - var(--p,0)))) rotateZ(calc(var(--erot,0deg)*(1 - var(--p,0)) + var(--rot,0deg)*.32*var(--p,0))) scale(calc((.55 + .45*var(--p,0))*var(--s2,1)));
+  transform:translate(-50%,-50%) translate3d(calc(var(--rx,0px)*(2.4 - 1.4*var(--p,0))),calc(var(--ry2,0px)*(2.4 - 1.4*var(--p,0))),calc(var(--rz,0px)*var(--p,0) - 260px*(1 - var(--p,0)))) rotateZ(calc(var(--rot,0deg)*var(--p,0))) scale(calc((.55 + .45*var(--p,0))*var(--s2,1)));
   opacity:var(--p,0);text-decoration:none;display:block;border-radius:14px;overflow:hidden;
   background:linear-gradient(165deg,rgba(20,38,68,.96),rgba(9,18,34,.95));border:1px solid var(--sc,rgba(127,178,224,.4));
   box-shadow:0 24px 50px -20px rgba(0,0,0,.88),0 0 0 1px rgba(255,255,255,.05) inset;will-change:transform,opacity;transition:border-color .25s ease,box-shadow .25s ease,background .25s ease;}
@@ -870,6 +881,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 <section id="toolkit" aria-label="Member toolkit preview">
   <div class="tk-wrap">
     <div class="tk-stage">
+      <div class="tk-aurora"><i></i><i></i><i></i></div>
       <div class="tk-grain"></div>
       <div class="tk-glow" id="tk-glow"></div>
       <div class="tk-head">
@@ -2389,8 +2401,8 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   // five rest slots — farther out, scattered, with imperfect rotation, depth
   // and scale so the links feel hand-placed rather than snapped to a grid.
   // Five base rest slots spread around the centre; each FOLDER then jitters
-  // them (position, size, and a distinct off-screen entry point) so no two
-  // folders lay their links out the same way.
+  // their position and size so no two folders lay their links out the same
+  // way (they all glide straight in along one radial path, though).
   const BASE_POS = [
     { rx: 340, ry:-180, rot:-9,  rz: 30, s:1.02 },
     { rx:-392, ry:-92,  rot: 12, rz:-26, s:.9  },
@@ -2411,15 +2423,10 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
       const rot = +(b.rot + (rand(k + 80) - 0.5) * 22).toFixed(1);
       const rz = Math.round(b.rz + (rand(k + 120) - 0.5) * 44);
       const sc = +(b.s * (0.82 + rand(k + 160) * 0.42)).toFixed(3);   // slightly different sizes
-      // a distinct off-screen entry point per link (different origins)
-      const ang = rand(k + 200) * Math.PI * 2, dist = 620 + rand(k + 240) * 320;
-      const ex = Math.round(Math.cos(ang) * dist), ey = Math.round(Math.sin(ang) * dist * 0.7);
-      const erot = +((rand(k + 280) - 0.5) * 90).toFixed(1);
       const a = document.createElement('a');
       a.className = 'tk-sat';
       if (s.u.charAt(0) === '#') { a.href = s.u; } else { a.href = s.u; a.target = '_blank'; a.rel = 'noopener'; }
-      a.style.cssText = '--rx:' + rx + 'px;--ry2:' + ry + 'px;--rot:' + rot + 'deg;--rz:' + rz + 'px;--s2:' + sc +
-        ';--ex:' + ex + 'px;--ey:' + ey + 'px;--erot:' + erot + 'deg;--sc:' + ACCENTS[ti] + ';';
+      a.style.cssText = '--rx:' + rx + 'px;--ry2:' + ry + 'px;--rot:' + rot + 'deg;--rz:' + rz + 'px;--s2:' + sc + ';--sc:' + ACCENTS[ti] + ';';
       a.innerHTML =
         (s.img ? '<img class="tk-sat-photo" src="' + esc(s.img) + '" alt="" loading="lazy">' : '') +
         '<div class="tk-sat-body">' +
@@ -2501,10 +2508,6 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     if (ry !== lastRy) { ring.style.setProperty('--ry', ry.toFixed(3) + 'deg'); lastRy = ry; }
     scene.style.setProperty('--mx', mx.toFixed(3));
     scene.style.setProperty('--my', my.toFixed(3));
-    // micro response: even while parked, the links drift a touch with the scroll
-    orbit.style.setProperty('--mox', (s.local * 10).toFixed(2) + 'px');
-    orbit.style.setProperty('--moy', (Math.sin(s.local * Math.PI) * 5).toFixed(2) + 'px');
-    orbit.style.setProperty('--moz', (s.local * 1.2).toFixed(2) + 'deg');
 
     // proximity recolor is the one layout-reading step — run it at ~20fps, and
     // only when the cursor is actually inside the section, so it never janks
@@ -2515,8 +2518,9 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
       c.style.setProperty('--self', (Math.max(-1.3, Math.min(1.3, d)) * 70).toFixed(2) + 'deg');
       c.style.setProperty('--settle', settle.toFixed(3));
       c.classList.toggle('front', settle > 0.55);
-      // wide visibility window so links from adjacent folders overlap in transit
-      const sp = smooth(clamp01((settle - 0.04) / 0.62));
+      // long, single-path ease-out: links accelerate off-screen then decelerate
+      // straight into place over a wide window (folders overlap in transit)
+      const sp = 1 - Math.pow(1 - clamp01((settle - 0.05) / 0.9), 2.3);
       satMeta[i].forEach(m => {
         if (Math.abs(sp - m.p) > 0.002) {                          // skip no-op writes
           m.el.style.setProperty('--p', sp.toFixed(3));
@@ -2560,7 +2564,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     tMy = ((e.clientY - r.top) / r.height - 0.5) * 2;
     if (glow) {
       glow.style.opacity = '1';
-      glow.style.transform = 'translate3d(' + (e.clientX - r.left - 350) + 'px,' + (e.clientY - r.top - 350) + 'px,0)';
+      glow.style.transform = 'translate3d(' + (e.clientX - r.left - 310) + 'px,' + (e.clientY - r.top - 310) + 'px,0)';
     }
     start();
   }, { passive: true });
