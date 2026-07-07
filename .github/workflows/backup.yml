@@ -1,0 +1,87 @@
+name: Daily cloud backup
+
+# Snapshots the shared Firestore database (members, chat, family tree,
+# resources, notes, class ratings) into backups/*.json once a day and
+# commits any changes. If dds-cloud-config.js hasn't been filled in yet,
+# the job exits cleanly — nothing to back up. The Firebase Web API key is
+# a public client key (it already ships in the site), so no secret needed.
+
+on:
+  schedule:
+    - cron: '17 8 * * *'   # 08:17 UTC daily (~4am ET)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cloud-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Snapshot Firestore collections
+        run: |
+          python3 - <<'PY'
+          import json, re, os, urllib.request, urllib.error
+
+          cfg = open('dds-cloud-config.js').read()
+          def grab(field):
+              m = re.search(field + r"\s*:\s*'([^']*)'", cfg)
+              return m.group(1) if m else ''
+          project, key = grab('projectId'), grab('apiKey')
+          if not project or not key:
+              print('Cloud sync not configured yet — nothing to back up.')
+              raise SystemExit(0)
+
+          base = 'https://firestore.googleapis.com/v1/projects/%s/databases/(default)/documents' % project
+          colls = ['members', 'channels', 'messages', 'family', 'resources', 'notes', 'classes', 'files', 'fileparts']
+          os.makedirs('backups', exist_ok=True)
+
+          def dec(v):
+              if 'stringValue' in v: return v['stringValue']
+              if 'integerValue' in v: return int(v['integerValue'])
+              if 'doubleValue' in v: return v['doubleValue']
+              if 'booleanValue' in v: return v['booleanValue']
+              if 'nullValue' in v: return None
+              if 'arrayValue' in v: return [dec(x) for x in v['arrayValue'].get('values', [])]
+              if 'mapValue' in v: return {k: dec(x) for k, x in v['mapValue'].get('fields', {}).items()}
+              return None
+
+          for coll in colls:
+              rows, token = [], None
+              while True:
+                  url = '%s/%s?key=%s&pageSize=300' % (base, coll, key)
+                  if token: url += '&pageToken=' + token
+                  try:
+                      data = json.load(urllib.request.urlopen(url, timeout=45))
+                  except urllib.error.HTTPError as e:
+                      print('skip %s (%s)' % (coll, e.code)); rows = None; break
+                  for d in data.get('documents', []):
+                      rows.append({k: dec(v) for k, v in d.get('fields', {}).items()})
+                  token = data.get('nextPageToken')
+                  if not token: break
+              if rows is None: continue
+              # drop base64 blobs from the human-readable snapshot; files.json keeps metadata
+              if coll == 'fileparts': continue
+              rows.sort(key=lambda r: (r.get('up') or 0))
+              with open('backups/%s.json' % coll, 'w') as f:
+                  json.dump(rows, f, indent=1, ensure_ascii=False)
+              print('%-10s %d docs' % (coll, len(rows)))
+          PY
+
+      - name: Commit snapshots
+        run: |
+          git config user.name 'dds-backup-bot'
+          git config user.email 'actions@github.com'
+          git add backups/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'No changes since last backup.'
+          else
+            git commit -m "Cloud backup $(date -u +%Y-%m-%d)"
+            git push
+          fi

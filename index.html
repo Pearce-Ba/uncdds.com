@@ -100,6 +100,9 @@ body.nav-open{overflow:hidden;}
 .ig-btn:hover{transform:translateY(-3px);}
 .li-btn:hover{transform:translateY(-3px);}
 .email-btn:hover{background:rgba(215,226,234,.12);}
+#exec-copy.is-copied{background:#B9975B;border-color:#B9975B;color:#0A1A30;}
+#exec-copy .exec-copy-txt{transition:none;}
+#exec-copy:focus-visible{outline:2px solid #B9975B;outline-offset:3px;}
 .cal-btn:hover{transform:translateY(-3px);}
 @keyframes mq-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes mq-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}
@@ -414,7 +417,21 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .nb-foot .nb-author{color:#13294B;}
 .nb-foot .nb-date{color:#5A7798;}
 @media(max-width:768px){.nb-arrow{display:none;}.nb-card{width:min(76vw,320px);}.nb-rail{padding:38px 6px 48px;}}
-@media (prefers-reduced-motion: no-preference){#top,#president-letter,#officer-profiles,#offers,#newsletter{cursor:none;}}
+/* Tooth cursor stays in the two zones it reads well — Opportunities and
+   Officer Profiles. Everywhere else a precise navy dot leads the cursor
+   (added by initDotCursor when the class below is set on <html>). */
+@media (prefers-reduced-motion: no-preference){#officer-profiles,#offers{cursor:none;}}
+html.cursor-dot, html.cursor-dot *{cursor:none;}
+html.cursor-dot input, html.cursor-dot textarea, html.cursor-dot select, html.cursor-dot [contenteditable]{cursor:auto;}
+#dotcur{position:fixed;top:0;left:0;width:13px;height:13px;border-radius:50%;
+  background:#13294B;pointer-events:none;z-index:99999;opacity:0;
+  transform:translate(-50%,-50%) scale(1);
+  box-shadow:0 0 0 1.5px rgba(233,240,248,.7), 0 0 12px 3px rgba(75,156,211,.5);
+  transition:opacity .25s ease, transform .16s cubic-bezier(.2,.7,.3,1), background .2s ease, box-shadow .2s ease;}
+#dotcur.show{opacity:1;}
+#dotcur.grow{transform:translate(-50%,-50%) scale(2.7);background:#4B9CD3;
+  box-shadow:0 0 0 1.5px rgba(233,240,248,.85), 0 0 22px 6px rgba(75,156,211,.7);}
+#dotcur.press{transform:translate(-50%,-50%) scale(1.8);}
 /* Offers: cursor-follow glow inside the stacked cards (lightens the navy) + radial gold text */
 .of-glow{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;background:radial-gradient(circle 360px at var(--gx,-999px) var(--gy,-999px),rgba(126,176,232,.42) 0%,rgba(75,156,211,.16) 46%,transparent 72%);mix-blend-mode:screen;opacity:0;transition:opacity .45s ease;}
 .of-glowtext{color:transparent;background-image:radial-gradient(circle 300px at var(--px,-999px) var(--py,-999px),#B9975B 0%,#B9975B 30%,var(--base,#EAF1F8) 70%);-webkit-background-clip:text;background-clip:text;}
@@ -462,12 +479,14 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   <div class="nav-links" style="display:flex;gap:clamp(15px,2.1vw,36px);align-items:center;">
     <a href="#top" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Home</a>
     <a href="#about" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">About</a>
+    <a href="#members-preview" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Members</a>
     <a href="#gallery" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Gallery</a>
     <a href="#officers" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Officers</a>
     <a href="#calendar" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Calendar</a>
     <div class="nav-dd" data-nav-dd>
       <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">Quick Links<svg class="nav-dd-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="nav-dd-menu" role="menu">
+        <a href="#toolkit" class="nav-dd-link" role="menuitem">Toolkit<span>&rarr;</span></a>
         <a href="#pillars" class="nav-dd-link" role="menuitem">Pillars<span>&rarr;</span></a>
         <a href="#offers" class="nav-dd-link" role="menuitem">Offers<span>&rarr;</span></a>
         <a href="#big-little" class="nav-dd-link" role="menuitem">Big Little<span>&rarr;</span></a>
@@ -489,8 +508,10 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   <div class="nav-mobile-list">
     <a href="#top">Home</a>
     <a href="#about">About</a>
+    <a href="#members-preview">Members</a>
     <a href="#gallery">Gallery</a>
     <a href="newsletter.html">Newsletter</a>
+    <a href="#toolkit">Toolkit</a>
     <a href="#pillars">Pillars</a>
     <a href="#offers">Offers</a>
     <a href="#big-little">Big Little</a>
@@ -508,7 +529,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 <section id="top" style="position:relative;min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(125% 95% at 50% -12%,#214a7e 0%,#16315a 34%,#0c2042 64%,#0A1A30 100%);overflow:clip;">
   <video autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;" src="hero-video.mp4"></video>
   <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,#0A1A30 0%,rgba(10,26,48,.86) 8%,rgba(10,26,48,0) 25%,rgba(10,26,48,0) 56%,rgba(6,15,32,.5) 80%,rgba(4,10,22,.9) 100%);"></div>
-  <div id="tooth-hero" style="position:absolute;top:0;left:0;width:48px;height:62px;z-index:5;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform;filter:drop-shadow(0 8px 16px rgba(0,0,0,.6));"><img src="slot-hero-portrait.webp" alt="" style="display:block;width:100%;height:100%;object-fit:contain;"></div>
+  <div id="hero-tint" style="position:absolute;top:0;left:0;width:820px;height:820px;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:soft-light;transition:opacity .55s ease;will-change:transform,background;z-index:1;background:radial-gradient(circle,rgba(75,156,211,.6) 0%,rgba(75,156,211,.14) 46%,transparent 70%);"></div>
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:clamp(72px,17vh,140px) clamp(20px,4vw,48px) clamp(48px,6vw,80px);perspective:1200px;gap:clamp(14px,2.2vw,26px);z-index:2;">
     <h1 data-reveal="0.08" style="margin:0;font-weight:900;line-height:0.84;letter-spacing:-0.02em;text-transform:uppercase;">
       <span style="display:block;font-size:clamp(1rem,1.5vw,2.1rem);color:#B9975B;letter-spacing:0.18em;font-weight:800;margin-bottom:6px;">LEARN. SERVE. LEAD.</span>
@@ -649,11 +670,110 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   </div>
 </section>
 
+<!-- OUR MEMBERS — cover-story spotlight over a member constellation -->
+<style>
+#members-preview{position:relative;z-index:5;margin-top:-30px;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;overflow:clip;color:#EAF1F8;
+  background:radial-gradient(120% 90% at 78% -6%,#16264a 0%,#0b1730 46%,#070f20 100%);
+  padding:clamp(96px,13vw,180px) clamp(20px,4vw,48px) clamp(90px,12vw,160px);}
+.om-stars{position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(1.4px 1.4px at 20% 30%,rgba(255,255,255,.7),transparent),radial-gradient(1.2px 1.2px at 65% 18%,rgba(200,222,255,.6),transparent),radial-gradient(1.6px 1.6px at 82% 62%,rgba(255,255,255,.55),transparent),radial-gradient(1.1px 1.1px at 42% 78%,rgba(200,222,255,.5),transparent),radial-gradient(1.3px 1.3px at 12% 66%,rgba(255,255,255,.5),transparent),radial-gradient(1.2px 1.2px at 90% 34%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 55% 48%,rgba(200,222,255,.45),transparent),radial-gradient(1.4px 1.4px at 33% 12%,rgba(255,255,255,.55),transparent);}
+.om-aurora{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.om-aurora i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;mix-blend-mode:screen;animation:omdrift 18s ease-in-out infinite;}
+.om-aurora i:nth-child(1){width:520px;height:520px;left:-90px;top:-40px;background:radial-gradient(circle,#2f5fa0,transparent 68%);}
+.om-aurora i:nth-child(2){width:460px;height:460px;right:-60px;top:120px;background:radial-gradient(circle,#8b7fd4,transparent 68%);animation-delay:-6s;}
+.om-aurora i:nth-child(3){width:400px;height:400px;left:40%;bottom:-120px;background:radial-gradient(circle,#b9975b,transparent 70%);animation-delay:-11s;}
+@keyframes omdrift{0%,100%{transform:translate(0,0)}50%{transform:translate(26px,-22px)}}
+@media (prefers-reduced-motion:reduce){.om-aurora i{animation:none;}}
+.om-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto;}
+.om-eyebrow{display:inline-flex;align-items:center;gap:9px;color:#8fb7de;font-weight:700;letter-spacing:3px;font-size:11px;text-transform:uppercase;}
+.om-eyebrow::before{content:"";width:26px;height:1px;background:rgba(143,183,222,.6);}
+.om-top{display:flex;justify-content:space-between;align-items:flex-end;gap:28px;flex-wrap:wrap;margin:14px 0 clamp(36px,5vw,64px);}
+.om-top h2{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:.9;font-size:clamp(2.4rem,6.5vw,5rem);}
+.om-top h2 em{font-family:'Lora',serif;font-style:italic;font-weight:500;text-transform:none;letter-spacing:0;background:linear-gradient(120deg,#8fb7de,#e3c27c);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.om-top p{margin:0;max-width:340px;color:#9FB6CE;line-height:1.65;font-size:clamp(.92rem,1.2vw,1.05rem);}
+.om-stage{display:grid;grid-template-columns:minmax(0,0.82fr) minmax(0,1fr);gap:clamp(28px,4vw,64px);align-items:center;}
+.om-portrait{position:relative;justify-self:center;width:min(340px,80vw);aspect-ratio:3/4;border-radius:clamp(140px,20vw,180px) clamp(140px,20vw,180px) 26px 26px;overflow:hidden;
+  border:1px solid rgba(143,183,222,.28);box-shadow:0 50px 100px -40px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.15);background:#0c2042;}
+.om-portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.06);transition:opacity .7s ease,transform 1.2s ease;}
+.om-portrait img.on{opacity:1;transform:scale(1);}
+.om-portrait::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(7,15,32,.78),transparent 46%);}
+.om-pindex{position:absolute;left:20px;bottom:16px;z-index:2;font-family:'Lora',serif;font-style:italic;color:#EAF1F8;font-size:15px;letter-spacing:1px;text-shadow:0 2px 10px rgba(0,0,0,.6);}
+.om-detail{min-width:0;}
+.om-focus{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--fc,#8fb7de);background:color-mix(in srgb,var(--fc,#8fb7de) 15%,transparent);border:1px solid color-mix(in srgb,var(--fc,#8fb7de) 45%,transparent);transition:color .4s,background .4s,border-color .4s;}
+.om-focus .om-focus-dot{width:7px;height:7px;border-radius:50%;background:var(--fc,#8fb7de);box-shadow:0 0 10px var(--fc,#8fb7de);}
+.om-name{margin:18px 0 4px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;font-size:clamp(1.8rem,3.6vw,2.9rem);line-height:1;}
+.om-role{color:#9FB6CE;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+.om-quote{margin:22px 0 0;font-family:'Lora',serif;font-style:italic;font-size:clamp(1.1rem,1.7vw,1.42rem);line-height:1.55;color:#DCE6F2;max-width:520px;position:relative;padding-left:20px;}
+.om-quote::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:3px;background:var(--fc,#8fb7de);transition:background .4s;}
+.om-controls{display:flex;align-items:center;gap:16px;margin-top:30px;flex-wrap:wrap;}
+.om-rail{display:flex;gap:10px;}
+.om-thumb{width:52px;height:52px;border-radius:50%;overflow:hidden;padding:0;border:2px solid transparent;background:#0c2042;cursor:pointer;opacity:.5;transition:opacity .3s,border-color .3s,transform .3s;}
+.om-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.om-thumb:hover{opacity:.85;transform:translateY(-2px);}
+.om-thumb.on{opacity:1;border-color:var(--fc,#8fb7de);box-shadow:0 0 16px -3px var(--fc,#8fb7de);}
+.om-arrows{display:flex;gap:8px;margin-left:auto;}
+.om-arrow{width:44px;height:44px;border-radius:50%;border:1px solid rgba(143,183,222,.35);background:rgba(143,183,222,.06);color:#EAF1F8;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s;}
+.om-arrow:hover{background:rgba(143,183,222,.16);border-color:#8fb7de;}
+.om-cta-row{margin-top:clamp(40px,5vw,64px);display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.om-cta{display:inline-flex;align-items:center;gap:11px;padding:17px 32px;border-radius:999px;background:linear-gradient(120deg,#4B9CD3,#8b7fd4);color:#06101f;font-weight:800;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 18px 44px -16px rgba(75,156,211,.8);transition:transform .2s,box-shadow .2s;}
+.om-cta:hover{transform:translateY(-2px);box-shadow:0 24px 54px -16px rgba(139,127,212,.8);}
+.om-cta-sub{color:#9FB6CE;font-size:12.5px;letter-spacing:.4px;}
+@media(max-width:860px){.om-stage{grid-template-columns:1fr;}.om-portrait{width:min(300px,72vw);} .om-top p{max-width:100%;}}
+</style>
+<section id="members-preview" aria-label="Our members">
+  <div class="om-stars"></div>
+  <div class="om-aurora"><i></i><i></i><i></i></div>
+  <div class="om-inner">
+    <div class="om-top">
+      <div>
+        <div class="om-eyebrow" data-reveal="0">The people</div>
+        <h2 data-reveal="0.05">Our<br><em>members</em></h2>
+      </div>
+      <p data-reveal="0.12">Behind every gauge on the dashboard is a person with a reason they chose dentistry. Here&rsquo;s a glimpse — the whole chapter is a click away.</p>
+    </div>
+    <div class="om-stage" data-reveal="0.05">
+      <div class="om-portrait" id="om-portrait">
+        <img src="slot-officer-photo-1.webp" alt="" class="on">
+        <img src="slot-officer-photo-2.webp" alt="">
+        <img src="slot-officer-photo-5.webp" alt="">
+        <img src="slot-officer-photo-7.webp" alt="">
+        <img src="slot-officer-photo-6.webp" alt="">
+        <img src="slot-officer-photo-4.webp" alt="">
+        <span class="om-pindex" id="om-pindex">01 / 06</span>
+      </div>
+      <div class="om-detail" id="om-detail" style="--fc:#4B9CD3;">
+        <span class="om-focus"><span class="om-focus-dot"></span><span id="om-focus-t">Oral &amp; Maxillofacial Surgery</span></span>
+        <h3 class="om-name" id="om-name">Maya Feldman</h3>
+        <div class="om-role" id="om-role">Class of 2026 · Biology</div>
+        <p class="om-quote" id="om-quote">The OR is where biology stops being a textbook. I scrub in every chance I get, and it&rsquo;s the reason I&rsquo;m here.</p>
+        <div class="om-controls">
+          <div class="om-rail" id="om-rail" role="tablist" aria-label="Member spotlights">
+            <button class="om-thumb on" type="button" data-i="0" style="--fc:#4B9CD3;" aria-label="Maya Feldman"><img src="slot-officer-photo-1.webp" alt=""></button>
+            <button class="om-thumb" type="button" data-i="1" style="--fc:#B9975B;" aria-label="Chris Okafor"><img src="slot-officer-photo-2.webp" alt=""></button>
+            <button class="om-thumb" type="button" data-i="2" style="--fc:#3FB7A6;" aria-label="Priya Shah"><img src="slot-officer-photo-5.webp" alt=""></button>
+            <button class="om-thumb" type="button" data-i="3" style="--fc:#E58AA5;" aria-label="Ethan Cole"><img src="slot-officer-photo-7.webp" alt=""></button>
+            <button class="om-thumb" type="button" data-i="4" style="--fc:#9B8CE0;" aria-label="Hannah Wu"><img src="slot-officer-photo-6.webp" alt=""></button>
+            <button class="om-thumb" type="button" data-i="5" style="--fc:#62C6D8;" aria-label="Dev Patel"><img src="slot-officer-photo-4.webp" alt=""></button>
+          </div>
+          <div class="om-arrows">
+            <button class="om-arrow" id="om-prev" type="button" aria-label="Previous member"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <button class="om-arrow" id="om-next" type="button" aria-label="Next member"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <div class="om-cta-row">
+          <a class="om-cta" href="dashboard.html#members">Meet every member<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <span class="om-cta-sub">Sign in to see the live directory &amp; message anyone.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- THE BITE — WEEKLY NEWSLETTER & BLOG PREVIEW -->
 <section id="newsletter" style="position:relative;background:radial-gradient(120% 85% at 50% -10%,#17335e 0%,#0e2242 46%,#0A1A30 100%);color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;z-index:5;padding:clamp(90px,12vw,160px) clamp(20px,4vw,48px) clamp(80px,11vw,140px);overflow:clip;scroll-margin-top:64px;">
   <div style="position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.5;mix-blend-mode:overlay;z-index:0;"></div>
   <div id="news-glow" style="position:absolute;top:0;left:0;width:820px;height:820px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,110,.42) 0%,rgba(185,151,91,.16) 45%,transparent 70%);mix-blend-mode:screen;pointer-events:none;opacity:0;transition:opacity .5s ease;will-change:transform;z-index:1;"></div>
-  <div id="tooth-news" style="position:absolute;top:0;left:0;width:38px;height:49px;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform;filter:drop-shadow(0 5px 12px rgba(0,0,0,.6));"><img src="slot-hero-portrait.webp" alt="" style="display:block;width:100%;height:100%;object-fit:contain;"></div>
   <div style="max-width:1180px;margin:0 auto;position:relative;z-index:2;">
     <div data-reveal="0" style="text-align:center;">
       <div style="display:inline-flex;align-items:center;gap:14px;margin-bottom:18px;"><span style="width:34px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;">Hot Off The Press · Every Monday</span><span style="width:34px;height:1.5px;background:#B9975B;display:block;"></span></div>
@@ -668,6 +788,84 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <div data-reveal="0.1" style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;">
       <a href="newsletter.html" class="cta-gold" style="display:inline-flex;align-items:center;padding:16px 34px;border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -12px rgba(185,151,91,.85);transition:transform .2s;">Read Every Issue&nbsp;→</a>
       <a href="newsletter.html#write" class="email-btn" style="display:inline-flex;align-items:center;padding:16px 34px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Write For The Bite</a>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBER TOOLKIT — scroll-driven 3D resource carousel -->
+<style>
+#toolkit{position:relative;z-index:5;background:radial-gradient(125% 90% at 50% -8%,#14345c 0%,#0d2144 46%,#0A1A30 100%);color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;overflow:clip;}
+.tk-wrap{position:relative;height:340vh;}
+.tk-stage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(28px,5vh,60px);padding:clamp(40px,7vh,90px) 16px;overflow:hidden;}
+.tk-grain{position:absolute;inset:0;background:url('grain.png') repeat;opacity:.34;mix-blend-mode:overlay;pointer-events:none;}
+.tk-head{text-align:center;position:relative;z-index:2;max-width:640px;}
+.tk-eyebrow{display:inline-flex;align-items:center;gap:8px;color:#7FB2E0;font-weight:700;letter-spacing:3px;font-size:11px;text-transform:uppercase;margin-bottom:12px;}
+.tk-eyebrow::before,.tk-eyebrow::after{content:"";width:24px;height:1px;background:rgba(127,178,224,.5);}
+.tk-head h2{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:.92;font-size:clamp(2rem,5.5vw,4rem);background:linear-gradient(180deg,#EAF1F8,#8FB7DE);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.tk-head p{margin:14px auto 0;color:#9FB6CE;font-size:clamp(.9rem,1.3vw,1.05rem);line-height:1.6;max-width:460px;}
+.tk-holder{position:relative;width:min(520px,86vw);height:clamp(220px,32vh,300px);perspective:1500px;z-index:2;}
+.tk-ring{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(var(--ry,0deg));will-change:transform;}
+.tk-card{position:absolute;left:50%;top:50%;width:clamp(150px,20vw,190px);height:clamp(150px,20vw,190px);margin:calc(clamp(150px,20vw,190px)/-2);
+  transform:rotateY(calc(var(--i)*72deg)) translateZ(var(--rad,250px)) rotateY(var(--self,0deg)) scale(var(--sc,.86));
+  border-radius:22px;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:18px;
+  background:linear-gradient(165deg,rgba(255,255,255,.1),rgba(10,26,48,.55));border:1px solid var(--edge,rgba(127,178,224,.3));
+  box-shadow:0 26px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(8px);opacity:var(--op,.5);
+  transition:opacity .3s ease,box-shadow .3s ease;will-change:transform;}
+.tk-card.front{box-shadow:0 34px 80px -26px var(--glow,rgba(75,156,211,.7)), inset 0 1px 0 rgba(255,255,255,.2);}
+.tk-ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--ink,#7FB2E0);background:var(--soft,rgba(127,178,224,.16));border:1px solid var(--edge,rgba(127,178,224,.3));}
+.tk-name{font-weight:800;text-transform:uppercase;letter-spacing:1px;font-size:clamp(.82rem,1.3vw,.98rem);color:#EAF1F8;line-height:1.15;}
+.tk-tag{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9FB6CE;font-weight:600;}
+.tk-open{font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:var(--ink,#7FB2E0);opacity:0;transition:opacity .3s;}
+.tk-card.front .tk-open{opacity:1;}
+.tk-dots{display:flex;gap:9px;position:relative;z-index:2;}
+.tk-dot{width:8px;height:8px;border-radius:50%;background:rgba(159,182,206,.28);transition:background .3s,transform .3s;}
+.tk-dot.on{background:#7FB2E0;transform:scale(1.5);box-shadow:0 0 12px #7FB2E0;}
+.tk-hint{position:relative;z-index:2;color:#7FB2E0;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px;}
+@media (max-width:680px), (prefers-reduced-motion: reduce){
+  .tk-wrap{height:auto;}
+  .tk-stage{position:static;height:auto;gap:26px;padding:clamp(70px,12vw,110px) 18px;}
+  .tk-holder{width:100%;height:auto;perspective:none;}
+  .tk-ring{position:static;transform:none!important;display:flex;flex-wrap:wrap;justify-content:center;gap:14px;}
+  .tk-card{position:static;margin:0;transform:none!important;opacity:1!important;width:clamp(140px,42vw,170px);height:auto;min-height:150px;}
+  .tk-open{opacity:1!important;}
+  .tk-dots{display:none;}
+}
+</style>
+<section id="toolkit" aria-label="Member toolkit preview">
+  <div class="tk-wrap">
+    <div class="tk-stage">
+      <div class="tk-grain"></div>
+      <div class="tk-head">
+        <div class="tk-eyebrow">Sign in · Everything in one place</div>
+        <h2>The Member Toolkit</h2>
+        <p>Five folders the chapter keeps stocked — applications, test prep, shadowing, chapter sheets, and research. Scroll to spin through them.</p>
+      </div>
+      <div class="tk-holder">
+        <div class="tk-ring" id="tk-ring">
+          <a class="tk-card" href="dashboard.html?folder=apps#resources" style="--i:0;--ink:#4B9CD3;--edge:rgba(75,156,211,.4);--soft:rgba(75,156,211,.16);--glow:rgba(75,156,211,.7);">
+            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg></span>
+            <span class="tk-name">Applications</span><span class="tk-tag">AADSAS · Essays</span><span class="tk-open">Open →</span>
+          </a>
+          <a class="tk-card" href="dashboard.html?folder=dat#resources" style="--i:1;--ink:#E3C27C;--edge:rgba(227,194,124,.4);--soft:rgba(227,194,124,.16);--glow:rgba(227,194,124,.65);">
+            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-1.5 5.6A3 3 0 0 0 6 17a3 3 0 0 0 6 0V4a1 1 0 0 0-1-1z"/><path d="M15 3a3 3 0 0 1 3 3 3 3 0 0 1 1.5 5.6A3 3 0 0 1 18 17a3 3 0 0 1-6 0"/></svg></span>
+            <span class="tk-name">DAT &amp; Test Prep</span><span class="tk-tag">Content · Practice</span><span class="tk-open">Open →</span>
+          </a>
+          <a class="tk-card" href="dashboard.html?folder=shadow#resources" style="--i:2;--ink:#E39A57;--edge:rgba(204,111,46,.45);--soft:rgba(204,111,46,.18);--glow:rgba(204,111,46,.6);">
+            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5c-1.6 0-2.3-1-4-1-2.8 0-4.4 2.4-4.4 5 0 2.4 1 3.8 1.6 5.9.6 2.2.8 4.6 2.6 4.6 1.6 0 1.3-4.4 3-4.4s1.4 4.4 3 4.4c1.8 0 2-2.4 2.6-4.6.6-2.1 1.6-3.5 1.6-5.9 0-2.6-1.6-5-4.4-5-1.7 0-2.4 1-3.2 1z"/></svg></span>
+            <span class="tk-name">Shadowing</span><span class="tk-tag">Hours · Clinical</span><span class="tk-open">Open →</span>
+          </a>
+          <a class="tk-card" href="dashboard.html?folder=chapter#resources" style="--i:3;--ink:#7FB2E0;--edge:rgba(127,178,224,.42);--soft:rgba(127,178,224,.16);--glow:rgba(127,178,224,.65);">
+            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V4"/></svg></span>
+            <span class="tk-name">Chapter &amp; Points</span><span class="tk-tag">Sheets · Standing</span><span class="tk-open">Open →</span>
+          </a>
+          <a class="tk-card" href="dashboard.html?folder=research#resources" style="--i:4;--ink:#C95E97;--edge:rgba(201,94,151,.45);--soft:rgba(201,94,151,.16);--glow:rgba(201,94,151,.6);">
+            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 22h11.6a2 2 0 0 0 1.7-3.5L14 9V3"/><path d="M7 15h10"/></svg></span>
+            <span class="tk-name">Scholarships</span><span class="tk-tag">Funding · Research</span><span class="tk-open">Open →</span>
+          </a>
+        </div>
+      </div>
+      <div class="tk-dots" id="tk-dots" aria-hidden="true"><span class="tk-dot on"></span><span class="tk-dot"></span><span class="tk-dot"></span><span class="tk-dot"></span><span class="tk-dot"></span></div>
+      <div class="tk-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>Scroll to explore</div>
     </div>
   </div>
 </section>
@@ -979,7 +1177,12 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     </div>
     <div data-reveal="0.1" style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:clamp(56px,8vw,96px);">
       <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener" class="ig-btn" style="display:inline-flex;align-items:center;gap:10px;padding:16px 34px;border-radius:999px;background:#4B9CD3;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:transform .2s;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>Follow @unc_dds</a>
-      <a href="mailto:ddsexec@unc.edu" class="email-btn" style="display:inline-flex;align-items:center;padding:16px 34px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Email the Exec Board</a>
+      <button type="button" id="exec-copy" class="email-btn" data-email="ddsexec@unc.edu" style="display:inline-flex;align-items:center;gap:9px;padding:16px 34px;border-radius:999px;border:1.5px solid #D7E2EA;background:transparent;color:#D7E2EA;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,color .2s;">
+        <span class="exec-copy-ic" aria-hidden="true" style="display:inline-flex;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </span>
+        <span class="exec-copy-txt">Email the Exec Board</span>
+      </button>
       <a href="https://www.linkedin.com/company/unc-delta-delta-sigma-dds" target="_blank" rel="noopener" class="li-btn" style="display:inline-flex;align-items:center;gap:10px;padding:16px 34px;border-radius:999px;background:#4B9CD3;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:transform .2s;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>Connect on LinkedIn</a>
     </div>
   </div>
@@ -1112,6 +1315,8 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 
 </div><!-- #root -->
 
+<script src="dds-cloud-config.js"></script>
+<script src="dds-cloud.js"></script>
 <script src="dds-auth.js"></script>
 <script src="dds-family.js"></script>
 <script src="dds-news.js"></script>
@@ -1981,10 +2186,172 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     }, {passive:true});
     stage.addEventListener('mouseleave', () => { tooth.style.opacity = '0'; });
   };
-  make(document.getElementById('top'), document.getElementById('tooth-hero'));
+  // Tooth stays only where it reads well: Opportunities + Officer Profiles.
   make(document.querySelector('#officer-profiles [data-hpin-stage]'), document.getElementById('tooth-officers'));
   make(document.getElementById('offers'), document.getElementById('tooth-offers'));
-  make(document.getElementById('newsletter'), document.getElementById('tooth-news'));
+})();
+
+// ---- Navy dot cursor: precise page-wide pointer that grows on hover ----
+// (yields to the tooth cursor inside #offers and #officer-profiles)
+(function initDotCursor(){
+  if (REDUCED_MOTION) return;
+  if (!window.matchMedia || !window.matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  const dot = document.createElement('div');
+  dot.id = 'dotcur';
+  document.body.appendChild(dot);
+  document.documentElement.classList.add('cursor-dot');
+  const HIT = 'a,button,summary,label,input,textarea,select,[role="button"],[data-cta-magnet],[onclick],.nb-card,.of-card,.blr-card,.op-tile,.galc-card';
+  let x = innerWidth / 2, y = innerHeight / 2, raf = null;
+  const draw = () => { raf = null; dot.style.left = x + 'px'; dot.style.top = y + 'px'; };
+  document.addEventListener('mousemove', (e) => {
+    x = e.clientX; y = e.clientY;
+    dot.classList.add('show');
+    // hand off to the tooth inside its two zones
+    const inTooth = e.target.closest && e.target.closest('#offers,#officer-profiles');
+    dot.classList.toggle('hidden-zone', !!inTooth);
+    dot.style.opacity = inTooth ? '0' : '';
+    const hot = e.target.closest && e.target.closest(HIT);
+    dot.classList.toggle('grow', !!hot && !inTooth);
+    if (!raf) raf = requestAnimationFrame(draw);
+  }, { passive: true });
+  document.addEventListener('mousedown', () => dot.classList.add('press'));
+  document.addEventListener('mouseup', () => dot.classList.remove('press'));
+  document.addEventListener('mouseleave', () => dot.classList.remove('show'));
+  document.addEventListener('mouseenter', () => dot.classList.add('show'));
+})();
+
+// ---- Hero: the dot recolors the background as it moves across ----
+(function initHeroTint(){
+  if (REDUCED_MOTION) return;
+  const sec = document.getElementById('top');
+  const tint = document.getElementById('hero-tint');
+  if (!sec || !tint) return;
+  // Carolina blue → cyan → gold, blended over the video with soft-light
+  const stops = [[75,156,211],[98,225,255],[227,194,124]];
+  const lerp = (a,b,t) => Math.round(a+(b-a)*t);
+  const colorAt = (f) => {
+    const seg = f < 0.5 ? 0 : 1, t = f < 0.5 ? f/0.5 : (f-0.5)/0.5;
+    const a = stops[seg], b = stops[seg+1];
+    return [lerp(a[0],b[0],t), lerp(a[1],b[1],t), lerp(a[2],b[2],t)];
+  };
+  let raf = null, cx = 0, cy = 0;
+  sec.addEventListener('mousemove', (e) => {
+    cx = e.clientX; cy = e.clientY;
+    tint.style.opacity = '1';
+    if (!raf) raf = requestAnimationFrame(() => {
+      raf = null;
+      const r = sec.getBoundingClientRect();
+      const f = Math.max(0, Math.min(1, (cx - r.left) / r.width));
+      const c = colorAt(f);
+      tint.style.background = 'radial-gradient(circle,rgba(' + c[0] + ',' + c[1] + ',' + c[2] +
+        ',.6) 0%,rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',.14) 46%,transparent 70%)';
+      tint.style.transform = 'translate3d(' + (cx - r.left - 410) + 'px,' + (cy - r.top - 410) + 'px,0)';
+    });
+  }, { passive: true });
+  sec.addEventListener('mouseleave', () => { tint.style.opacity = '0'; });
+})();
+
+// ---- Member toolkit: scroll drives a 3D ring through the five folders ----
+(function initToolkitRing(){
+  const sec = document.getElementById('toolkit');
+  if (!sec) return;
+  const wrap = sec.querySelector('.tk-wrap');
+  const ring = document.getElementById('tk-ring');
+  const cards = Array.from(ring.querySelectorAll('.tk-card'));
+  const dots = Array.from(document.querySelectorAll('#tk-dots .tk-dot'));
+  const N = cards.length;                    // 5
+  const flat = window.matchMedia('(max-width:680px)').matches || REDUCED_MOTION;
+  if (flat) return;                          // CSS lays the cards out in a flat row
+
+  // set the ring radius from card size so the squares sit shoulder to shoulder
+  const setRadius = () => {
+    const cw = cards[0].offsetWidth || 180;
+    const rad = Math.round((cw * 1.18) / Math.tan(Math.PI / N));  // circumradius for N faces
+    cards.forEach(c => c.style.setProperty('--rad', rad + 'px'));
+  };
+  setRadius();
+  window.addEventListener('resize', setRadius, { passive: true });
+
+  let raf = null;
+  const update = () => {
+    raf = null;
+    const total = wrap.offsetHeight - window.innerHeight;
+    const p = Math.max(0, Math.min(1, -wrap.getBoundingClientRect().top / total));
+    ring.style.setProperty('--ry', (-p * (N - 1) * 72) + 'deg');   // sweep card0 → card4
+    const frontF = p * (N - 1);
+    let near = 0, nearD = 9;
+    cards.forEach((c, i) => {
+      const d = frontF - i;
+      c.style.setProperty('--self', (Math.max(-1.4, Math.min(1.4, d)) * 72) + 'deg'); // spin on own axis, upright at front
+      const ad = Math.abs(d);
+      c.style.setProperty('--op', (ad < 0.5 ? 1 : Math.max(0.32, 0.72 - ad * 0.16)).toFixed(2));
+      c.style.setProperty('--sc', (ad < 0.5 ? 1.12 : 0.86).toFixed(2));
+      c.classList.toggle('front', ad < 0.5);
+      if (ad < nearD) { nearD = ad; near = i; }
+    });
+    dots.forEach((dt, i) => dt.classList.toggle('on', i === near));
+  };
+  const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  update();
+})();
+
+// ---- Our Members: auto-cycling cover-story spotlight ----
+(function initMemberSpotlight(){
+  const sec = document.getElementById('members-preview');
+  if (!sec) return;
+  const MEMBERS = [
+    { name:'Maya Feldman',  role:'Class of 2026 · Biology',        focus:'Oral & Maxillofacial Surgery', fc:'#4B9CD3',
+      quote:'The OR is where biology stops being a textbook. I scrub in every chance I get, and it’s the reason I’m here.' },
+    { name:'Chris Okafor',  role:'Class of 2025 · Chemistry',      focus:'Pediatric Dentistry',          fc:'#B9975B',
+      quote:'A kid who leaves unafraid of the chair is a patient for life. That first visit is everything.' },
+    { name:'Priya Shah',    role:'Class of 2027 · Biology',        focus:'Orthodontics',                 fc:'#3FB7A6',
+      quote:'There’s a quiet math to moving teeth a millimeter at a time — I could study it for hours.' },
+    { name:'Ethan Cole',    role:'Class of 2027 · Public Health',  focus:'Public Health Dentistry',      fc:'#E58AA5',
+      quote:'Access is the whole game. I want to build clinics in the counties that never had one.' },
+    { name:'Hannah Wu',     role:'Class of 2026 · Materials Sci.', focus:'Biomaterials Research',        fc:'#9B8CE0',
+      quote:'The composite in a filling started in a lab like the one I work in. Research is dentistry’s future tense.' },
+    { name:'Dev Patel',     role:'Class of 2028 · Neuroscience',   focus:'Endodontics',                  fc:'#62C6D8',
+      quote:'Everyone dreads a root canal — I want to be the reason they walk out saying it was nothing.' }
+  ];
+  const imgs = Array.from(sec.querySelectorAll('#om-portrait img'));
+  const thumbs = Array.from(sec.querySelectorAll('.om-thumb'));
+  const nameEl = document.getElementById('om-name');
+  const roleEl = document.getElementById('om-role');
+  const focusEl = document.getElementById('om-focus-t');
+  const quoteEl = document.getElementById('om-quote');
+  const detailEl = document.getElementById('om-detail');
+  const pindex = document.getElementById('om-pindex');
+  let cur = 0, timer = null;
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const show = (i) => {
+    cur = (i + MEMBERS.length) % MEMBERS.length;
+    const m = MEMBERS[cur];
+    imgs.forEach((im, k) => im.classList.toggle('on', k === cur));
+    thumbs.forEach((t, k) => t.classList.toggle('on', k === cur));
+    detailEl.style.setProperty('--fc', m.fc);
+    nameEl.textContent = m.name;
+    roleEl.textContent = m.role;
+    focusEl.textContent = m.focus;
+    quoteEl.textContent = m.quote;
+    pindex.textContent = String(cur + 1).padStart(2, '0') + ' / ' + String(MEMBERS.length).padStart(2, '0');
+  };
+  const advance = () => show(cur + 1);
+  const restart = () => { if (REDUCED) return; clearInterval(timer); timer = setInterval(advance, 5200); };
+
+  thumbs.forEach((t) => t.addEventListener('click', () => { show(+t.getAttribute('data-i')); restart(); }));
+  document.getElementById('om-prev').addEventListener('click', () => { show(cur - 1); restart(); });
+  document.getElementById('om-next').addEventListener('click', () => { show(cur + 1); restart(); });
+  sec.addEventListener('mouseenter', () => clearInterval(timer));
+  sec.addEventListener('mouseleave', restart);
+  // only auto-run while the section is in view
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((es) => es.forEach((e) => { e.isIntersecting ? restart() : clearInterval(timer); }),
+      { threshold: 0.25 }).observe(sec);
+  } else { restart(); }
+  show(0);
 })();
 
 // ---- The Bite: gold glow that trails the cursor across the press desk ----
@@ -2040,6 +2407,48 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     glow.style.opacity = '0';
     innerGlows.forEach(g => { if (g) g.style.opacity = '0'; });
     for (const t of texts) { t.style.setProperty('--px', '-999px'); t.style.setProperty('--py', '-999px'); }
+  });
+})();
+
+// ---- Exec-board button: copy the address instead of launching a mail client ----
+(function initExecCopy(){
+  const btn = document.getElementById('exec-copy');
+  if (!btn) return;
+  const txt = btn.querySelector('.exec-copy-txt');
+  const ic = btn.querySelector('.exec-copy-ic');
+  const email = btn.getAttribute('data-email');
+  const idle = txt.textContent;
+  const idleSvg = ic.innerHTML;
+  const checkSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  let resetT = null;
+
+  const copy = (text) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return new Promise((res, rej) => {                 // fallback for non-secure contexts
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      ta.remove(); ok ? res() : rej();
+    });
+  };
+
+  btn.addEventListener('click', () => {
+    copy(email).then(() => {
+      clearTimeout(resetT);
+      btn.classList.add('is-copied');
+      ic.innerHTML = checkSvg;
+      txt.textContent = 'Copied to clipboard';
+      btn.setAttribute('aria-live', 'polite');
+      resetT = setTimeout(() => {
+        btn.classList.remove('is-copied');
+        ic.innerHTML = idleSvg;
+        txt.textContent = idle;
+      }, 2200);
+    }).catch(() => {
+      txt.textContent = email;                          // worst case, show it to copy by hand
+      setTimeout(() => { txt.textContent = idle; }, 3000);
+    });
   });
 })();
 

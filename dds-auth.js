@@ -41,6 +41,15 @@
   }
   function saveMembers(list) {
     localStorage.setItem(MEMBERS_KEY, JSON.stringify(list));
+    if (window.DDSCloud) DDSCloud.touch('members');
+  }
+
+  /* Refresh the member table from the shared cloud database (when
+     configured) so an account created on any other device is found here.
+     Resolves quietly either way — offline just means local-only. */
+  function cloudRoster() {
+    if (!window.DDSCloud || !DDSCloud.enabled) return Promise.resolve();
+    return DDSCloud.pullNow(['members']).catch(function () {});
   }
 
   function readSession() {
@@ -61,17 +70,46 @@
 
   function uid() { return 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
+  function hexify(buf) {
+    return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+  }
+
+  /* Legacy digest — only kept to verify accounts created before the
+     PBKDF2 upgrade; those rows re-hash on their next successful sign-in. */
   function hash(salt, password) {
     var msg = salt + '::' + password;
     if (window.crypto && crypto.subtle && crypto.subtle.digest) {
-      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg)).then(function (buf) {
-        return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
-      });
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg)).then(hexify);
     }
     // FNV-1a fallback for non-secure contexts (crypto.subtle unavailable)
     var h = 0x811c9dc5;
     for (var i = 0; i < msg.length; i++) { h ^= msg.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
     return Promise.resolve('fnv' + h.toString(16));
+  }
+
+  /* PBKDF2-SHA256, 310k iterations. Member rows sync to a shared database
+     once cloud sync is configured, so hashes need to be slow to attack —
+     a plain SHA-256 would crack in bulk. Prefix marks the scheme. */
+  function kdf(salt, password) {
+    if (window.crypto && crypto.subtle && crypto.subtle.importKey) {
+      var te = new TextEncoder();
+      return crypto.subtle.importKey('raw', te.encode(String(password)), 'PBKDF2', false, ['deriveBits'])
+        .then(function (key) {
+          return crypto.subtle.deriveBits(
+            { name: 'PBKDF2', hash: 'SHA-256', salt: te.encode(salt), iterations: 310000 }, key, 256);
+        })
+        .then(function (buf) { return 'p2$' + hexify(buf); })
+        .catch(function () { return hash(salt, password); });
+    }
+    return hash(salt, password);
+  }
+
+  /* Check a password against a row, whichever scheme the row uses. */
+  function verifyPassword(m, password) {
+    if (String(m.hash || '').indexOf('p2$') === 0) {
+      return kdf(m.salt, password).then(function (h) { return h === m.hash; });
+    }
+    return hash(m.salt, password).then(function (h) { return h === m.hash; });
   }
 
   function notify() {
@@ -137,12 +175,13 @@
       if (!rec.password || rec.password.length < 8) return Promise.resolve({ ok: false, err: 'Password needs at least 8 characters.' });
       if (!rec.gradYear) return Promise.resolve({ ok: false, err: 'Pick your graduation year.' });
       if (!String(rec.major || '').trim()) return Promise.resolve({ ok: false, err: 'Enter your major.' });
+      return cloudRoster().then(function () {
       var list = loadMembers();
       if (list.some(function (m) { return m.email === email; })) {
         return Promise.resolve({ ok: false, err: 'That email already has an account — sign in instead.' });
       }
       var salt = uid() + Math.random().toString(36).slice(2);
-      return hash(salt, rec.password).then(function (h) {
+      return kdf(salt, rec.password).then(function (h) {
         var member = {
           id: uid(), name: name, email: email, salt: salt, hash: h,
           gradYear: rec.gradYear, major: String(rec.major).trim(),
@@ -155,20 +194,32 @@
         notify();
         return { ok: true, member: api.current() };
       });
+      });
     },
 
     signIn: function (email, password, remember) {
       email = String(email || '').trim().toLowerCase();
-      var m = loadMembers().find(function (r) { return r.email === email; });
-      if (!m) return Promise.resolve({ ok: false, err: 'No account with that email — create one below.' });
-      return hash(m.salt, password || '').then(function (h) {
-        if (h !== m.hash) return { ok: false, err: 'Wrong password. Try again.' };
-        var before = m.role + '|' + (m.execTitle || '');
-        syncExecStatus(m);
-        if (before !== m.role + '|' + (m.execTitle || '')) saveMembers(loadMembers().map(function (r) { return r.id === m.id ? m : r; }));
-        writeSession({ id: m.id, ts: Date.now() }, !!remember);
-        notify();
-        return { ok: true, member: api.current() };
+      return cloudRoster().then(function () {
+        var m = loadMembers().find(function (r) { return r.email === email; });
+        if (!m) return { ok: false, err: 'No account with that email — create one below.' };
+        return verifyPassword(m, password || '').then(function (good) {
+          if (!good) return { ok: false, err: 'Wrong password. Try again.' };
+          var before = m.role + '|' + (m.execTitle || '') + '|' + m.hash;
+          syncExecStatus(m);
+          var finish = function () {
+            if (before !== m.role + '|' + (m.execTitle || '') + '|' + m.hash) {
+              saveMembers(loadMembers().map(function (r) { return r.id === m.id ? m : r; }));
+            }
+            writeSession({ id: m.id, ts: Date.now() }, !!remember);
+            notify();
+            return { ok: true, member: api.current() };
+          };
+          // quietly upgrade pre-PBKDF2 rows now that we know the password
+          if (String(m.hash || '').indexOf('p2$') !== 0) {
+            return kdf(m.salt, password || '').then(function (h) { m.hash = h; return finish(); });
+          }
+          return finish();
+        });
       });
     },
 
@@ -190,19 +241,21 @@
       return EXEC_BOARD[String(m.email || '').toLowerCase()] || m.execTitle || (m.role === 'exec' ? 'Exec Board' : null);
     },
 
-    /* Accounts live in this browser's member table, so a reset is local:
-       find the row by email, re-salt, re-hash. */
+    /* Reset by email: re-salt + re-hash the row (pulled fresh from the
+       cloud first, when configured, so resets work from any browser). */
     resetPassword: function (email, newPassword) {
       email = String(email || '').trim().toLowerCase();
-      var list = loadMembers();
-      var m = list.find(function (r) { return r.email === email; });
-      if (!m) return Promise.resolve({ ok: false, err: 'No account with that email in this browser.' });
       if (!newPassword || newPassword.length < 8) return Promise.resolve({ ok: false, err: 'Password needs at least 8 characters.' });
-      var salt = uid() + Math.random().toString(36).slice(2);
-      return hash(salt, newPassword).then(function (h) {
-        m.salt = salt; m.hash = h;
-        saveMembers(list);
-        return { ok: true };
+      return cloudRoster().then(function () {
+        var list = loadMembers();
+        var m = list.find(function (r) { return r.email === email; });
+        if (!m) return { ok: false, err: 'No account with that email yet.' };
+        var salt = uid() + Math.random().toString(36).slice(2);
+        return kdf(salt, newPassword).then(function (h) {
+          m.salt = salt; m.hash = h;
+          saveMembers(list);
+          return { ok: true };
+        });
       });
     },
 

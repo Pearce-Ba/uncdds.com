@@ -76,7 +76,10 @@
     return saved;
   }
 
-  function save(list) { localStorage.setItem(KEY, JSON.stringify(list)); }
+  function save(list) {
+    localStorage.setItem(KEY, JSON.stringify(list));
+    if (window.DDSCloud) DDSCloud.touch('family');
+  }
 
   /* Base families + everything saved in this browser, merged. Entries carry
      an id (surfaced as editId on their node) so the page that rendered them

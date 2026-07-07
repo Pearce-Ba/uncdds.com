@@ -56,7 +56,7 @@
         links.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); });
       });
     }, { rootMargin: '-38% 0px -56% 0px' });
-    ['instruments', 'events', 'meetings', 'classes', 'resources', 'chat', 'family', 'gallery'].forEach(function (id) {
+    ['instruments', 'events', 'meetings', 'classes', 'resources', 'members', 'chat', 'family', 'gallery'].forEach(function (id) {
       var s = $(id); if (s) spy.observe(s);
     });
 
@@ -354,6 +354,7 @@
     if (text.trim()) all[ME.id][key] = { t: text, at: Date.now() };
     else delete all[ME.id][key];
     writeLS(NOTES_KEY, all);
+    if (window.DDSCloud) DDSCloud.touch('notes');
     refreshOthers(); // keeps each row's shared-note count honest
   }
 
@@ -486,8 +487,13 @@
       if (migrated) writeLS(CLS_KEY, list);
       return list;
     }
+    // Stable seed ids (seed-*) keep this demo content local-only — the
+    // cloud engine never uploads rows whose id starts with "seed-", so
+    // every browser shows the same examples without duplicating them
+    // into the shared database. Real member ratings get uid() ids.
+    var seq = 0;
     var mk = function (kind, code, prof, rating, take, by, days) {
-      return { id: uid(), kind: kind, code: code, prof: prof, rating: rating, take: take, by: by, byId: 'seed-' + by.replace(/\W/g, ''), at: Date.now() - days * 864e5 };
+      return { id: 'seed-cls-' + (seq++), kind: kind, code: code, prof: prof, rating: rating, take: take, by: by, byId: 'seed-' + by.replace(/\W/g, ''), at: Date.now() - days * 864e5 };
     };
     list = [
       mk('prof', 'BIOL 252', 'Dr. Griffith', 5, 'Hard, but the anatomy unit carries straight into the DAT. Go to office hours early.', 'Jordan Reyes', 64),
@@ -654,6 +660,7 @@
     var entry = { id: mineIdx > -1 ? list[mineIdx].id : uid(), kind: 'class', code: code, prof: null, rating: cfRating, take: $('cf-take').value.trim(), by: ME.name, byId: ME.id, at: Date.now() };
     if (mineIdx > -1) list[mineIdx] = entry; else list.push(entry);
     writeLS(CLS_KEY, list);
+    if (window.DDSCloud) DDSCloud.touch('classes');
     $('cls-modal').hidden = true;
     renderClasses();
   });
@@ -671,21 +678,131 @@
     var entry = { id: mineIdx > -1 ? list[mineIdx].id : uid(), kind: 'prof', code: code, prof: prof, rating: prRating, take: $('pr-take').value.trim(), by: ME.name, byId: ME.id, at: Date.now() };
     if (mineIdx > -1) list[mineIdx] = entry; else list.push(entry);
     writeLS(CLS_KEY, list);
+    if (window.DDSCloud) DDSCloud.touch('classes');
     $('prof-modal').hidden = true;
     renderClasses();
   });
 
-  /* ================= Chapter chat ================= */
-  var CHAT_KEY = 'dds-chat-v1';
-  function chatAll() {
-    var list = readLS(CHAT_KEY, null);
-    if (!list) {
-      list = [{ id: 'seed-hello', by: 'Exec Board', byId: 'exec', at: Date.now() - 3 * 864e5,
-        text: 'Welcome to the chapter chat — the whole cohort sees this room. Meeting questions, ride shares, DAT wins: all fair game.' }];
-      writeLS(CHAT_KEY, list);
+  /* ================= Roster helpers (shared by chat + directory) ======== */
+  function allMembers() { return DDSAuth.members ? DDSAuth.members() : []; }
+  function memberById(id) { return allMembers().find(function (m) { return m.id === id; }); }
+  function pub(m) {
+    if (!m) return null;
+    return { id: m.id, name: m.name, gradYear: m.gradYear, major: m.major || '', role: m.role,
+      execTitle: m.execTitle || (DDSAuth.execTitle ? DDSAuth.execTitle(m) : null),
+      photo: m.photo || null, interests: m.interests || '', hobbies: m.hobbies || '',
+      favClasses: m.favClasses || '', favProfs: m.favProfs || '',
+      instagram: m.instagram || '', linkedin: m.linkedin || '' };
+  }
+  function initial(name) { return String(name || '?').trim().charAt(0).toUpperCase() || '?'; }
+  function avatarHtml(p, cls) {
+    return '<span class="' + cls + '">' + (p && p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : esc(initial(p && p.name))) + '</span>';
+  }
+
+  /* ================= Chapter chat — channels, groups, DMs ================ */
+  var CHAT_KEY = 'dds-chat-v1';   // legacy single room (migrated once)
+  var MSG_KEY = 'dds-chat-v2';    // { id, ch, by, byId, text, img?, at }
+  var CHAN_KEY = 'dds-chat-meta-v1'; // groups + DMs (General is implicit)
+  var GENERAL = { id: 'seed-general', kind: 'channel', name: 'General', members: null };
+  var curChan = 'seed-general';
+
+  function messagesAll() {
+    var list = readLS(MSG_KEY, null);
+    if (list) return list;
+    var legacy = readLS(CHAT_KEY, null);
+    if (legacy && legacy.length) {          // fold the old single room into General
+      list = legacy.map(function (m) {
+        return { id: m.id, ch: 'seed-general', by: m.by, byId: m.byId, text: m.text || '', img: m.img, at: m.at };
+      });
+    } else {
+      list = [{ id: 'seed-hello', ch: 'seed-general', by: 'Exec Board', byId: 'exec', at: Date.now() - 3 * 864e5,
+        text: 'Welcome to the chapter chat — everyone signed in sees General. Start a group or a direct message with the “New chat” button, and type @ to tag someone.' }];
     }
+    writeLS(MSG_KEY, list);
     return list;
   }
+  function saveMessages(list) {
+    if (list.length > 600) list = list.slice(-600);
+    writeLS(MSG_KEY, list);
+    if (window.DDSCloud) DDSCloud.touch('chatMsgs');
+    return list;
+  }
+  function channelsStored() { var l = readLS(CHAN_KEY, []); return Array.isArray(l) ? l : []; }
+  function saveChannels(list) { writeLS(CHAN_KEY, list); if (window.DDSCloud) DDSCloud.touch('chatMeta'); }
+
+  // channels this member can see: General + groups they're in + their DMs
+  function myChannels() {
+    var mine = channelsStored().filter(function (c) {
+      if (c.kind === 'dm') return (c.members || []).indexOf(ME.id) > -1;
+      return c.members == null || c.members.indexOf(ME.id) > -1;
+    });
+    return [GENERAL].concat(mine);
+  }
+  function channelById(id) {
+    if (id === 'seed-general') return GENERAL;
+    return channelsStored().find(function (c) { return c.id === id; }) || GENERAL;
+  }
+  function channelLabel(c) {
+    if (c.kind === 'dm') { var o = (c.members || []).filter(function (x) { return x !== ME.id; })[0]; var p = pub(memberById(o)); return p ? p.name : 'Direct message'; }
+    return c.name || 'Channel';
+  }
+  function channelAvatar(c) {
+    if (c.kind === 'dm') { var o = (c.members || []).filter(function (x) { return x !== ME.id; })[0]; return pub(memberById(o)); }
+    return null;
+  }
+  function lastAt(chId) {
+    var t = 0; messagesAll().forEach(function (m) { if (m.ch === chId && m.at > t) t = m.at; });
+    return t;
+  }
+
+  function dmId(a, b) { return 'dm-' + [a, b].sort().join('-'); }
+  function startDM(otherId) {
+    if (!otherId || otherId === ME.id) return;
+    var id = dmId(ME.id, otherId);
+    var chans = channelsStored();
+    if (!chans.some(function (c) { return c.id === id; })) {
+      chans.push({ id: id, kind: 'dm', name: '', members: [ME.id, otherId].sort(), by: ME.id, at: Date.now() });
+      saveChannels(chans);
+    }
+    switchChannel(id);
+    if (!$('mem-modal').hidden) $('mem-modal').hidden = true;
+    var chatSec = document.getElementById('chat');
+    if (chatSec) chatSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(function () { $('chat-input').focus(); }, 400);
+  }
+
+  function switchChannel(id) {
+    curChan = id;
+    var c = channelById(id);
+    $('chat-title').textContent = channelLabel(c);
+    var subEl = $('chat-sub');
+    if (c.kind === 'dm') subEl.textContent = 'Direct message';
+    else if (c.members) subEl.textContent = c.members.length + ' members';
+    else subEl.textContent = 'Everyone in the chapter';
+    renderRail();
+    renderChat(true);
+    $('chat-rail').classList.remove('open');
+  }
+
+  function renderRail() {
+    var chans = myChannels();
+    var channels = chans.filter(function (c) { return c.kind !== 'dm'; });
+    var dms = chans.filter(function (c) { return c.kind === 'dm'; })
+      .sort(function (a, b) { return lastAt(b.id) - lastAt(a.id); });
+    var rowHtml = function (c) {
+      var p = channelAvatar(c);
+      var av = c.kind === 'dm'
+        ? (p && p.photo ? '<span class="chat-chan-av"><img src="' + esc(p.photo) + '" alt=""></span>' : '<span class="chat-chan-av">' + esc(initial(p && p.name)) + '</span>')
+        : '<span class="chat-chan-av">#</span>';
+      return '<button class="chat-chan' + (c.kind === 'dm' ? ' dm' : '') + (c.id === curChan ? ' on' : '') + '" type="button" data-chan="' + esc(c.id) + '">' +
+        av + '<span class="chat-chan-name">' + esc(channelLabel(c)) + '</span></button>';
+    };
+    $('chat-rail').innerHTML =
+      '<div class="chat-rail-group">Channels</div>' + channels.map(rowHtml).join('') +
+      '<div class="chat-rail-group">Direct messages</div>' +
+      (dms.length ? dms.map(rowHtml).join('') : '<div class="res-fempty" style="padding:6px 10px;font-size:11px;">No DMs yet — open a profile and hit Message.</div>');
+  }
+
   function dayLabel(t) {
     var d = new Date(t), now = new Date();
     var day = function (x) { return x.toDateString(); };
@@ -693,28 +810,47 @@
     if (day(d) === day(new Date(now - 864e5))) return 'Yesterday';
     return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
   }
+
+  /* Render message text, turning @[Name|id] tokens into profile chips. */
+  var MENTION_RE = /@\[([^\|\]]+)\|([^\]]+)\]/g;
+  function mentionChip(id, fallbackName) {
+    var p = pub(memberById(id));
+    var nm = p ? p.name : fallbackName;
+    var av = p && p.photo ? '<span class="mention-av"><img src="' + esc(p.photo) + '" alt=""></span>'
+      : '<span class="mention-av">' + esc(initial(nm)) + '</span>';
+    return '<a class="mention" href="#members" data-mid="' + esc(id) + '" data-mention="' + esc(id) + '">' + av + '@' + esc(nm) + '</a>';
+  }
+  function renderMsgText(text) {
+    var out = '', last = 0, m; MENTION_RE.lastIndex = 0;
+    while ((m = MENTION_RE.exec(text))) {
+      out += esc(text.slice(last, m.index));
+      out += mentionChip(m[2], m[1]);
+      last = MENTION_RE.lastIndex;
+    }
+    return out + esc(text.slice(last));
+  }
+
   function renderChat(stick) {
     var log = $('chat-log');
     var nearBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 80;
     var lastDay = '';
-    var profCache = {};
-    var getProf = function (id) {
-      if (!(id in profCache)) profCache[id] = DDSAuth.profile ? DDSAuth.profile(id) : null;
-      return profCache[id];
-    };
-    log.innerHTML = chatAll().map(function (m) {
+    var msgs = messagesAll().filter(function (m) { return m.ch === curChan; });
+    if (!msgs.length) {
+      log.innerHTML = '<div class="res-fempty" style="text-align:center;margin:auto;">No messages yet — say hi.</div>';
+      return;
+    }
+    log.innerHTML = msgs.map(function (m) {
       var mine = m.byId === ME.id;
       var head = '';
       var dl = dayLabel(m.at);
       if (dl !== lastDay) { lastDay = dl; head = '<span class="chat-day">' + dl + '</span>'; }
-      var p = getProf(m.byId);
+      var p = pub(memberById(m.byId));
       var mid = p ? ' data-mid="' + esc(m.byId) + '" role="button" tabindex="0"' : '';
       var avatar = mine ? '' :
         '<span class="msg-av"' + mid + (p ? ' title="' + esc(m.by) + '"' : '') + '>' +
-          (p && p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : esc(String(m.by || '?').trim().charAt(0).toUpperCase())) +
-        '</span>';
+          (p && p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : esc(initial(m.by))) + '</span>';
       var body = (m.img ? '<img class="chat-img" src="' + esc(m.img) + '" alt="Photo from ' + esc(m.by) + '" loading="lazy">' : '') +
-        (m.text ? '<span class="chat-txt">' + esc(m.text) + '</span>' : '');
+        (m.text ? '<span class="chat-txt">' + renderMsgText(m.text) + '</span>' : '');
       return head + '<div class="msg' + (mine ? ' mine' : '') + '">' + avatar +
         '<div class="msg-body">' +
         '<div class="msg-head"><span class="msg-by"' + (mine ? '' : mid) + '>' + esc(mine ? 'You' : m.by) + '</span>' +
@@ -725,10 +861,7 @@
     }).join('');
     var settle = function () { if (stick || nearBottom) log.scrollTop = log.scrollHeight; };
     settle();
-    // photos load async and grow the log — re-stick as each one arrives
-    log.querySelectorAll('img').forEach(function (img) {
-      if (!img.complete) img.addEventListener('load', settle, { once: true });
-    });
+    log.querySelectorAll('img').forEach(function (img) { if (!img.complete) img.addEventListener('load', settle, { once: true }); });
   }
 
   /* --- attach a photo --- */
@@ -771,32 +904,43 @@
   function sendChat() {
     var ta = $('chat-input'), text = ta.value.trim();
     if (!text && !chatImg) return;
-    var list = chatAll();
-    var msg = { id: uid(), by: ME.name, byId: ME.id, text: text.slice(0, 1000), at: Date.now() };
+    var list = messagesAll();
+    var msg = { id: uid(), ch: curChan, by: ME.name, byId: ME.id, text: text.slice(0, 1000), at: Date.now() };
     if (chatImg) msg.img = chatImg;
     list.push(msg);
-    if (list.length > 500) list = list.slice(-500);
-    try { writeLS(CHAT_KEY, list); }
+    try { list = saveMessages(list); }
     catch (e) { setPending(chatImg, 'This browser’s storage is full — the photo won’t fit. Clear old uploads or send text only.', true); return; }
     ta.value = ''; ta.style.height = '44px';
     setPending(null, null, false);
+    closeMentionPop();
     renderChat(true);
+    renderRail();
   }
   $('chat-send').addEventListener('click', sendChat);
   $('chat-input').addEventListener('keydown', function (e) {
+    if (menOpen) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); moveMention(1); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); moveMention(-1); return; }
+      if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); pickMention(menItems[menActive]); return; }
+      if (e.key === 'Escape') { e.preventDefault(); closeMentionPop(); return; }
+    }
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
   });
   $('chat-input').addEventListener('input', function () {
     this.style.height = '44px';
     this.style.height = Math.min(120, this.scrollHeight) + 'px';
+    updateMentions();
   });
   $('chat-log').addEventListener('click', function (e) {
     var b = e.target.closest('[data-del]');
     if (b) {
-      writeLS(CHAT_KEY, chatAll().filter(function (m) { return m.id !== b.getAttribute('data-del'); }));
-      renderChat(false);
+      var did = b.getAttribute('data-del');
+      saveMessages(messagesAll().filter(function (m) { return m.id !== did; }));
+      if (window.DDSCloud) DDSCloud.tombstone('chatMsgs', did);
+      renderChat(false); renderRail();
       return;
     }
+    if (e.target.closest('[data-mid]')) return; // handled by profile openers below
     var img = e.target.closest('.chat-img');
     if (img) { $('imgview-img').src = img.src; $('imgview').hidden = false; }
   });
@@ -804,10 +948,62 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && !$('imgview').hidden) $('imgview').hidden = true;
   });
-  renderChat(true);
 
-  /* --- member profile popover: hover or click a name/avatar in chat --- */
-  var popPinned = false, popHideT = null, popFor = null;
+  /* --- rail + new-chat --- */
+  $('chat-rail').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-chan]'); if (!b) return;
+    switchChannel(b.getAttribute('data-chan'));
+  });
+  $('chat-back').addEventListener('click', function () { $('chat-rail').classList.toggle('open'); });
+
+  /* --- @mention autocomplete --- */
+  var menOpen = false, menItems = [], menActive = 0, menStart = 0;
+  function closeMentionPop() { menOpen = false; $('mention-pop').classList.remove('show'); }
+  function updateMentions() {
+    var ta = $('chat-input'), val = ta.value, caret = ta.selectionStart;
+    var before = val.slice(0, caret);
+    var m = /(^|\s)@([\w.'-]*)$/.exec(before);
+    if (!m) { closeMentionPop(); return; }
+    var q = m[2].toLowerCase();
+    menStart = caret - m[2].length - 1; // index of '@'
+    var me = ME.id;
+    menItems = allMembers().filter(function (u) {
+      if (u.id === me) return false;
+      if (!q) return true;
+      return String(u.name).toLowerCase().indexOf(q) > -1 ||
+        String(u.name).toLowerCase().split(/\s+/).some(function (w) { return w.indexOf(q) === 0; });
+    }).slice(0, 6);
+    if (!menItems.length) { closeMentionPop(); return; }
+    menActive = 0; menOpen = true;
+    renderMentionPop();
+  }
+  function renderMentionPop() {
+    $('mention-pop').innerHTML = menItems.map(function (u, i) {
+      var p = pub(u);
+      return '<div class="mention-opt' + (i === menActive ? ' on' : '') + '" data-mi="' + i + '" role="option">' +
+        avatarHtml(p, 'mo-av') + '<b>' + esc(p.name) + '</b><span>' + esc(p.major || ('Class of ' + (p.gradYear || '—'))) + '</span></div>';
+    }).join('');
+    $('mention-pop').classList.add('show');
+  }
+  function moveMention(d) { menActive = (menActive + d + menItems.length) % menItems.length; renderMentionPop(); }
+  function pickMention(u) {
+    if (!u) return;
+    var ta = $('chat-input'), val = ta.value, caret = ta.selectionStart;
+    var name = String(u.name).replace(/[|\]]/g, '');
+    var token = '@[' + name + '|' + u.id + '] ';
+    ta.value = val.slice(0, menStart) + token + val.slice(caret);
+    var pos = menStart + token.length;
+    ta.setSelectionRange(pos, pos);
+    ta.focus();
+    closeMentionPop();
+  }
+  $('mention-pop').addEventListener('mousedown', function (e) {
+    var o = e.target.closest('[data-mi]'); if (!o) return;
+    e.preventDefault(); pickMention(menItems[+o.getAttribute('data-mi')]);
+  });
+
+  /* --- member profile popover (hover) + full modal (click) --- */
+  var popHideT = null, popFor = null;
   function socialChips(p) {
     var out = '';
     if (p.instagram) {
@@ -824,54 +1020,197 @@
     return out ? '<div class="ppop-socials">' + out + '</div>' : '';
   }
   function showPop(mid, anchor) {
-    var p = DDSAuth.profile ? DDSAuth.profile(mid) : null;
+    var p = pub(memberById(mid));
     if (!p) return;
     popFor = mid;
     var pop = $('ppop');
     var bio = [p.interests, p.hobbies].filter(Boolean).join(' · ');
     pop.innerHTML =
-      '<div class="ppop-head">' +
-        '<span class="ppop-av">' + (p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : esc(p.name.trim().charAt(0).toUpperCase())) + '</span>' +
+      '<div class="ppop-head">' + avatarHtml(p, 'ppop-av') +
         '<div><h5 class="ppop-name">' + esc(p.name) + '</h5>' +
         '<p class="ppop-meta">' + esc(['Class of ' + (p.gradYear || '—'), p.major].filter(Boolean).join(' · ')) + '</p></div>' +
       '</div>' +
       (bio ? '<p class="ppop-bio">' + esc(bio) + '</p>' : '') +
-      socialChips(p);
+      socialChips(p) +
+      '<button class="btn btn-solid" type="button" data-viewprofile="' + esc(mid) + '" style="width:100%;margin-top:12px;">View full profile</button>';
     pop.classList.add('show');
     var r = anchor.getBoundingClientRect();
     var w = pop.offsetWidth, h = pop.offsetHeight;
     var left = Math.max(12, Math.min(r.left, window.innerWidth - w - 12));
     var top = r.top - h - 10;
     if (top < 64) top = Math.min(r.bottom + 10, window.innerHeight - h - 12);
-    pop.style.left = left + 'px';
-    pop.style.top = top + 'px';
+    pop.style.left = left + 'px'; pop.style.top = top + 'px';
   }
-  function hidePop(force) {
-    if (popPinned && !force) return;
-    popPinned = false; popFor = null;
-    $('ppop').classList.remove('show');
-  }
-  $('chat-log').addEventListener('mouseover', function (e) {
+  function hidePop() { popFor = null; $('ppop').classList.remove('show'); }
+  document.addEventListener('mouseover', function (e) {
     var t = e.target.closest('[data-mid]'); if (!t) return;
-    clearTimeout(popHideT);
-    if (!popPinned || popFor === t.getAttribute('data-mid')) showPop(t.getAttribute('data-mid'), t);
+    clearTimeout(popHideT); showPop(t.getAttribute('data-mid'), t);
   });
-  $('chat-log').addEventListener('mouseout', function (e) {
-    if (e.target.closest('[data-mid]')) popHideT = setTimeout(function () { hidePop(false); }, 260);
+  document.addEventListener('mouseout', function (e) {
+    if (e.target.closest('[data-mid]')) popHideT = setTimeout(hidePop, 260);
   });
   $('ppop').addEventListener('mouseenter', function () { clearTimeout(popHideT); });
-  $('ppop').addEventListener('mouseleave', function () { popHideT = setTimeout(function () { hidePop(false); }, 220); });
+  $('ppop').addEventListener('mouseleave', function () { popHideT = setTimeout(hidePop, 220); });
   document.addEventListener('click', function (e) {
+    var view = e.target.closest('[data-viewprofile]');
+    if (view) { openMemberModal(view.getAttribute('data-viewprofile')); hidePop(); return; }
     var t = e.target.closest('[data-mid]');
-    if (t) { popPinned = true; showPop(t.getAttribute('data-mid'), t); return; }
-    if (!e.target.closest('#ppop')) hidePop(true);
+    if (t) { e.preventDefault(); openMemberModal(t.getAttribute('data-mid')); hidePop(); return; }
+    if (!e.target.closest('#ppop')) hidePop();
   });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') hidePop(true);
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-mid]')) {
-      e.preventDefault(); popPinned = true; showPop(e.target.getAttribute('data-mid'), e.target);
+
+  /* ================= Member directory — profiles in space ============== */
+  var memQuery = '';
+  function memberSort(a, b) {
+    var ax = DDSAuth.isExec && DDSAuth.isExec(a) ? 0 : 1;
+    var bx = DDSAuth.isExec && DDSAuth.isExec(b) ? 0 : 1;
+    if (ax !== bx) return ax - bx;
+    return String(a.name).localeCompare(String(b.name));
+  }
+  function renderMembers() {
+    var host = $('mem-space');
+    var list = allMembers().slice().sort(memberSort);
+    if (memQuery) {
+      var q = memQuery.toLowerCase();
+      list = list.filter(function (m) {
+        return [m.name, m.major, m.interests, m.hobbies, DDSAuth.execTitle && DDSAuth.execTitle(m)]
+          .filter(Boolean).join(' ').toLowerCase().indexOf(q) > -1;
+      });
+    }
+    if (!list.length) {
+      host.innerHTML = '<div class="mem-empty">' + (memQuery ? 'No members match “' + esc(memQuery) + '.”' : 'You’re the first one here. As members sign in, they’ll appear in this constellation.') + '</div>';
+      return;
+    }
+    host.innerHTML = list.map(function (m, i) {
+      var p = pub(m);
+      var isExec = DDSAuth.isExec && DDSAuth.isExec(m);
+      var role = isExec ? (DDSAuth.execTitle(m) || 'Exec Board') : 'Class of ' + (p.gradYear || '—');
+      var tags = [p.interests, p.major].filter(Boolean).join(' · ');
+      return '<button class="mem-card" type="button" data-mem="' + esc(p.id) + '" style="--dur:' + (6 + (i % 5) * 0.7).toFixed(1) + 's;--dly:' + (i % 6 * 0.35).toFixed(2) + 's;">' +
+        (m.id === ME.id ? '<span class="mem-badge">You</span>' : '') +
+        avatarHtml(p, 'mem-av') +
+        '<span class="mem-name">' + esc(p.name) + '</span>' +
+        '<span class="mem-role' + (isExec ? ' exec' : '') + '">' + esc(role) + '</span>' +
+        (tags ? '<span class="mem-tags">' + esc(tags) + '</span>' : '') +
+      '</button>';
+    }).join('');
+  }
+  $('mem-space').addEventListener('click', function (e) {
+    var c = e.target.closest('[data-mem]'); if (!c) return;
+    openMemberModal(c.getAttribute('data-mem'));
+  });
+  $('mem-search').addEventListener('input', function () { memQuery = this.value.trim(); renderMembers(); });
+
+  function openMemberModal(id) {
+    var m = memberById(id); var p = pub(m);
+    if (!p) return;
+    var isExec = DDSAuth.isExec && DDSAuth.isExec(m);
+    var role = isExec ? (DDSAuth.execTitle(m) || 'Exec Board') : null;
+    var meta = ['Class of ' + (p.gradYear || '—'), p.major].filter(Boolean).join('  ·  ');
+    var bio = [p.interests, p.hobbies].filter(Boolean).join(' · ');
+    var cell = function (label, val) { return val ? '<div><h5>' + label + '</h5><p>' + esc(val) + '</p></div>' : ''; };
+    var grid = cell('Interests', p.interests) + cell('Hobbies', p.hobbies) +
+      cell('Favorite classes', p.favClasses) + cell('Favorite professors', p.favProfs);
+    var foot = '';
+    if (id === ME.id) {
+      foot = '<a class="btn btn-solid" href="member.html">Edit your profile</a>';
+    } else {
+      foot = '<button class="btn btn-solid" type="button" data-msg="' + esc(id) + '">Message ' + esc(p.name.split(/\s+/)[0]) + '</button>';
+    }
+    foot += '<button class="btn" type="button" data-findtree="' + esc(id) + '">Find on family tree</button>';
+    if (p.instagram) foot += '<a class="btn" href="' + esc(p.instagram) + '" target="_blank" rel="noopener">Instagram</a>';
+    if (p.linkedin) foot += '<a class="btn" href="' + esc(p.linkedin) + '" target="_blank" rel="noopener">LinkedIn</a>';
+    $('mem-modal-body').innerHTML =
+      '<div class="mem-detail-head">' + avatarHtml(p, 'mem-detail-av') +
+        '<div><h3>' + esc(p.name) + '</h3><div class="mem-detail-meta">' + esc(meta) + '</div>' +
+        (role ? '<span class="mem-detail-chip">' + esc(role) + '</span>' : '') + '</div>' +
+      '</div>' +
+      (bio ? '<p class="mem-detail-bio">' + esc(bio) + '</p>' : '<p class="mem-detail-bio" style="color:var(--ink3);">This member hasn’t added a bio yet.</p>') +
+      (grid ? '<div class="mem-detail-grid">' + grid + '</div>' : '') +
+      '<div class="mem-detail-foot">' + foot + '</div>';
+    $('mem-modal').hidden = false;
+  }
+  $('mem-modal-body').addEventListener('click', function (e) {
+    var msg = e.target.closest('[data-msg]');
+    if (msg) { startDM(msg.getAttribute('data-msg')); return; }
+    var tree = e.target.closest('[data-findtree]');
+    if (tree) {
+      $('mem-modal').hidden = true;
+      var fam = document.getElementById('family');
+      if (fam) fam.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
+
+  /* --- new-chat modal (DM or group) --- */
+  var cnMode = 'dm', cnPicked = {};
+  function cnRenderPeople() {
+    var q = $('cn-people-search').value.trim().toLowerCase();
+    var list = allMembers().filter(function (u) { return u.id !== ME.id; })
+      .filter(function (u) { return !q || String(u.name).toLowerCase().indexOf(q) > -1; })
+      .sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
+    $('cn-people').innerHTML = list.length ? list.map(function (u) {
+      var p = pub(u);
+      return '<button class="cn-person' + (cnPicked[u.id] ? ' on' : '') + '" type="button" data-cnp="' + esc(u.id) + '">' +
+        avatarHtml(p, 'cnp-av') + '<span><b>' + esc(p.name) + '</b><small>' + esc(p.major || ('Class of ' + (p.gradYear || '—'))) + '</small></span>' +
+        '<svg class="cnp-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>';
+    }).join('') : '<div class="res-fempty" style="padding:10px;">No other members yet.</div>';
+  }
+  function openNewChat() {
+    cnMode = 'dm'; cnPicked = {};
+    document.querySelectorAll('[data-cn-mode]').forEach(function (t) { t.classList.toggle('on', t.getAttribute('data-cn-mode') === 'dm'); });
+    $('cn-name-fld').hidden = true;
+    $('cn-people-label').textContent = 'Message who?';
+    $('cn-save').textContent = 'Start';
+    $('cn-err').textContent = '';
+    $('cn-people-search').value = '';
+    cnRenderPeople();
+    $('chat-new-modal').hidden = false;
+  }
+  $('chat-new').addEventListener('click', openNewChat);
+  document.querySelectorAll('[data-cn-mode]').forEach(function (t) {
+    t.addEventListener('click', function () {
+      cnMode = t.getAttribute('data-cn-mode');
+      document.querySelectorAll('[data-cn-mode]').forEach(function (x) { x.classList.toggle('on', x === t); });
+      $('cn-name-fld').hidden = cnMode !== 'group';
+      $('cn-people-label').textContent = cnMode === 'group' ? 'Add members' : 'Message who?';
+      if (cnMode === 'dm') { var keys = Object.keys(cnPicked); if (keys.length > 1) cnPicked = {}; }
+      cnRenderPeople();
+    });
+  });
+  $('cn-people-search').addEventListener('input', cnRenderPeople);
+  $('cn-people').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-cnp]'); if (!b) return;
+    var id = b.getAttribute('data-cnp');
+    if (cnMode === 'dm') { cnPicked = {}; cnPicked[id] = true; }
+    else { if (cnPicked[id]) delete cnPicked[id]; else cnPicked[id] = true; }
+    cnRenderPeople();
+  });
+  $('cn-save').addEventListener('click', function () {
+    var ids = Object.keys(cnPicked);
+    if (!ids.length) { $('cn-err').textContent = cnMode === 'dm' ? 'Pick someone to message.' : 'Add at least one member.'; return; }
+    if (cnMode === 'dm') { $('chat-new-modal').hidden = true; startDM(ids[0]); return; }
+    var name = $('cn-name').value.trim();
+    if (!name) { $('cn-err').textContent = 'Name your group.'; return; }
+    var chans = channelsStored();
+    var id = uid();
+    chans.push({ id: id, kind: 'channel', name: name, by: ME.id, members: [ME.id].concat(ids), at: Date.now() });
+    saveChannels(chans);
+    $('chat-new-modal').hidden = true;
+    switchChannel(id);
+    document.getElementById('chat').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  /* --- deep links: ?member=<id> opens a profile; ?dm=<id> starts a DM --- */
+  (function memberDeepLink() {
+    var mm = /[?&]member=([^&#]+)/.exec(location.search);
+    var dm = /[?&]dm=([^&#]+)/.exec(location.search);
+    if (mm) setTimeout(function () { openMemberModal(decodeURIComponent(mm[1])); }, 300);
+    else if (dm) setTimeout(function () { startDM(decodeURIComponent(dm[1])); }, 300);
+  })();
+
+  renderMembers();
+  renderRail();
+  switchChannel('seed-general');
 
   /* ================= Big / Little family ================= */
   var famList = [], famIdx = 0, famPaths = [];
@@ -1291,89 +1630,254 @@
     });
   }
 
-  /* ================= Member resources (exec-curated) ================= */
+  /* ================= Member resources — five shared folders ============= */
   var IS_EXEC = !!(DDSAuth.isExec && DDSAuth.isExec());
-  var resEditing = null; // resource id while the modal is in edit mode
+  var resEditing = null;   // resource id while the modal is in edit mode
+  var resMode = 'link';    // 'link' | 'file'
+  var resFile = null;      // pending upload { fileId?, fileData?, fileName, mime } or raw
+  var openFolders = {};    // which folders are expanded
+
+  var RES_ICONS = {
+    doc:   '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/>',
+    brain: '<path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-1.5 5.6A3 3 0 0 0 6 17a3 3 0 0 0 6 0V4a1 1 0 0 0-1-1z"/><path d="M15 3a3 3 0 0 1 3 3 3 3 0 0 1 1.5 5.6A3 3 0 0 1 18 17a3 3 0 0 1-6 0"/>',
+    tooth: '<path d="M12 5.5c-1.6 0-2.3-1-4-1-2.8 0-4.4 2.4-4.4 5 0 2.4 1 3.8 1.6 5.9.6 2.2.8 4.6 2.6 4.6 1.6 0 1.3-4.4 3-4.4s1.4 4.4 3 4.4c1.8 0 2-2.4 2.6-4.6.6-2.1 1.6-3.5 1.6-5.9 0-2.6-1.6-5-4.4-5-1.7 0-2.4 1-3.2 1z"/>',
+    flag:  '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V4"/>',
+    flask: '<path d="M9 3h6M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 22h11.6a2 2 0 0 0 1.7-3.5L14 9V3"/><path d="M7 15h10"/>'
+  };
+  var LINK_SVG = '<svg class="res-ficon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+  var FILE_SVG = '<svg class="res-ficon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+
+  function canEditRes(r) { return IS_EXEC || (r.byId && r.byId === ME.id); }
 
   function renderResources() {
-    var rows = DDSResources.all();
-    if (!rows.length) {
-      $('res-list').innerHTML = '<div class="upe-empty">No resources posted yet' +
-        (IS_EXEC ? ' — add the first one.' : ' — the exec board is on it.') + '</div>';
-      return;
-    }
-    var LINK_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
-    $('res-list').innerHTML = rows.map(function (r) {
-      var host = '';
-      try { host = new URL(r.url).host.replace(/^www\./, ''); } catch (e) {}
-      return '<div class="res-row">' +
-        '<div class="res-main">' +
-          '<a class="res-title" href="' + esc(r.url) + '" target="_blank" rel="noopener">' + LINK_SVG + esc(r.title) + '</a>' +
-          (host ? '<span class="res-url">' + esc(host) + '</span>' : '') +
-          (r.blurb ? '<p class="res-blurb">' + esc(r.blurb) + '</p>' : '') +
-        '</div>' +
-        (IS_EXEC ? '<div class="res-tools">' +
-          '<button type="button" data-res-edit="' + esc(r.id) + '">&#9998; Edit</button>' +
-          '<button type="button" data-res-del="' + esc(r.id) + '" aria-label="Remove ' + esc(r.title) + '">&#10005;</button>' +
-        '</div>' : '') +
+    var groups = DDSResources.byCat();
+    var host = $('res-folders');
+    host.innerHTML = DDSResources.CATS.map(function (c) {
+      var rows = groups[c.id] || [];
+      var open = !!openFolders[c.id];
+      var body = rows.length ? '<div class="res-flist">' + rows.map(function (r) {
+        var isFile = !!(r.fileId || r.fileData);
+        var sub = '';
+        if (r.url) { try { sub = new URL(r.url).host.replace(/^www\./, ''); } catch (e) {} }
+        else if (isFile) sub = (r.fileName || 'file');
+        var title = isFile
+          ? '<a class="res-title" href="#" data-res-file="' + esc(r.id) + '">' + FILE_SVG + esc(r.title) + '</a>'
+          : '<a class="res-title" href="' + esc(r.url) + '" target="_blank" rel="noopener">' + LINK_SVG + esc(r.title) + '</a>';
+        return '<div class="res-row">' +
+          '<div class="res-main">' + title +
+            (sub ? '<span class="res-url">' + esc(sub) + '</span>' : '') +
+            (r.blurb ? '<p class="res-blurb">' + esc(r.blurb) + '</p>' : '') +
+            (r.by ? '<span class="res-by">Added by ' + esc(r.by) + '</span>' : '') +
+          '</div>' +
+          (canEditRes(r) ? '<div class="res-tools">' +
+            '<button type="button" data-res-edit="' + esc(r.id) + '">&#9998;</button>' +
+            '<button type="button" data-res-del="' + esc(r.id) + '" aria-label="Remove ' + esc(r.title) + '">&#10005;</button>' +
+          '</div>' : '') +
+        '</div>';
+      }).join('') + '</div>'
+      : '<p class="res-fempty">Nothing here yet — use “Add a resource” above and pick this folder.</p>';
+      return '<div class="res-fold' + (open ? ' open' : '') + '" data-acc="' + c.acc + '" data-fold="' + c.id + '">' +
+        '<button class="res-fhead" type="button" data-fold-toggle="' + c.id + '" aria-expanded="' + open + '">' +
+          '<span class="res-fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + RES_ICONS[c.icon] + '</svg></span>' +
+          '<span class="res-fmeta"><span class="res-fname">' + esc(c.name) + '</span><span class="res-ftag">' + esc(c.tag) + '</span></span>' +
+          '<span class="res-fcount">' + rows.length + '</span>' +
+          '<svg class="res-fchev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>' +
+        '</button>' +
+        '<div class="res-fbody"><div class="res-finner">' + body + '</div></div>' +
       '</div>';
     }).join('');
   }
 
-  if (IS_EXEC) {
-    $('res-add').hidden = false;
-    $('res-note').hidden = false;
-    $('res-note').textContent = 'You’re seeing edit tools because you’re signed in as ' +
-      (DDSAuth.execTitle(ME) || 'a member of the exec board') +
-      '. Members can open every link; only exec can change them.';
+  /* Populate the folder <select> once */
+  (function fillCatSelect() {
+    var sel = $('rf-cat');
+    if (sel) sel.innerHTML = DDSResources.CATS.map(function (c) {
+      return '<option value="' + c.id + '">' + esc(c.name) + '</option>';
+    }).join('');
+  })();
 
-    var openResModal = function (rec) {
-      resEditing = rec ? rec.id : null;
-      $('rf-title').textContent = rec ? 'Edit this resource' : 'Add a resource';
-      $('rf-name').value = rec ? rec.title : '';
-      $('rf-url').value = rec ? rec.url : '';
-      $('rf-blurb').value = rec ? (rec.blurb || '') : '';
-      $('rf-err').textContent = '';
-      $('res-modal').hidden = false;
-      $('rf-name').focus();
+  function setResMode(mode) {
+    resMode = mode;
+    document.querySelectorAll('.rf-tab').forEach(function (t) { t.classList.toggle('on', t.getAttribute('data-rf-mode') === mode); });
+    $('rf-link-fld').hidden = mode !== 'link';
+    $('rf-file-fld').hidden = mode !== 'file';
+  }
+
+  function openResModal(rec, presetCat) {
+    resEditing = rec ? rec.id : null;
+    resFile = rec && (rec.fileId || rec.fileData) ? { fileId: rec.fileId, fileData: rec.fileData, fileName: rec.fileName, mime: rec.mime } : null;
+    $('rf-title').textContent = rec ? 'Edit this resource' : 'Add a resource';
+    $('rf-cat').value = rec ? rec.cat : (presetCat || DDSResources.CATS[0].id);
+    $('rf-name').value = rec ? rec.title : '';
+    $('rf-url').value = rec && rec.url ? rec.url : '';
+    $('rf-blurb').value = rec ? (rec.blurb || '') : '';
+    $('rf-err').textContent = '';
+    var drop = $('rf-drop'), label = $('rf-file-label');
+    drop.classList.toggle('has', !!(rec && (rec.fileId || rec.fileData)));
+    label.textContent = rec && rec.fileName ? rec.fileName : 'Choose a file to share';
+    setResMode(rec && (rec.fileId || rec.fileData) ? 'file' : 'link');
+    $('res-modal').hidden = false;
+    $('rf-name').focus();
+  }
+
+  $('res-add').addEventListener('click', function () { openResModal(null); });
+
+  document.querySelectorAll('.rf-tab').forEach(function (t) {
+    t.addEventListener('click', function () { setResMode(t.getAttribute('data-rf-mode')); });
+  });
+
+  /* --- file picker + drag/drop --- */
+  var resDrop = $('rf-drop'), resInput = $('rf-file');
+  resDrop.addEventListener('click', function () { resInput.click(); });
+  ['dragover', 'dragenter'].forEach(function (ev) {
+    resDrop.addEventListener(ev, function (e) { e.preventDefault(); resDrop.classList.add('drag'); });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    resDrop.addEventListener(ev, function (e) { e.preventDefault(); resDrop.classList.remove('drag'); });
+  });
+  resDrop.addEventListener('drop', function (e) {
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) takeResFile(f);
+  });
+  resInput.addEventListener('change', function () { if (this.files && this.files[0]) takeResFile(this.files[0]); this.value = ''; });
+
+  function takeResFile(f) {
+    if (f.size > 5 * 1024 * 1024) { $('rf-err').textContent = 'Keep files under 5 MB.'; return; }
+    $('rf-err').textContent = '';
+    $('rf-file-label').textContent = 'Reading “' + f.name + '”…';
+    var r = new FileReader();
+    r.onload = function () {
+      resFile = { raw: r.result, fileName: f.name, mime: f.type || 'application/octet-stream' };
+      $('rf-drop').classList.add('has');
+      $('rf-file-label').textContent = f.name;
+      if (!$('rf-name').value.trim()) $('rf-name').value = f.name.replace(/\.[^.]+$/, '');
+    };
+    r.onerror = function () { $('rf-file-label').textContent = 'That file could not be read — try another.'; };
+    r.readAsDataURL(f);
+  }
+
+  $('rf-save').addEventListener('click', function () {
+    var title = $('rf-name').value.trim();
+    var cat = $('rf-cat').value;
+    var blurb = $('rf-blurb').value.trim();
+    if (!title) { $('rf-err').textContent = 'Give the resource a title.'; return; }
+
+    var save = $('rf-save');
+    var finish = function (fields) {
+      if (resEditing) DDSResources.update(resEditing, fields);
+      else DDSResources.add(fields);
+      $('res-modal').hidden = true;
+      openFolders[cat] = true;
+      save.disabled = false; save.textContent = 'Save resource';
+      renderResources();
     };
 
-    $('res-add').addEventListener('click', function () { openResModal(null); });
-
-    $('res-list').addEventListener('click', function (e) {
-      var edit = e.target.closest('[data-res-edit]');
-      var del = e.target.closest('[data-res-del]');
-      if (edit) {
-        var rec = DDSResources.all().find(function (r) { return r.id === edit.getAttribute('data-res-edit'); });
-        if (rec) openResModal(rec);
-      } else if (del) {
-        var id = del.getAttribute('data-res-del');
-        var doomed = DDSResources.all().find(function (r) { return r.id === id; });
-        if (doomed && confirm('Remove "' + doomed.title + '" for everyone?')) {
-          DDSResources.remove(id);
-          renderResources();
-        }
-      }
-    });
-
-    $('rf-save').addEventListener('click', function () {
-      var title = $('rf-name').value.trim();
+    if (resMode === 'link') {
       var url = DDSResources.normUrl($('rf-url').value);
-      var blurb = $('rf-blurb').value.trim();
-      if (!title) { $('rf-err').textContent = 'Give the resource a title.'; return; }
       if (!url) { $('rf-err').textContent = 'That link doesn’t look like a URL.'; return; }
-      if (resEditing) DDSResources.update(resEditing, { title: title, url: url, blurb: blurb });
-      else DDSResources.add({ title: title, url: url, blurb: blurb });
-      $('res-modal').hidden = true;
-      renderResources();
-    });
+      finish({ cat: cat, title: title, blurb: blurb, url: url, fileId: null, fileData: null, fileName: null, mime: null,
+        by: resEditing ? undefined : ME.name, byId: resEditing ? undefined : ME.id });
+      return;
+    }
+
+    // file mode
+    if (resFile && resFile.raw) {                          // a fresh upload
+      save.disabled = true; save.textContent = 'Uploading…';
+      var meta = { cat: cat, title: title, blurb: blurb, url: null,
+        fileName: resFile.fileName, mime: resFile.mime,
+        by: resEditing ? undefined : ME.name, byId: resEditing ? undefined : ME.id };
+      if (window.DDSCloud && DDSCloud.enabled) {
+        DDSCloud.fileUpload(resFile.raw, resFile.fileName).then(function (up) {
+          meta.fileId = up.fileId; meta.fileData = null; finish(meta);
+        }).catch(function (err) {
+          save.disabled = false; save.textContent = 'Save resource';
+          $('rf-err').textContent = (err && err.message) || 'Upload failed — try again.';
+        });
+      } else {
+        // no cloud configured: keep the file inline on this device only
+        meta.fileData = resFile.raw; meta.fileId = null; finish(meta);
+      }
+    } else if (resEditing && resFile) {                    // editing text, keeping existing file
+      finish({ cat: cat, title: title, blurb: blurb });
+    } else {
+      $('rf-err').textContent = 'Choose a file to upload, or switch to Link.';
+    }
+  });
+
+  /* --- folder toggle + row actions (delegated) --- */
+  $('res-folders').addEventListener('click', function (e) {
+    var tog = e.target.closest('[data-fold-toggle]');
+    if (tog) {
+      var id = tog.getAttribute('data-fold-toggle');
+      openFolders[id] = !openFolders[id];
+      var fold = tog.closest('.res-fold');
+      fold.classList.toggle('open', openFolders[id]);
+      tog.setAttribute('aria-expanded', String(!!openFolders[id]));
+      return;
+    }
+    var fileLink = e.target.closest('[data-res-file]');
+    if (fileLink) {
+      e.preventDefault();
+      openResFile(fileLink.getAttribute('data-res-file'), fileLink);
+      return;
+    }
+    var edit = e.target.closest('[data-res-edit]');
+    if (edit) {
+      var rec = DDSResources.all().find(function (r) { return r.id === edit.getAttribute('data-res-edit'); });
+      if (rec) openResModal(rec);
+      return;
+    }
+    var del = e.target.closest('[data-res-del]');
+    if (del) {
+      var did = del.getAttribute('data-res-del');
+      var doomed = DDSResources.all().find(function (r) { return r.id === did; });
+      if (doomed && confirm('Remove "' + doomed.title + '" for everyone?')) {
+        DDSResources.remove(did);
+        renderResources();
+      }
+    }
+  });
+
+  /* Open an uploaded file — from the cloud (chunked) or the local fallback */
+  function openResFile(id, anchor) {
+    var rec = DDSResources.all().find(function (r) { return r.id === id; });
+    if (!rec) return;
+    var toBlobUrl = function (dataUrl) {
+      try {
+        var m = /^data:([^;,]+)?;base64,(.*)$/.exec(dataUrl);
+        if (!m) return dataUrl;
+        var bin = atob(m[2]), arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        return URL.createObjectURL(new Blob([arr], { type: m[1] || rec.mime || 'application/octet-stream' }));
+      } catch (e) { return dataUrl; }
+    };
+    if (rec.fileData) { window.open(toBlobUrl(rec.fileData), '_blank', 'noopener'); return; }
+    if (rec.fileId && window.DDSCloud) {
+      var label = anchor && anchor.textContent;
+      if (anchor) anchor.textContent = 'Opening…';
+      DDSCloud.fileGet(rec.fileId).then(function (dataUrl) {
+        if (anchor) anchor.innerHTML = FILE_SVG + esc(rec.title);
+        window.open(toBlobUrl(dataUrl), '_blank', 'noopener');
+      }).catch(function () {
+        if (anchor) anchor.innerHTML = FILE_SVG + esc(rec.title);
+        alert('That file isn’t available right now — it may still be uploading on another device.');
+      });
+    }
   }
+
+  // Deep link from the homepage banner: ?folder=<catId> opens that folder
+  (function openDeepFolder() {
+    var m = /[?&]folder=([a-z]+)/i.exec(location.search);
+    if (m && DDSResources.CATS.some(function (c) { return c.id === m[1]; })) openFolders[m[1]] = true;
+  })();
 
   renderResources();
 
-  /* ================= Cross-tab sync ================= */
+  /* ================= Cross-tab / cloud sync ================= */
   window.addEventListener('storage', function (e) {
-    if (e.key === CHAT_KEY) renderChat(false);
+    if (e.key === MSG_KEY) { renderChat(false); renderRail(); }
+    else if (e.key === CHAN_KEY) { renderRail(); }
+    else if (e.key === 'dds-members-v1') { renderMembers(); renderChat(false); renderRail(); }
     else if (e.key === DDSResources.KEY) renderResources();
     else if (e.key === NOTES_KEY) refreshOthers();
     else if (e.key === CLS_KEY) renderClasses();
