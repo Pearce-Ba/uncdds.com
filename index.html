@@ -111,9 +111,9 @@ body.nav-open{overflow:hidden;}
 /* Gallery carousel — same album tiles as the dashboard gallery, three at a time */
 .galc{position:relative;max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px) 20px;display:flex;align-items:center;gap:clamp(10px,1.6vw,18px);}
 .galc-view{overflow:hidden;flex:1;min-width:0;padding:6px 0 10px;}
-.galc-track{display:flex;gap:18px;transition:transform .65s cubic-bezier(.25,.6,.3,1);}
-.galc-tile{flex:0 0 calc((100% - 36px)/3);position:relative;display:block;aspect-ratio:16/10;border-radius:20px;overflow:hidden;text-decoration:none;border:1px solid rgba(163,196,233,.18);background:#0a1830;box-shadow:0 24px 48px -24px rgba(0,0,0,.8);transition:transform .3s cubic-bezier(.25,.6,.3,1),border-color .3s;}
-.galc-tile:hover{transform:translateY(-4px);border-color:rgba(127,178,224,.55);}
+.galc-track{display:flex;gap:18px;will-change:transform;}
+.galc-tile{flex:0 0 calc((100% - 36px)/3);position:relative;display:block;aspect-ratio:16/10;border-radius:20px;overflow:hidden;text-decoration:none;border:1px solid rgba(163,196,233,.18);background:#0a1830;box-shadow:0 24px 48px -24px rgba(0,0,0,.8);transition:transform .3s cubic-bezier(.25,.6,.3,1),border-color .3s,box-shadow .3s;}
+.galc-tile:hover{transform:translateY(-4px);border-color:rgba(147,194,236,.6);box-shadow:inset 0 0 0 200px rgba(147,194,236,.12),0 30px 56px -22px rgba(0,0,0,.85);}
 .galc-img{position:absolute;inset:0;background-size:cover;background-position:center;}
 .galc-scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(4,10,22,.85) 0%,rgba(4,10,22,.1) 52%);}
 .galc-meta{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;}
@@ -148,11 +148,13 @@ body.nav-open{overflow:hidden;}
 .nm-glass{position:relative;overflow:hidden;isolation:isolate;border-radius:22px;
   border:1px solid rgba(255,255,255,.26);
   box-shadow:0 24px 58px -26px rgba(3,9,22,.66),inset 0 1px 0 rgba(255,255,255,.22),inset 0 0 0 1px rgba(255,255,255,.05);}
-/* zoomed, blurred, darkened video "backdrop" — the lens */
+/* blurred, darkened video "backdrop" — at rest it sits flush with the hero
+   video behind it (no zoom, blends in); hovering zooms into the lens */
 .nm-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;
-  transform:scale(1.14);filter:blur(5px) brightness(.62) saturate(1.12);
+  transform:scale(1);filter:blur(5px) brightness(.62) saturate(1.12);
   transition:transform .55s cubic-bezier(.22,.61,.36,1),filter .55s ease;}
-.nm-glass:hover .nm-bg{transform:scale(1.19);filter:blur(6px) brightness(.5) saturate(1.16);}
+.nm-glass{cursor:pointer;}
+.nm-glass:hover .nm-bg{transform:scale(1.14);filter:blur(6px) brightness(.5) saturate(1.16);}
 /* readability scrim, deepens on hover (animated) */
 .nm-scrim{position:absolute;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(158deg,rgba(8,18,36,.3),rgba(5,12,26,.46));
@@ -399,9 +401,9 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .nb-rail{flex:1;min-width:0;display:flex;gap:clamp(16px,2vw,26px);overflow-x:auto;overflow-y:hidden;padding:clamp(48px,5vw,66px) 10px clamp(56px,6vw,78px);scroll-snap-type:x proximity;scrollbar-width:none;-ms-overflow-style:none;}
 .nb-rail::-webkit-scrollbar{display:none;}
 .nb-card{position:relative;flex:none;width:clamp(276px,26vw,348px);scroll-snap-align:center;}
-.nb-in{position:relative;display:flex;flex-direction:column;gap:12px;height:100%;background:#FBF8F1;color:#13294B;border-radius:6px;padding:clamp(18px,1.8vw,24px);box-shadow:0 34px 70px -30px rgba(0,0,0,.75),0 6px 18px -8px rgba(0,0,0,.4);text-decoration:none;transform:translateY(var(--ty,0px)) rotate(var(--rot,0deg));opacity:var(--op,1);transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .45s ease,box-shadow .45s ease;will-change:transform,opacity;}
+.nb-in{position:relative;display:flex;flex-direction:column;gap:12px;height:100%;background:#FBF8F1;color:#13294B;border-radius:6px;padding:clamp(18px,1.8vw,24px);box-shadow:0 34px 70px -30px rgba(0,0,0,.75),0 6px 18px -8px rgba(0,0,0,.4);text-decoration:none;transform:translateY(var(--ty,0px)) rotate(var(--rot,0deg));opacity:var(--op,1);transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .45s ease,box-shadow .45s ease,background .3s ease;will-change:transform,opacity;}
 .nb-in::after{content:"";position:absolute;inset:0;border-radius:6px;background:url('grain.png') repeat;opacity:.16;mix-blend-mode:multiply;pointer-events:none;}
-.nb-card:hover .nb-in,.nb-card:focus-within .nb-in{transform:translateY(calc(var(--ty,0px) - 12px)) rotate(var(--rot,0deg));box-shadow:0 50px 90px -34px rgba(0,0,0,.85),0 10px 24px -10px rgba(0,0,0,.45);}
+.nb-card:hover .nb-in,.nb-card:focus-within .nb-in{background:#EAF1FB;transform:translateY(calc(var(--ty,0px) - 12px)) rotate(var(--rot,0deg));box-shadow:0 50px 90px -34px rgba(0,0,0,.85),0 10px 24px -10px rgba(0,0,0,.45);}
 .nb-mast{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:2px solid #13294B;padding-bottom:9px;}
 .nb-mast-name{font-weight:900;letter-spacing:2.5px;font-size:13px;color:#13294B;}
 .nb-mast-issue{font-weight:700;letter-spacing:1.5px;font-size:10px;text-transform:uppercase;color:#B9975B;white-space:nowrap;}
@@ -483,12 +485,12 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <a href="#top" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Home</a>
     <a href="#about" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">About</a>
     <a href="#members-preview" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Members</a>
-    <a href="#gallery" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Gallery</a>
     <a href="#officers" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Officers</a>
-    <a href="#calendar" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Calendar</a>
     <div class="nav-dd" data-nav-dd>
       <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">Quick Links<svg class="nav-dd-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="nav-dd-menu" role="menu">
+        <a href="#gallery" class="nav-dd-link" role="menuitem">Gallery<span>&rarr;</span></a>
+        <a href="#calendar" class="nav-dd-link" role="menuitem">Calendar<span>&rarr;</span></a>
         <a href="#toolkit" class="nav-dd-link" role="menuitem">Toolkit<span>&rarr;</span></a>
         <a href="#pillars" class="nav-dd-link" role="menuitem">Pillars<span>&rarr;</span></a>
         <a href="#offers" class="nav-dd-link" role="menuitem">Offers<span>&rarr;</span></a>
@@ -542,7 +544,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <div style="margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:clamp(64px,7vh,96px);padding-top:clamp(40px,8vh,110px);">
       <!-- Next on the calendar — liquid-glass lens panel, holds its place while the buttons below chase the cursor -->
       <div data-reveal="0.34" class="nm-wrap">
-        <div class="nm-glass" id="nm-glass">
+        <div class="nm-glass" id="nm-glass" role="button" tabindex="0" aria-label="See what's next — jump to the calendar">
           <video class="nm-bg" src="hero-video.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
           <div class="nm-scrim"></div>
           <div class="nm-glow"></div>
@@ -1373,6 +1375,15 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
     glass.style.setProperty('--mx', (e.clientX - r.left) + 'px');
     glass.style.setProperty('--my', (e.clientY - r.top) + 'px');
   }, { passive: true });
+  // the whole lens is a shortcut down to the full calendar
+  var goCal = function () {
+    var cal = document.getElementById('calendar');
+    if (cal) cal.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  };
+  glass.addEventListener('click', goCal);
+  glass.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goCal(); }
+  });
 })();
 </script>
 <script>
@@ -1394,7 +1405,7 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
   const rail = document.getElementById('nb-rail');
   if (!rail || !window.DDSNews) return;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  rail.innerHTML = DDSNews.all().map(p => {
+  const cardHTML = p => {
     const chips = (p.tags || []).map(t => '<span class="nb-chip' + (t === 'Newsletter' || t === 'Blog Post' ? ' gold' : '') + '">' + esc(t) + '</span>').join('');
     return '<article class="nb-card">' +
       '<a class="nb-in" href="newsletter.html#post-' + esc(p.id) + '" aria-label="Read issue ' + p.issue + ': ' + esc(p.title) + '">' +
@@ -1405,37 +1416,68 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
         '<p class="nb-ex">' + esc(String(p.body || '').split('\n')[0]) + '</p>' +
         '<div class="nb-foot"><span class="nb-author">' + esc(p.author) + '</span><span class="nb-date">' + DDSNews.fmtDate(p.date) + '</span></div>' +
       '</a></article>';
-  }).join('');
+  };
+  const reducedNB = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const posts = DDSNews.all();
+  const oneSet = () => posts.map(cardHTML).join('');
+  // two identical sets so the rail can auto-scroll forever and wrap by one
+  // set width (invisible because the sets match). One set under reduced motion.
+  rail.innerHTML = reducedNB ? oneSet() : oneSet() + oneSet();
+  rail.style.scrollSnapType = 'none';
 
-  // Upward-arc carousel: center card settles low, neighbors rise and fade out
-  // toward the edges. Recomputed from scroll position (rAF-throttled).
   const cards = Array.from(rail.querySelectorAll('.nb-card'));
   const prevBtn = document.querySelector('[data-nb-prev]');
   const nextBtn = document.querySelector('[data-nb-next]');
+
+  // Upward-arc layout: the card nearest the centre settles low, neighbours
+  // rise and fade toward the edges. Recomputed every frame as the rail glides.
   const layout = () => {
     const r = rail.getBoundingClientRect();
     const cx = r.left + r.width / 2;
     cards.forEach(card => {
       const cr = card.getBoundingClientRect();
-      const x = (cr.left + cr.width / 2 - cx) / (r.width / 2); // -1..1 across the rail
+      const x = (cr.left + cr.width / 2 - cx) / (r.width / 2);
       const ax = Math.abs(x);
       const inEl = card.firstElementChild;
       inEl.style.setProperty('--ty', (26 - 46 * x * x).toFixed(1) + 'px');
       inEl.style.setProperty('--rot', (-4.2 * x).toFixed(2) + 'deg');
       inEl.style.setProperty('--op', Math.max(.3, Math.min(1, 1 - 1.4 * Math.max(0, ax - .62))).toFixed(3));
     });
-    if (prevBtn) prevBtn.disabled = rail.scrollLeft < 20;
-    if (nextBtn) nextBtn.disabled = rail.scrollLeft > rail.scrollWidth - rail.clientWidth - 20;
   };
-  let raf = 0;
-  const queueLayout = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; layout(); }); };
-  rail.addEventListener('scroll', queueLayout, {passive:true});
-  window.addEventListener('resize', queueLayout, {passive:true});
+
+  // sx is the float scroll position we own (scrollLeft rounds sub-pixel
+  // increments to 0, so accumulating there stalls — drive it from sx instead).
+  let setW = 0, hovered = false, mraf = 0, sx = 0;
+  const NB_SPEED = 0.5; // px/frame drift
+  const measure = () => { setW = reducedNB ? 0 : rail.scrollWidth / 2; };
+  const tick = () => {
+    mraf = requestAnimationFrame(tick);
+    if (hovered || document.hidden || reducedNB || !setW) { sx = rail.scrollLeft; layout(); return; }
+    sx += NB_SPEED;
+    if (sx >= setW) sx -= setW;
+    rail.scrollLeft = sx;
+    layout();
+  };
+  const startNB = () => { if (!reducedNB && !mraf) mraf = requestAnimationFrame(tick); };
+
+  rail.addEventListener('mouseenter', () => { hovered = true; });
+  rail.addEventListener('mouseleave', () => { hovered = false; });
+  rail.addEventListener('focusin', () => { hovered = true; });
+  rail.addEventListener('focusout', () => { hovered = false; });
+  window.addEventListener('resize', () => { measure(); layout(); }, { passive: true });
+
   const step = () => (cards[0] ? cards[0].getBoundingClientRect().width : 320) + 22;
-  prevBtn && prevBtn.addEventListener('click', () => rail.scrollBy({left: -step(), behavior: 'smooth'}));
-  nextBtn && nextBtn.addEventListener('click', () => rail.scrollBy({left: step(), behavior: 'smooth'}));
-  layout();
-  setTimeout(layout, 400); // once more after fonts settle card widths
+  const jog = (dir) => {
+    if (reducedNB) { rail.scrollBy({ left: dir * step(), behavior: 'smooth' }); return; }
+    sx = ((sx + dir * step()) % setW + setW) % setW;
+    rail.scrollLeft = sx;
+    layout();
+  };
+  prevBtn && prevBtn.addEventListener('click', () => jog(-1));
+  nextBtn && nextBtn.addEventListener('click', () => jog(1));
+
+  measure(); layout(); startNB();
+  setTimeout(() => { measure(); layout(); }, 400); // re-measure after fonts settle widths
 })();
 
 // ---- Data ----
@@ -1859,59 +1901,68 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   const escT = s => String(s == null ? '' : s).replace(/[&<>"']/g,
     c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  const perView = () => window.innerWidth <= 640 ? 1 : window.innerWidth <= 900 ? 2 : 3;
-  const maxIdx = () => Math.max(0, collections.length - perView());
+  // one album tile
+  const tileHTML = (col) => {
+    const cover = col.photos.length ? col.photos[col.photos.length - 1].u : '';
+    const n = col.photos.length;
+    return `<a class="galc-tile" href="dashboard.html?album=${encodeURIComponent(col.id)}#gallery" aria-label="Open album ${escT(col.title)} in the member dashboard">
+      ${cover ? `<span class="galc-img" style="background-image:url('${cover}');"></span>`
+              : `<span class="galc-img" style="background:radial-gradient(120% 100% at 50% 0%,#1c3c68 0%,#0c2042 70%);"></span>`}
+      <span class="galc-scrim"></span>
+      <span class="galc-meta"><span class="galc-title">${escT(col.title)}</span>
+      <span class="galc-n">${n === 1 ? '1 photo' : n + ' photos'}</span></span>
+    </a>`;
+  };
+  const oneSet = () => collections.map(tileHTML).join('');
+
+  // seamless infinite marquee: the track holds enough repeats of the album
+  // list that it always overflows; it glides left forever and wraps by one
+  // set width (invisible because the sets are identical). Hover pauses it.
+  let period = 0, pos = 0, mraf = 0;
+  const SPEED = 0.4; // px/frame — gentle drift
 
   function renderTiles() {
-    track.innerHTML = collections.map(col => {
-      const cover = col.photos.length ? col.photos[col.photos.length - 1].u : '';
-      const n = col.photos.length;
-      return `<a class="galc-tile" href="dashboard.html?album=${encodeURIComponent(col.id)}#gallery" aria-label="Open album ${escT(col.title)} in the member dashboard">
-        ${cover ? `<span class="galc-img" style="background-image:url('${cover}');"></span>`
-                : `<span class="galc-img" style="background:radial-gradient(120% 100% at 50% 0%,#1c3c68 0%,#0c2042 70%);"></span>`}
-        <span class="galc-scrim"></span>
-        <span class="galc-meta"><span class="galc-title">${escT(col.title)}</span>
-        <span class="galc-n">${n === 1 ? '1 photo' : n + ' photos'}</span></span>
-      </a>`;
-    }).join('');
-    slide(true);
+    if (!collections.length) { track.innerHTML = ''; return; }
+    if (reduced) {                      // no auto-motion: one set, scroll by arrows
+      view.style.overflowX = 'auto';
+      track.style.transform = 'none';
+      track.innerHTML = oneSet();
+      return;
+    }
+    track.style.transition = 'none';
+    track.style.transform = 'none';
+    track.innerHTML = oneSet();
+    const one = track.scrollWidth || 1;
+    const copies = Math.max(2, Math.ceil((view.clientWidth || 1) / one) + 1);
+    track.innerHTML = new Array(copies).fill(oneSet()).join('');
+    period = track.scrollWidth / copies;
+    pos = period ? (pos % period) : 0;
+    apply();
+    start();
   }
+  const apply = () => { track.style.transform = 'translate3d(' + (-pos) + 'px,0,0)'; };
+  const loop = () => {
+    mraf = requestAnimationFrame(loop);
+    if (hovered || document.hidden || !period) return;
+    pos += SPEED;
+    if (pos >= period) pos -= period;
+    apply();
+  };
+  const start = () => { if (!reduced && !mraf) mraf = requestAnimationFrame(loop); };
+  const tileStep = () => { const el = track.firstElementChild; return el ? el.offsetWidth + 18 : 300; };
+  const nudge = (dir) => {
+    if (reduced) { view.scrollBy({ left: dir * tileStep(), behavior: 'smooth' }); return; }
+    if (!period) return;
+    pos = ((pos + dir * tileStep()) % period + period) % period;
+    apply();
+  };
 
-  function slide(instant) {
-    const tiles = track.children;
-    if (!tiles.length) return;
-    idx = Math.min(idx, maxIdx());
-    const step = tiles[0].offsetWidth + 18; // tile + track gap
-    if (instant) track.style.transition = 'none';
-    track.style.transform = 'translateX(-' + (idx * step) + 'px)';
-    if (instant) requestAnimationFrame(() => { track.style.transition = ''; });
-    const cyclable = maxIdx() > 0;
-    prevBtn.style.display = cyclable ? '' : 'none';
-    nextBtn.style.display = cyclable ? '' : 'none';
-  }
-
-  function go(dir) {
-    const m = maxIdx();
-    if (m === 0) return;
-    idx = idx + dir;
-    if (idx > m) idx = 0;
-    if (idx < 0) idx = m;
-    slide(false);
-  }
-
-  function restartAuto() {
-    clearInterval(timer);
-    if (reduced) return;
-    timer = setInterval(() => {
-      if (hovered || document.hidden || maxIdx() === 0) return;
-      go(1);
-    }, 4600);
-  }
-  prevBtn.addEventListener('click', () => { go(-1); restartAuto(); });
-  nextBtn.addEventListener('click', () => { go(1); restartAuto(); });
+  prevBtn.addEventListener('click', () => nudge(-1));
+  nextBtn.addEventListener('click', () => nudge(1));
   shell.addEventListener('mouseenter', () => { hovered = true; });
   shell.addEventListener('mouseleave', () => { hovered = false; });
-  window.addEventListener('resize', () => slide(true), {passive: true});
+  window.addEventListener('resize', () => renderTiles(), { passive: true });
+  function restartAuto() { start(); }   // kept for the callers below
 
   // Member uploads from the dashboard live in localStorage — merge them on
   // top of the published albums so both galleries show the same photos.
