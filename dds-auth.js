@@ -132,6 +132,7 @@
         id: m.id, name: m.name, email: m.email, gradYear: m.gradYear, major: m.major, role: m.role,
         execTitle: m.execTitle || null,
         photo: m.photo || null,
+        quote: m.quote || '',
         interests: m.interests || '', hobbies: m.hobbies || '',
         favClasses: m.favClasses || '', favProfs: m.favProfs || '',
         instagram: m.instagram || '', linkedin: m.linkedin || ''
@@ -145,7 +146,7 @@
       return m ? {
         id: m.id, name: m.name, gradYear: m.gradYear, major: m.major || '',
         role: m.role, execTitle: m.execTitle || null,
-        photo: m.photo || null,
+        photo: m.photo || null, quote: m.quote || '',
         interests: m.interests || '', hobbies: m.hobbies || '',
         instagram: m.instagram || '', linkedin: m.linkedin || ''
       } : null;
@@ -159,7 +160,7 @@
       var list = loadMembers();
       var m = list.find(function (r) { return r.id === sess.id; });
       if (!m) return { ok: false, err: 'Sign in first.' };
-      ['photo', 'interests', 'hobbies', 'major', 'favClasses', 'favProfs', 'instagram', 'linkedin'].forEach(function (k) {
+      ['photo', 'quote', 'interests', 'hobbies', 'major', 'favClasses', 'favProfs', 'instagram', 'linkedin'].forEach(function (k) {
         if (k in fields) m[k] = fields[k];
       });
       saveMembers(list);

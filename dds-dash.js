@@ -690,7 +690,7 @@
     if (!m) return null;
     return { id: m.id, name: m.name, gradYear: m.gradYear, major: m.major || '', role: m.role,
       execTitle: m.execTitle || (DDSAuth.execTitle ? DDSAuth.execTitle(m) : null),
-      photo: m.photo || null, interests: m.interests || '', hobbies: m.hobbies || '',
+      photo: m.photo || null, quote: m.quote || '', interests: m.interests || '', hobbies: m.hobbies || '',
       favClasses: m.favClasses || '', favProfs: m.favProfs || '',
       instagram: m.instagram || '', linkedin: m.linkedin || '' };
   }
@@ -1030,7 +1030,7 @@
         '<div><h5 class="ppop-name">' + esc(p.name) + '</h5>' +
         '<p class="ppop-meta">' + esc(['Class of ' + (p.gradYear || '—'), p.major].filter(Boolean).join(' · ')) + '</p></div>' +
       '</div>' +
-      (bio ? '<p class="ppop-bio">' + esc(bio) + '</p>' : '') +
+      (p.quote ? '<p class="ppop-quote">“' + esc(p.quote) + '”</p>' : (bio ? '<p class="ppop-bio">' + esc(bio) + '</p>' : '')) +
       socialChips(p) +
       '<button class="btn btn-solid" type="button" data-viewprofile="' + esc(mid) + '" style="width:100%;margin-top:12px;">View full profile</button>';
     pop.classList.add('show');
@@ -1085,13 +1085,13 @@
       var p = pub(m);
       var isExec = DDSAuth.isExec && DDSAuth.isExec(m);
       var role = isExec ? (DDSAuth.execTitle(m) || 'Exec Board') : 'Class of ' + (p.gradYear || '—');
-      var tags = [p.interests, p.major].filter(Boolean).join(' · ');
+      var tags = p.quote ? '“' + p.quote + '”' : [p.interests, p.major].filter(Boolean).join(' · ');
       return '<button class="mem-card" type="button" data-mem="' + esc(p.id) + '" style="--dur:' + (6 + (i % 5) * 0.7).toFixed(1) + 's;--dly:' + (i % 6 * 0.35).toFixed(2) + 's;">' +
         (m.id === ME.id ? '<span class="mem-badge">You</span>' : '') +
         avatarHtml(p, 'mem-av') +
         '<span class="mem-name">' + esc(p.name) + '</span>' +
         '<span class="mem-role' + (isExec ? ' exec' : '') + '">' + esc(role) + '</span>' +
-        (tags ? '<span class="mem-tags">' + esc(tags) + '</span>' : '') +
+        (tags ? '<span class="mem-tags' + (p.quote ? ' is-quote' : '') + '">' + esc(tags) + '</span>' : '') +
       '</button>';
     }).join('');
   }
@@ -1125,6 +1125,7 @@
         '<div><h3>' + esc(p.name) + '</h3><div class="mem-detail-meta">' + esc(meta) + '</div>' +
         (role ? '<span class="mem-detail-chip">' + esc(role) + '</span>' : '') + '</div>' +
       '</div>' +
+      (p.quote ? '<blockquote class="mem-detail-quote">' + esc(p.quote) + '</blockquote>' : '') +
       (bio ? '<p class="mem-detail-bio">' + esc(bio) + '</p>' : '<p class="mem-detail-bio" style="color:var(--ink3);">This member hasn’t added a bio yet.</p>') +
       (grid ? '<div class="mem-detail-grid">' + grid + '</div>' : '') +
       '<div class="mem-detail-foot">' + foot + '</div>';

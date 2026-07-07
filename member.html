@@ -116,6 +116,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
         </div>
       </div>
       <label>Major(s)<input type="text" id="sh-major" placeholder="e.g. Biology, Chemistry minor" maxlength="80"></label>
+      <label>Your quote<textarea id="sh-quote" maxlength="220" placeholder="A line that captures why you're here — “The OR is where biology stops being a textbook.”"></textarea><span class="sh-hint" id="sh-quote-count">Up to 35 words — this shows on your profile card.</span></label>
       <label>Interests<textarea id="sh-interests" maxlength="400" placeholder="Pediatric dentistry, public health, research…"></textarea></label>
       <label>Hobbies<textarea id="sh-hobbies" maxlength="400" placeholder="Intramural soccer, ceramics, Sunday hikes at Occoneechee…"></textarea></label>
       <div class="sh-grid">
@@ -172,6 +173,21 @@ function setPhotoRow(){
 renderHead();
 setPhotoRow();
 document.getElementById('sh-major').value = me.major || '';
+document.getElementById('sh-quote').value = me.quote || '';
+
+/* Keep the quote to about 35 words — trim overflow and show a live count. */
+var quoteEl = document.getElementById('sh-quote'), quoteCount = document.getElementById('sh-quote-count');
+var QUOTE_MAX_WORDS = 35;
+function words(s){ return String(s).trim().split(/\s+/).filter(Boolean); }
+function updateQuoteCount(){
+  var w = words(quoteEl.value);
+  if (w.length > QUOTE_MAX_WORDS){ quoteEl.value = w.slice(0, QUOTE_MAX_WORDS).join(' '); w = words(quoteEl.value); }
+  var n = w.length;
+  quoteCount.textContent = n + ' / ' + QUOTE_MAX_WORDS + ' words' + (n >= QUOTE_MAX_WORDS ? ' — that’s the limit.' : '');
+}
+quoteEl.addEventListener('input', updateQuoteCount);
+updateQuoteCount();
+
 document.getElementById('sh-interests').value = me.interests || '';
 document.getElementById('sh-hobbies').value = me.hobbies || '';
 document.getElementById('sh-classes').value = me.favClasses || '';
@@ -228,6 +244,7 @@ document.getElementById('sh-form').addEventListener('submit', function(e){
   var res = DDSAuth.updateProfile({
     photo: photoData,
     major: document.getElementById('sh-major').value.trim(),
+    quote: words(document.getElementById('sh-quote').value).slice(0, QUOTE_MAX_WORDS).join(' '),
     interests: document.getElementById('sh-interests').value.trim(),
     hobbies: document.getElementById('sh-hobbies').value.trim(),
     favClasses: document.getElementById('sh-classes').value.trim(),

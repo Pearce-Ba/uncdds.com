@@ -417,12 +417,15 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .nb-foot .nb-author{color:#13294B;}
 .nb-foot .nb-date{color:#5A7798;}
 @media(max-width:768px){.nb-arrow{display:none;}.nb-card{width:min(76vw,320px);}.nb-rail{padding:38px 6px 48px;}}
-/* Tooth cursor stays in the two zones it reads well — Opportunities and
-   Officer Profiles. Everywhere else a precise navy dot leads the cursor
-   (added by initDotCursor when the class below is set on <html>). */
-@media (prefers-reduced-motion: no-preference){#officer-profiles,#offers{cursor:none;}}
-html.cursor-dot, html.cursor-dot *{cursor:none;}
-html.cursor-dot input, html.cursor-dot textarea, html.cursor-dot select, html.cursor-dot [contenteditable]{cursor:auto;}
+/* Per-section cursors. The navy dot leads only in the Hero and Our Members;
+   the tooth stays in Opportunities + Officer Profiles; the President's
+   letter hides the cursor (its glow does the work); everywhere else keeps
+   the normal pointer. cursor:none for the dot zones is gated on html.dot-on
+   so it only applies when initDotCursor actually runs (fine pointer). */
+@media (prefers-reduced-motion: no-preference){
+  #officer-profiles,#offers,#president-letter{cursor:none;}
+  html.dot-on #top,html.dot-on #members-preview{cursor:none;}
+}
 #dotcur{position:fixed;top:0;left:0;width:13px;height:13px;border-radius:50%;
   background:#13294B;pointer-events:none;z-index:99999;opacity:0;
   transform:translate(-50%,-50%) scale(1);
@@ -719,11 +722,16 @@ html.cursor-dot input, html.cursor-dot textarea, html.cursor-dot select, html.cu
 .om-cta{display:inline-flex;align-items:center;gap:11px;padding:17px 32px;border-radius:999px;background:linear-gradient(120deg,#4B9CD3,#8b7fd4);color:#06101f;font-weight:800;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 18px 44px -16px rgba(75,156,211,.8);transition:transform .2s,box-shadow .2s;}
 .om-cta:hover{transform:translateY(-2px);box-shadow:0 24px 54px -16px rgba(139,127,212,.8);}
 .om-cta-sub{color:#9FB6CE;font-size:12.5px;letter-spacing:.4px;}
+.om-glow{position:absolute;top:0;left:0;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:3;opacity:0;
+  mix-blend-mode:color-dodge;will-change:transform,opacity;transition:opacity .5s ease;
+  background:radial-gradient(circle,rgba(90,150,220,.5) 0%,rgba(120,140,230,.16) 42%,transparent 68%);}
 @media(max-width:860px){.om-stage{grid-template-columns:1fr;}.om-portrait{width:min(300px,72vw);} .om-top p{max-width:100%;}}
+@media (prefers-reduced-motion: reduce){.om-glow{display:none;}}
 </style>
 <section id="members-preview" aria-label="Our members">
   <div class="om-stars"></div>
   <div class="om-aurora"><i></i><i></i><i></i></div>
+  <div class="om-glow" id="om-glow"></div>
   <div class="om-inner">
     <div class="om-top">
       <div>
@@ -792,80 +800,103 @@ html.cursor-dot input, html.cursor-dot textarea, html.cursor-dot select, html.cu
   </div>
 </section>
 
-<!-- MEMBER TOOLKIT — scroll-driven 3D resource carousel -->
+<!-- MEMBER TOOLKIT — scroll-driven 3D resource carousel with parking + satellites -->
 <style>
 #toolkit{position:relative;z-index:5;background:radial-gradient(125% 90% at 50% -8%,#14345c 0%,#0d2144 46%,#0A1A30 100%);color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;overflow:clip;}
-.tk-wrap{position:relative;height:340vh;}
-.tk-stage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(28px,5vh,60px);padding:clamp(40px,7vh,90px) 16px;overflow:hidden;}
+.tk-wrap{position:relative;height:520vh;}
+.tk-stage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(20px,3.5vh,44px);padding:clamp(36px,6vh,80px) 16px;overflow:hidden;}
 .tk-grain{position:absolute;inset:0;background:url('grain.png') repeat;opacity:.34;mix-blend-mode:overlay;pointer-events:none;}
-.tk-head{text-align:center;position:relative;z-index:2;max-width:640px;}
+.tk-glow{position:absolute;top:0;left:0;width:640px;height:640px;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:screen;will-change:transform,opacity;transition:opacity .5s ease;z-index:1;
+  background:radial-gradient(circle,rgba(75,156,211,.32) 0%,rgba(127,178,224,.1) 44%,transparent 68%);}
+.tk-head{text-align:center;position:relative;z-index:3;max-width:640px;}
 .tk-eyebrow{display:inline-flex;align-items:center;gap:8px;color:#7FB2E0;font-weight:700;letter-spacing:3px;font-size:11px;text-transform:uppercase;margin-bottom:12px;}
 .tk-eyebrow::before,.tk-eyebrow::after{content:"";width:24px;height:1px;background:rgba(127,178,224,.5);}
 .tk-head h2{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:.92;font-size:clamp(2rem,5.5vw,4rem);background:linear-gradient(180deg,#EAF1F8,#8FB7DE);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
 .tk-head p{margin:14px auto 0;color:#9FB6CE;font-size:clamp(.9rem,1.3vw,1.05rem);line-height:1.6;max-width:460px;}
-.tk-holder{position:relative;width:min(520px,86vw);height:clamp(220px,32vh,300px);perspective:1500px;z-index:2;}
+.tk-3d{position:relative;z-index:2;width:min(940px,96vw);height:clamp(300px,46vh,460px);perspective:1600px;}
+.tk-scene{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(calc(var(--my,0)*-6deg)) rotateY(calc(var(--mx,0)*9deg)) translate3d(calc(var(--mx,0)*14px),calc(var(--my,0)*10px),0);will-change:transform;}
+.tk-orbit{position:absolute;inset:0;transform-style:preserve-3d;}
+.tk-sat{position:absolute;left:50%;top:50%;width:clamp(150px,17vw,184px);
+  transform:translate(-50%,-50%) translate3d(calc(var(--rx)*(2.6 - 1.6*var(--p,0))),calc(var(--ry2)*(2.6 - 1.6*var(--p,0))),calc(46px - 300px*(1 - var(--p,0)))) rotateZ(calc(var(--rot)*(1 - var(--p,0)))) scale(calc(.7 + .3*var(--p,0)));
+  opacity:var(--p,0);text-decoration:none;display:block;padding:12px 14px;border-radius:14px;
+  background:linear-gradient(165deg,rgba(18,34,62,.94),rgba(9,18,34,.9));border:1px solid var(--sc,rgba(127,178,224,.4));
+  box-shadow:0 22px 46px -20px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05) inset;backdrop-filter:blur(3px);will-change:transform,opacity;}
+.tk-sat::before{content:"";position:absolute;inset:0;border-radius:14px;background:url('grain.png');opacity:.14;mix-blend-mode:overlay;pointer-events:none;}
+.tk-sat-top{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.tk-sat-dot{width:8px;height:8px;border-radius:50%;background:var(--sc,#7FB2E0);box-shadow:0 0 8px var(--sc,#7FB2E0);flex:none;}
+.tk-sat-host{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#9FB6CE;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tk-sat-title{font-weight:700;font-size:12.5px;line-height:1.3;color:#EAF1F8;display:flex;align-items:center;gap:6px;}
+.tk-sat-title svg{flex:none;opacity:.7;}
 .tk-ring{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(var(--ry,0deg));will-change:transform;}
 .tk-card{position:absolute;left:50%;top:50%;width:clamp(150px,20vw,190px);height:clamp(150px,20vw,190px);margin:calc(clamp(150px,20vw,190px)/-2);
-  transform:rotateY(calc(var(--i)*72deg)) translateZ(var(--rad,250px)) rotateY(var(--self,0deg)) scale(var(--sc,.86));
-  border-radius:22px;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:18px;
-  background:linear-gradient(165deg,rgba(255,255,255,.1),rgba(10,26,48,.55));border:1px solid var(--edge,rgba(127,178,224,.3));
-  box-shadow:0 26px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(8px);opacity:var(--op,.5);
-  transition:opacity .3s ease,box-shadow .3s ease;will-change:transform;}
-.tk-card.front{box-shadow:0 34px 80px -26px var(--glow,rgba(75,156,211,.7)), inset 0 1px 0 rgba(255,255,255,.2);}
-.tk-ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--ink,#7FB2E0);background:var(--soft,rgba(127,178,224,.16));border:1px solid var(--edge,rgba(127,178,224,.3));}
-.tk-name{font-weight:800;text-transform:uppercase;letter-spacing:1px;font-size:clamp(.82rem,1.3vw,.98rem);color:#EAF1F8;line-height:1.15;}
-.tk-tag{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9FB6CE;font-weight:600;}
-.tk-open{font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:var(--ink,#7FB2E0);opacity:0;transition:opacity .3s;}
-.tk-card.front .tk-open{opacity:1;}
-.tk-dots{display:flex;gap:9px;position:relative;z-index:2;}
+  transform:rotateY(calc(var(--i)*72deg)) translateZ(var(--rad,250px)) rotateY(var(--self,0deg)) scale(calc(.82 + var(--settle,0)*.34));
+  border-radius:22px;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;text-align:center;padding:18px;
+  background:color-mix(in srgb,#fff calc(var(--settle,0)*74%),rgba(10,26,48,.55));
+  color:color-mix(in srgb,#0A1A30 calc(var(--settle,0)*100%),#EAF1F8);
+  border:1px solid var(--edge,rgba(127,178,224,.3));
+  box-shadow:0 26px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(8px);
+  opacity:calc(.4 + var(--settle,0)*.6);will-change:transform;}
+.tk-card.front{box-shadow:0 40px 90px -24px var(--glow,rgba(75,156,211,.75)), 0 0 0 1px rgba(255,255,255,.35) inset;}
+.tk-ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--ink,#7FB2E0);background:var(--soft,rgba(127,178,224,.16));border:1px solid var(--edge,rgba(127,178,224,.3));transition:color .3s;}
+.tk-name{font-weight:800;text-transform:uppercase;letter-spacing:1px;font-size:clamp(.82rem,1.3vw,.98rem);color:inherit;line-height:1.15;}
+.tk-tag{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:inherit;opacity:.62;font-weight:600;}
+.tk-open{font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:800;color:inherit;opacity:0;transition:opacity .3s;}
+.tk-card.front .tk-open{opacity:.9;}
+.tk-dots{display:flex;gap:9px;position:relative;z-index:3;}
 .tk-dot{width:8px;height:8px;border-radius:50%;background:rgba(159,182,206,.28);transition:background .3s,transform .3s;}
 .tk-dot.on{background:#7FB2E0;transform:scale(1.5);box-shadow:0 0 12px #7FB2E0;}
-.tk-hint{position:relative;z-index:2;color:#7FB2E0;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px;}
+.tk-hint{position:relative;z-index:3;color:#7FB2E0;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px;}
 @media (max-width:680px), (prefers-reduced-motion: reduce){
   .tk-wrap{height:auto;}
   .tk-stage{position:static;height:auto;gap:26px;padding:clamp(70px,12vw,110px) 18px;}
-  .tk-holder{width:100%;height:auto;perspective:none;}
+  .tk-3d{width:100%;height:auto;perspective:none;}
+  .tk-scene{position:static;transform:none!important;}
+  .tk-orbit{display:none;}
   .tk-ring{position:static;transform:none!important;display:flex;flex-wrap:wrap;justify-content:center;gap:14px;}
-  .tk-card{position:static;margin:0;transform:none!important;opacity:1!important;width:clamp(140px,42vw,170px);height:auto;min-height:150px;}
-  .tk-open{opacity:1!important;}
-  .tk-dots{display:none;}
+  .tk-card{position:static;margin:0;transform:none!important;opacity:1!important;width:clamp(140px,42vw,170px);height:auto;min-height:150px;background:linear-gradient(165deg,rgba(255,255,255,.1),rgba(10,26,48,.55));color:#EAF1F8;}
+  .tk-open{opacity:.9!important;}
+  .tk-dots,.tk-glow{display:none;}
 }
 </style>
 <section id="toolkit" aria-label="Member toolkit preview">
   <div class="tk-wrap">
     <div class="tk-stage">
       <div class="tk-grain"></div>
+      <div class="tk-glow" id="tk-glow"></div>
       <div class="tk-head">
         <div class="tk-eyebrow">Sign in · Everything in one place</div>
         <h2>The Member Toolkit</h2>
-        <p>Five folders the chapter keeps stocked — applications, test prep, shadowing, chapter sheets, and research. Scroll to spin through them.</p>
+        <p>Five folders the chapter keeps stocked. Scroll to park on each one — its top resources slide in around it.</p>
       </div>
-      <div class="tk-holder">
-        <div class="tk-ring" id="tk-ring">
-          <a class="tk-card" href="dashboard.html?folder=apps#resources" style="--i:0;--ink:#4B9CD3;--edge:rgba(75,156,211,.4);--soft:rgba(75,156,211,.16);--glow:rgba(75,156,211,.7);">
-            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg></span>
-            <span class="tk-name">Applications</span><span class="tk-tag">AADSAS · Essays</span><span class="tk-open">Open →</span>
-          </a>
-          <a class="tk-card" href="dashboard.html?folder=dat#resources" style="--i:1;--ink:#E3C27C;--edge:rgba(227,194,124,.4);--soft:rgba(227,194,124,.16);--glow:rgba(227,194,124,.65);">
-            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-1.5 5.6A3 3 0 0 0 6 17a3 3 0 0 0 6 0V4a1 1 0 0 0-1-1z"/><path d="M15 3a3 3 0 0 1 3 3 3 3 0 0 1 1.5 5.6A3 3 0 0 1 18 17a3 3 0 0 1-6 0"/></svg></span>
-            <span class="tk-name">DAT &amp; Test Prep</span><span class="tk-tag">Content · Practice</span><span class="tk-open">Open →</span>
-          </a>
-          <a class="tk-card" href="dashboard.html?folder=shadow#resources" style="--i:2;--ink:#E39A57;--edge:rgba(204,111,46,.45);--soft:rgba(204,111,46,.18);--glow:rgba(204,111,46,.6);">
-            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5c-1.6 0-2.3-1-4-1-2.8 0-4.4 2.4-4.4 5 0 2.4 1 3.8 1.6 5.9.6 2.2.8 4.6 2.6 4.6 1.6 0 1.3-4.4 3-4.4s1.4 4.4 3 4.4c1.8 0 2-2.4 2.6-4.6.6-2.1 1.6-3.5 1.6-5.9 0-2.6-1.6-5-4.4-5-1.7 0-2.4 1-3.2 1z"/></svg></span>
-            <span class="tk-name">Shadowing</span><span class="tk-tag">Hours · Clinical</span><span class="tk-open">Open →</span>
-          </a>
-          <a class="tk-card" href="dashboard.html?folder=chapter#resources" style="--i:3;--ink:#7FB2E0;--edge:rgba(127,178,224,.42);--soft:rgba(127,178,224,.16);--glow:rgba(127,178,224,.65);">
-            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V4"/></svg></span>
-            <span class="tk-name">Chapter &amp; Points</span><span class="tk-tag">Sheets · Standing</span><span class="tk-open">Open →</span>
-          </a>
-          <a class="tk-card" href="dashboard.html?folder=research#resources" style="--i:4;--ink:#C95E97;--edge:rgba(201,94,151,.45);--soft:rgba(201,94,151,.16);--glow:rgba(201,94,151,.6);">
-            <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 22h11.6a2 2 0 0 0 1.7-3.5L14 9V3"/><path d="M7 15h10"/></svg></span>
-            <span class="tk-name">Scholarships</span><span class="tk-tag">Funding · Research</span><span class="tk-open">Open →</span>
-          </a>
+      <div class="tk-3d" id="tk-3d">
+        <div class="tk-scene" id="tk-scene">
+          <div class="tk-orbit" id="tk-orbit"></div>
+          <div class="tk-ring" id="tk-ring">
+            <a class="tk-card" href="dashboard.html?folder=apps#resources" style="--i:0;--ink:#4B9CD3;--edge:rgba(75,156,211,.4);--soft:rgba(75,156,211,.16);--glow:rgba(75,156,211,.7);">
+              <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg></span>
+              <span class="tk-name">Applications</span><span class="tk-tag">AADSAS · Essays</span><span class="tk-open">Open →</span>
+            </a>
+            <a class="tk-card" href="dashboard.html?folder=dat#resources" style="--i:1;--ink:#E3C27C;--edge:rgba(227,194,124,.4);--soft:rgba(227,194,124,.16);--glow:rgba(227,194,124,.65);">
+              <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-1.5 5.6A3 3 0 0 0 6 17a3 3 0 0 0 6 0V4a1 1 0 0 0-1-1z"/><path d="M15 3a3 3 0 0 1 3 3 3 3 0 0 1 1.5 5.6A3 3 0 0 1 18 17a3 3 0 0 1-6 0"/></svg></span>
+              <span class="tk-name">DAT &amp; Test Prep</span><span class="tk-tag">Content · Practice</span><span class="tk-open">Open →</span>
+            </a>
+            <a class="tk-card" href="dashboard.html?folder=shadow#resources" style="--i:2;--ink:#E39A57;--edge:rgba(204,111,46,.45);--soft:rgba(204,111,46,.18);--glow:rgba(204,111,46,.6);">
+              <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5c-1.6 0-2.3-1-4-1-2.8 0-4.4 2.4-4.4 5 0 2.4 1 3.8 1.6 5.9.6 2.2.8 4.6 2.6 4.6 1.6 0 1.3-4.4 3-4.4s1.4 4.4 3 4.4c1.8 0 2-2.4 2.6-4.6.6-2.1 1.6-3.5 1.6-5.9 0-2.6-1.6-5-4.4-5-1.7 0-2.4 1-3.2 1z"/></svg></span>
+              <span class="tk-name">Shadowing</span><span class="tk-tag">Hours · Clinical</span><span class="tk-open">Open →</span>
+            </a>
+            <a class="tk-card" href="dashboard.html?folder=chapter#resources" style="--i:3;--ink:#7FB2E0;--edge:rgba(127,178,224,.42);--soft:rgba(127,178,224,.16);--glow:rgba(127,178,224,.65);">
+              <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V4"/></svg></span>
+              <span class="tk-name">Chapter &amp; Points</span><span class="tk-tag">Sheets · Standing</span><span class="tk-open">Open →</span>
+            </a>
+            <a class="tk-card" href="dashboard.html?folder=research#resources" style="--i:4;--ink:#C95E97;--edge:rgba(201,94,151,.45);--soft:rgba(201,94,151,.16);--glow:rgba(201,94,151,.6);">
+              <span class="tk-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 22h11.6a2 2 0 0 0 1.7-3.5L14 9V3"/><path d="M7 15h10"/></svg></span>
+              <span class="tk-name">Scholarships</span><span class="tk-tag">Funding · Research</span><span class="tk-open">Open →</span>
+            </a>
+          </div>
         </div>
       </div>
       <div class="tk-dots" id="tk-dots" aria-hidden="true"><span class="tk-dot on"></span><span class="tk-dot"></span><span class="tk-dot"></span><span class="tk-dot"></span><span class="tk-dot"></span></div>
-      <div class="tk-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>Scroll to explore</div>
+      <div class="tk-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>Scroll to park on each</div>
     </div>
   </div>
 </section>
@@ -2191,33 +2222,32 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   make(document.getElementById('offers'), document.getElementById('tooth-offers'));
 })();
 
-// ---- Navy dot cursor: precise page-wide pointer that grows on hover ----
-// (yields to the tooth cursor inside #offers and #officer-profiles)
+// ---- Navy dot cursor: leads only in the Hero and Our Members sections ----
+// (tooth handles Offers + Officer Profiles; the President's letter and the
+//  rest of the page keep the normal pointer)
 (function initDotCursor(){
   if (REDUCED_MOTION) return;
   if (!window.matchMedia || !window.matchMedia('(hover:hover) and (pointer:fine)').matches) return;
   const dot = document.createElement('div');
   dot.id = 'dotcur';
   document.body.appendChild(dot);
-  document.documentElement.classList.add('cursor-dot');
-  const HIT = 'a,button,summary,label,input,textarea,select,[role="button"],[data-cta-magnet],[onclick],.nb-card,.of-card,.blr-card,.op-tile,.galc-card';
+  document.documentElement.classList.add('dot-on');
+  const ZONES = '#top,#members-preview';
+  const HIT = 'a,button,summary,label,input,textarea,select,[role="button"],[data-cta-magnet],[onclick]';
   let x = innerWidth / 2, y = innerHeight / 2, raf = null;
   const draw = () => { raf = null; dot.style.left = x + 'px'; dot.style.top = y + 'px'; };
   document.addEventListener('mousemove', (e) => {
+    const inZone = e.target.closest && e.target.closest(ZONES);
+    if (!inZone) { dot.classList.remove('show'); return; }
     x = e.clientX; y = e.clientY;
     dot.classList.add('show');
-    // hand off to the tooth inside its two zones
-    const inTooth = e.target.closest && e.target.closest('#offers,#officer-profiles');
-    dot.classList.toggle('hidden-zone', !!inTooth);
-    dot.style.opacity = inTooth ? '0' : '';
-    const hot = e.target.closest && e.target.closest(HIT);
-    dot.classList.toggle('grow', !!hot && !inTooth);
+    const hot = e.target.closest(HIT);
+    dot.classList.toggle('grow', !!hot);
     if (!raf) raf = requestAnimationFrame(draw);
   }, { passive: true });
   document.addEventListener('mousedown', () => dot.classList.add('press'));
   document.addEventListener('mouseup', () => dot.classList.remove('press'));
   document.addEventListener('mouseleave', () => dot.classList.remove('show'));
-  document.addEventListener('mouseenter', () => dot.classList.add('show'));
 })();
 
 // ---- Hero: the dot recolors the background as it moves across ----
@@ -2251,50 +2281,141 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   sec.addEventListener('mouseleave', () => { tint.style.opacity = '0'; });
 })();
 
-// ---- Member toolkit: scroll drives a 3D ring through the five folders ----
+// ---- Member toolkit: scroll parks the 3D ring on each folder, its top
+//      resources orbit in from off-screen, and the cursor glides the scene ----
 (function initToolkitRing(){
   const sec = document.getElementById('toolkit');
   if (!sec) return;
   const wrap = sec.querySelector('.tk-wrap');
+  const scene = document.getElementById('tk-scene');
   const ring = document.getElementById('tk-ring');
+  const orbit = document.getElementById('tk-orbit');
+  const glow = document.getElementById('tk-glow');
   const cards = Array.from(ring.querySelectorAll('.tk-card'));
   const dots = Array.from(document.querySelectorAll('#tk-dots .tk-dot'));
   const N = cards.length;                    // 5
-  const flat = window.matchMedia('(max-width:680px)').matches || REDUCED_MOTION;
-  if (flat) return;                          // CSS lays the cards out in a flat row
+  if (window.matchMedia('(max-width:680px)').matches || REDUCED_MOTION) return; // flat grid
 
-  // set the ring radius from card size so the squares sit shoulder to shoulder
+  // --- the five folders' top resources (the same links the dashboard lists) ---
+  const ACCENTS = ['rgba(75,156,211,.6)','rgba(227,194,124,.6)','rgba(204,111,46,.6)','rgba(127,178,224,.6)','rgba(201,94,151,.6)'];
+  const LINK_IC = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+  const SATS = [
+    [{t:'ADEA AADSAS application',h:'adea.org',u:'https://www.adea.org/dental_education_pathways/aadsas/'},
+     {t:'Personal statement guide',h:'asdanet.org',u:'https://www.asdanet.org/index/dental-education/applying-to-dental-school/personal-statement'}],
+    [{t:'DAT — official ADA guide',h:'ada.org',u:'https://www.ada.org/education/testing/dat'},
+     {t:'DAT Bootcamp schedules',h:'datbootcamp.com',u:'https://datbootcamp.com/'}],
+    [{t:'Finding shadowing hours',h:'asdanet.org',u:'https://www.asdanet.org/index/get-involved/predental/shadowing'},
+     {t:'UNC Adams School of Dentistry',h:'dentistry.unc.edu',u:'https://www.dentistry.unc.edu/'}],
+    [{t:'Chapter points & hours sheet',h:'docs.google.com',u:'https://docs.google.com/spreadsheets/d/1yXCL-EK5xeVeIATHolpgLdSzQcEDcndSCJL4bbnPFE4/'},
+     {t:'ASDA pre-dental membership',h:'asdanet.org',u:'https://www.asdanet.org/index/get-involved/predental'}],
+    [{t:'UNC Undergraduate Research',h:'our.unc.edu',u:'https://our.unc.edu/'},
+     {t:'Find a lab & research grants',h:'our.unc.edu',u:'https://our.unc.edu/students/'}]
+  ];
+  // rest positions around the centre card (diagonal framing, alternating sides)
+  const POS = [{rx:270,ry:-152,rot:15},{rx:-282,ry:138,rot:-15}];
+  const satEls = [];                         // satEls[topic] = [el,el]
+  SATS.forEach((group, ti) => {
+    const arr = [];
+    group.forEach((s, si) => {
+      const p = POS[si % POS.length];
+      const a = document.createElement('a');
+      a.className = 'tk-sat';
+      a.href = s.u; a.target = '_blank'; a.rel = 'noopener';
+      a.style.cssText = '--rx:' + p.rx + 'px;--ry2:' + p.ry + 'px;--rot:' + p.rot + 'deg;--sc:' + ACCENTS[ti] + ';';
+      a.innerHTML = '<div class="tk-sat-top"><span class="tk-sat-dot"></span><span class="tk-sat-host">' + s.h + '</span></div>' +
+        '<div class="tk-sat-title">' + s.t + ' ' + LINK_IC + '</div>';
+      orbit.appendChild(a);
+      arr.push(a);
+    });
+    satEls.push(arr);
+  });
+
   const setRadius = () => {
     const cw = cards[0].offsetWidth || 180;
-    const rad = Math.round((cw * 1.18) / Math.tan(Math.PI / N));  // circumradius for N faces
+    const rad = Math.round((cw * 1.18) / Math.tan(Math.PI / N));
     cards.forEach(c => c.style.setProperty('--rad', rad + 'px'));
   };
   setRadius();
   window.addEventListener('resize', setRadius, { passive: true });
 
-  let raf = null;
-  const update = () => {
-    raf = null;
+  // --- scroll → position with a dwell (parked) span on each of the 5 folders,
+  //     smooth eased transitions between them, and extra room at both ends ---
+  const DWELL = 1.5, TRANS = 1.0, ENDX = 1.1;
+  const phases = [];
+  for (let i = 0; i < N; i++) {
+    phases.push({ type: 'dwell', a: i, len: DWELL + (i === 0 || i === N - 1 ? ENDX : 0) });
+    if (i < N - 1) phases.push({ type: 'trans', a: i, b: i + 1, len: TRANS });
+  }
+  const totalUnits = phases.reduce((s, p) => s + p.len, 0);
+  let acc = 0;
+  phases.forEach(p => { p.t0 = acc / totalUnits; acc += p.len; p.t1 = acc / totalUnits; });
+  const easeInOut = u => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+  const smooth = u => u * u * (3 - 2 * u);
+  const mapToPos = t => {
+    t = Math.max(0, Math.min(1, t));
+    for (let k = 0; k < phases.length; k++) {
+      const p = phases[k];
+      if (t <= p.t1 || k === phases.length - 1) {
+        if (p.type === 'dwell') return p.a;                        // parked: stays put while scrolling
+        const u = Math.max(0, Math.min(1, (t - p.t0) / (p.t1 - p.t0)));
+        return p.a + easeInOut(u) * (p.b - p.a);
+      }
+    }
+    return N - 1;
+  };
+
+  let curPos = 0, mx = 0, my = 0, tMx = 0, tMy = 0, running = false, rafId = null;
+  const frame = () => {
     const total = wrap.offsetHeight - window.innerHeight;
-    const p = Math.max(0, Math.min(1, -wrap.getBoundingClientRect().top / total));
-    ring.style.setProperty('--ry', (-p * (N - 1) * 72) + 'deg');   // sweep card0 → card4
-    const frontF = p * (N - 1);
+    const t = Math.max(0, Math.min(1, -wrap.getBoundingClientRect().top / total));
+    const target = mapToPos(t);
+    curPos += (target - curPos) * 0.16;                            // smoothing → no jumpiness
+    if (Math.abs(target - curPos) < 0.0004) curPos = target;
+    mx += (tMx - mx) * 0.07; my += (tMy - my) * 0.07;              // parallax easing
+
+    ring.style.setProperty('--ry', (-curPos * 72) + 'deg');
+    scene.style.setProperty('--mx', mx.toFixed(3));
+    scene.style.setProperty('--my', my.toFixed(3));
+
     let near = 0, nearD = 9;
     cards.forEach((c, i) => {
-      const d = frontF - i;
-      c.style.setProperty('--self', (Math.max(-1.4, Math.min(1.4, d)) * 72) + 'deg'); // spin on own axis, upright at front
-      const ad = Math.abs(d);
-      c.style.setProperty('--op', (ad < 0.5 ? 1 : Math.max(0.32, 0.72 - ad * 0.16)).toFixed(2));
-      c.style.setProperty('--sc', (ad < 0.5 ? 1.12 : 0.86).toFixed(2));
-      c.classList.toggle('front', ad < 0.5);
-      if (ad < nearD) { nearD = ad; near = i; }
+      const d = curPos - i;
+      const settle = Math.max(0, 1 - Math.abs(d));                 // 1 when parked on i
+      c.style.setProperty('--self', (Math.max(-1.3, Math.min(1.3, d)) * 70) + 'deg');
+      c.style.setProperty('--settle', settle.toFixed(3));
+      c.classList.toggle('front', settle > 0.55);
+      // satellites for this folder: enter as it settles, park at full settle
+      const sp = smooth(Math.max(0, Math.min(1, (settle - 0.5) / 0.5)));
+      satEls[i].forEach(el => {
+        el.style.setProperty('--p', sp.toFixed(3));
+        el.style.pointerEvents = sp > 0.6 ? 'auto' : 'none';
+      });
+      if (Math.abs(d) < nearD) { nearD = Math.abs(d); near = i; }
     });
     dots.forEach((dt, i) => dt.classList.toggle('on', i === near));
+
+    if (running) rafId = requestAnimationFrame(frame);
   };
-  const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll, { passive: true });
-  update();
+  const start = () => { if (!running) { running = true; rafId = requestAnimationFrame(frame); } };
+  const stop = () => { running = false; if (rafId) cancelAnimationFrame(rafId); };
+
+  // run the loop only while the section is on screen
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? start() : stop()), { threshold: 0 }).observe(sec);
+  } else { start(); }
+
+  // cursor drives the parallax tilt + the background glow
+  sec.addEventListener('mousemove', (e) => {
+    const r = sec.getBoundingClientRect();
+    tMx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    tMy = ((e.clientY - r.top) / r.height - 0.5) * 2;
+    if (glow) {
+      glow.style.opacity = '1';
+      glow.style.transform = 'translate3d(' + (e.clientX - r.left - 320) + 'px,' + (e.clientY - r.top - 320) + 'px,0)';
+    }
+    start();
+  }, { passive: true });
+  sec.addEventListener('mouseleave', () => { tMx = 0; tMy = 0; if (glow) glow.style.opacity = '0'; });
 })();
 
 // ---- Our Members: auto-cycling cover-story spotlight ----
@@ -2352,6 +2473,25 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
       { threshold: 0.25 }).observe(sec);
   } else { restart(); }
   show(0);
+})();
+
+// ---- Our Members: a cursor spotlight that lights up the text behind it ----
+(function initMembersGlow(){
+  if (REDUCED_MOTION) return;
+  const sec = document.getElementById('members-preview');
+  const glow = document.getElementById('om-glow');
+  if (!sec || !glow) return;
+  let raf = null, cx = 0, cy = 0;
+  sec.addEventListener('mousemove', (e) => {
+    cx = e.clientX; cy = e.clientY;
+    glow.style.opacity = '1';
+    if (!raf) raf = requestAnimationFrame(() => {
+      raf = null;
+      const r = sec.getBoundingClientRect();
+      glow.style.transform = 'translate3d(' + (cx - r.left - 260) + 'px,' + (cy - r.top - 260) + 'px,0)';
+    });
+  }, { passive: true });
+  sec.addEventListener('mouseleave', () => { glow.style.opacity = '0'; });
 })();
 
 // ---- The Bite: gold glow that trails the cursor across the press desk ----
