@@ -805,48 +805,56 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 <!-- MEMBER TOOLKIT — scroll-driven 3D resource carousel with parking + satellites -->
 <style>
 #toolkit{position:relative;z-index:5;background:radial-gradient(125% 90% at 50% -8%,#14345c 0%,#0d2144 46%,#0A1A30 100%);color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;overflow:clip;}
-.tk-wrap{position:relative;height:520vh;}
-.tk-stage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(20px,3.5vh,44px);padding:clamp(36px,6vh,80px) 16px;overflow:hidden;}
+.tk-wrap{position:relative;height:660vh;}
+.tk-stage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3vh,40px);padding:clamp(36px,6vh,80px) 16px;overflow:hidden;}
 .tk-grain{position:absolute;inset:0;background:url('grain.png') repeat;opacity:.34;mix-blend-mode:overlay;pointer-events:none;}
-.tk-glow{position:absolute;top:0;left:0;width:640px;height:640px;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:screen;will-change:transform,opacity;transition:opacity .5s ease;z-index:1;
-  background:radial-gradient(circle,rgba(75,156,211,.32) 0%,rgba(127,178,224,.1) 44%,transparent 68%);}
+.tk-glow{position:absolute;top:0;left:0;width:700px;height:700px;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:screen;will-change:transform,opacity;transition:opacity .5s ease;z-index:4;
+  background:radial-gradient(circle,rgba(90,168,224,.4) 0%,rgba(127,178,224,.12) 44%,transparent 68%);}
 .tk-head{text-align:center;position:relative;z-index:3;max-width:640px;}
 .tk-eyebrow{display:inline-flex;align-items:center;gap:8px;color:#7FB2E0;font-weight:700;letter-spacing:3px;font-size:11px;text-transform:uppercase;margin-bottom:12px;}
 .tk-eyebrow::before,.tk-eyebrow::after{content:"";width:24px;height:1px;background:rgba(127,178,224,.5);}
 .tk-head h2{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:.92;font-size:clamp(2rem,5.5vw,4rem);background:linear-gradient(180deg,#EAF1F8,#8FB7DE);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
 .tk-head p{margin:14px auto 0;color:#9FB6CE;font-size:clamp(.9rem,1.3vw,1.05rem);line-height:1.6;max-width:460px;}
-.tk-3d{position:relative;z-index:2;width:min(940px,96vw);height:clamp(300px,46vh,460px);perspective:1600px;}
+.tk-3d{position:relative;z-index:2;width:min(1080px,98vw);height:clamp(320px,52vh,520px);perspective:1700px;}
 .tk-scene{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(calc(var(--my,0)*-6deg)) rotateY(calc(var(--mx,0)*9deg)) translate3d(calc(var(--mx,0)*14px),calc(var(--my,0)*10px),0);will-change:transform;}
-.tk-orbit{position:absolute;inset:0;transform-style:preserve-3d;}
-.tk-sat{position:absolute;left:50%;top:50%;width:clamp(150px,17vw,184px);
-  transform:translate(-50%,-50%) translate3d(calc(var(--rx)*(2.6 - 1.6*var(--p,0))),calc(var(--ry2)*(2.6 - 1.6*var(--p,0))),calc(46px - 300px*(1 - var(--p,0)))) rotateZ(calc(var(--rot)*(1 - var(--p,0)))) scale(calc(.7 + .3*var(--p,0)));
-  opacity:var(--p,0);text-decoration:none;display:block;padding:12px 14px;border-radius:14px;
-  background:linear-gradient(165deg,rgba(18,34,62,.94),rgba(9,18,34,.9));border:1px solid var(--sc,rgba(127,178,224,.4));
-  box-shadow:0 22px 46px -20px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05) inset;backdrop-filter:blur(3px);will-change:transform,opacity;}
-.tk-sat::before{content:"";position:absolute;inset:0;border-radius:14px;background:url('grain.png');opacity:.14;mix-blend-mode:overlay;pointer-events:none;}
+.tk-orbit{position:absolute;inset:0;transform-style:preserve-3d;transform:translate3d(var(--mox,0px),var(--moy,0px),0) rotateZ(var(--moz,0deg));}
+.tk-sat{position:absolute;left:50%;top:50%;width:clamp(146px,15vw,178px);
+  transform:translate(-50%,-50%) translate3d(calc(var(--rx)*(2.5 - 1.5*var(--p,0))),calc(var(--ry2)*(2.5 - 1.5*var(--p,0))),calc(var(--rz,0px) - 320px*(1 - var(--p,0)))) rotateZ(calc(var(--rot)*(1 - .68*var(--p,0)))) scale(calc((.6 + .4*var(--p,0))*var(--s2,1)));
+  opacity:var(--p,0);text-decoration:none;display:block;border-radius:14px;overflow:hidden;
+  background:linear-gradient(165deg,rgba(20,38,68,.95),rgba(9,18,34,.92));border:1px solid var(--sc,rgba(127,178,224,.4));
+  box-shadow:0 24px 50px -20px rgba(0,0,0,.88),0 0 0 1px rgba(255,255,255,.05) inset;backdrop-filter:blur(3px);will-change:transform,opacity;transition:border-color .25s ease,box-shadow .25s ease,background .25s ease;}
+.tk-sat:hover{border-color:#EAF6FF;background:linear-gradient(165deg,rgba(36,62,102,.97),rgba(14,28,52,.95));box-shadow:0 26px 56px -18px rgba(0,0,0,.9),0 0 22px -2px var(--sc,rgba(127,178,224,.7));}
+.tk-sat-photo{display:block;width:100%;height:66px;object-fit:cover;border-bottom:1px solid rgba(255,255,255,.08);}
+.tk-sat-body{padding:11px 13px;}
 .tk-sat-top{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
 .tk-sat-dot{width:8px;height:8px;border-radius:50%;background:var(--sc,#7FB2E0);box-shadow:0 0 8px var(--sc,#7FB2E0);flex:none;}
 .tk-sat-host{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#9FB6CE;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tk-sat-title{font-weight:700;font-size:12.5px;line-height:1.3;color:#EAF1F8;display:flex;align-items:center;gap:6px;}
-.tk-sat-title svg{flex:none;opacity:.7;}
+.tk-sat-title{font-weight:700;font-size:12.5px;line-height:1.3;color:#EAF1F8;display:flex;align-items:flex-start;gap:6px;}
+.tk-sat-title svg{flex:none;opacity:.7;margin-top:2px;}
 .tk-ring{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(var(--ry,0deg));will-change:transform;}
-.tk-card{position:absolute;left:50%;top:50%;width:clamp(150px,20vw,190px);height:clamp(150px,20vw,190px);margin:calc(clamp(150px,20vw,190px)/-2);
-  transform:rotateY(calc(var(--i)*72deg)) translateZ(var(--rad,250px)) rotateY(var(--self,0deg)) scale(calc(.82 + var(--settle,0)*.34));
+.tk-card{position:absolute;left:50%;top:50%;width:clamp(152px,20vw,192px);height:clamp(152px,20vw,192px);margin:calc(clamp(152px,20vw,192px)/-2);
+  transform:rotateY(calc(var(--i)*72deg)) translateZ(var(--rad,250px)) rotateY(var(--self,0deg)) scale(calc(.8 + var(--settle,0)*.62));
   border-radius:22px;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;text-align:center;padding:18px;
-  background:color-mix(in srgb,#fff calc(var(--settle,0)*74%),rgba(10,26,48,.55));
+  background:color-mix(in srgb,#fff calc(var(--settle,0)*76%),rgba(10,26,48,.55));
   color:color-mix(in srgb,#0A1A30 calc(var(--settle,0)*100%),#EAF1F8);
   border:1px solid var(--edge,rgba(127,178,224,.3));
   box-shadow:0 26px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(8px);
-  opacity:calc(.4 + var(--settle,0)*.6);will-change:transform;}
-.tk-card.front{box-shadow:0 40px 90px -24px var(--glow,rgba(75,156,211,.75)), 0 0 0 1px rgba(255,255,255,.35) inset;}
+  opacity:calc(.4 + var(--settle,0)*.6);will-change:transform;transition:box-shadow .25s ease,border-color .25s ease;}
+.tk-card.front{box-shadow:0 46px 100px -22px var(--glow,rgba(75,156,211,.8)), 0 0 0 1px rgba(255,255,255,.4) inset;}
+.tk-card:hover{border-color:var(--ink,#7FB2E0);box-shadow:0 46px 100px -20px var(--glow,rgba(75,156,211,.9)),0 0 0 2px var(--ink,#7FB2E0) inset;}
 .tk-ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--ink,#7FB2E0);background:var(--soft,rgba(127,178,224,.16));border:1px solid var(--edge,rgba(127,178,224,.3));transition:color .3s;}
 .tk-name{font-weight:800;text-transform:uppercase;letter-spacing:1px;font-size:clamp(.82rem,1.3vw,.98rem);color:inherit;line-height:1.15;}
 .tk-tag{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:inherit;opacity:.62;font-weight:600;}
 .tk-open{font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:800;color:inherit;opacity:0;transition:opacity .3s;}
 .tk-card.front .tk-open{opacity:.9;}
-.tk-dots{display:flex;gap:9px;position:relative;z-index:3;}
-.tk-dot{width:8px;height:8px;border-radius:50%;background:rgba(159,182,206,.28);transition:background .3s,transform .3s;}
-.tk-dot.on{background:#7FB2E0;transform:scale(1.5);box-shadow:0 0 12px #7FB2E0;}
+/* scroll progress bar (replaces the dots): fill tracks raw scroll so it keeps
+   moving even while the carousel is parked; ticks mark each of the five stops */
+.tk-prog{position:relative;z-index:3;width:min(420px,80vw);height:6px;border-radius:999px;background:rgba(159,182,206,.16);}
+.tk-prog-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;background:#7FB2E0;box-shadow:0 0 14px rgba(127,178,224,.65);overflow:hidden;}
+.tk-prog-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);background-size:38px 100%;animation:tkshimmer 1s linear infinite;}
+@keyframes tkshimmer{from{background-position:-38px 0}to{background-position:120px 0}}
+.tk-tick{position:absolute;top:50%;width:2px;height:13px;transform:translate(-50%,-50%);background:rgba(159,182,206,.55);border-radius:2px;transition:background .3s,box-shadow .3s;}
+.tk-tick.done{background:#EAF1F8;box-shadow:0 0 8px rgba(234,241,248,.8);}
 .tk-hint{position:relative;z-index:3;color:#7FB2E0;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px;}
 @media (max-width:680px), (prefers-reduced-motion: reduce){
   .tk-wrap{height:auto;}
@@ -857,7 +865,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   .tk-ring{position:static;transform:none!important;display:flex;flex-wrap:wrap;justify-content:center;gap:14px;}
   .tk-card{position:static;margin:0;transform:none!important;opacity:1!important;width:clamp(140px,42vw,170px);height:auto;min-height:150px;background:linear-gradient(165deg,rgba(255,255,255,.1),rgba(10,26,48,.55));color:#EAF1F8;}
   .tk-open{opacity:.9!important;}
-  .tk-dots,.tk-glow{display:none;}
+  .tk-prog,.tk-glow{display:none;}
 }
 </style>
 <section id="toolkit" aria-label="Member toolkit preview">
@@ -897,7 +905,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
           </div>
         </div>
       </div>
-      <div class="tk-dots" id="tk-dots" aria-hidden="true"><span class="tk-dot on"></span><span class="tk-dot"></span><span class="tk-dot"></span><span class="tk-dot"></span><span class="tk-dot"></span></div>
+      <div class="tk-prog" id="tk-prog" aria-hidden="true"><div class="tk-prog-fill" id="tk-prog-fill"></div></div>
       <div class="tk-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>Scroll to park on each</div>
     </div>
   </div>
@@ -2342,56 +2350,87 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   const ring = document.getElementById('tk-ring');
   const orbit = document.getElementById('tk-orbit');
   const glow = document.getElementById('tk-glow');
+  const prog = document.getElementById('tk-prog');
+  const progFill = document.getElementById('tk-prog-fill');
   const cards = Array.from(ring.querySelectorAll('.tk-card'));
-  const dots = Array.from(document.querySelectorAll('#tk-dots .tk-dot'));
   const N = cards.length;                    // 5
   if (window.matchMedia('(max-width:680px)').matches || REDUCED_MOTION) return; // flat grid
 
-  // --- the five folders' top resources (the same links the dashboard lists) ---
   const ACCENTS = ['rgba(75,156,211,.6)','rgba(227,194,124,.6)','rgba(204,111,46,.6)','rgba(127,178,224,.6)','rgba(201,94,151,.6)'];
+  const ACC_RGB = [[75,156,211],[227,194,124],[204,111,46],[127,178,224],[201,94,151]];
   const LINK_IC = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+  // five resources per folder — the same links the dashboard lists; some carry a photo
   const SATS = [
-    [{t:'ADEA AADSAS application',h:'adea.org',u:'https://www.adea.org/dental_education_pathways/aadsas/'},
-     {t:'Personal statement guide',h:'asdanet.org',u:'https://www.asdanet.org/index/dental-education/applying-to-dental-school/personal-statement'}],
-    [{t:'DAT — official ADA guide',h:'ada.org',u:'https://www.ada.org/education/testing/dat'},
-     {t:'DAT Bootcamp schedules',h:'datbootcamp.com',u:'https://datbootcamp.com/'}],
-    [{t:'Finding shadowing hours',h:'asdanet.org',u:'https://www.asdanet.org/index/get-involved/predental/shadowing'},
-     {t:'UNC Adams School of Dentistry',h:'dentistry.unc.edu',u:'https://www.dentistry.unc.edu/'}],
-    [{t:'Chapter points & hours sheet',h:'docs.google.com',u:'https://docs.google.com/spreadsheets/d/1yXCL-EK5xeVeIATHolpgLdSzQcEDcndSCJL4bbnPFE4/'},
-     {t:'ASDA pre-dental membership',h:'asdanet.org',u:'https://www.asdanet.org/index/get-involved/predental'}],
-    [{t:'UNC Undergraduate Research',h:'our.unc.edu',u:'https://our.unc.edu/'},
-     {t:'Find a lab & research grants',h:'our.unc.edu',u:'https://our.unc.edu/students/'}]
+    [{t:'ADEA AADSAS application',h:'adea.org',u:'https://www.adea.org/dental_education_pathways/aadsas/',img:'slot-mq-1.webp'},
+     {t:'Personal statement guide',h:'asdanet.org',u:'https://www.asdanet.org/index/dental-education/applying-to-dental-school/personal-statement'},
+     {t:'Application timeline & fees',h:'adea.org',u:'https://www.adea.org/godental/',img:'slot-mq-3.webp'},
+     {t:'Letters of evaluation',h:'asdanet.org',u:'https://www.asdanet.org/'},
+     {t:'Interview prep — SDN',h:'studentdoctor.net',u:'https://www.studentdoctor.net/',img:'slot-mq-5.webp'}],
+    [{t:'DAT — official ADA guide',h:'ada.org',u:'https://www.ada.org/education/testing/dat',img:'slot-mq-2.webp'},
+     {t:'DAT Bootcamp schedules',h:'datbootcamp.com',u:'https://datbootcamp.com/',img:'slot-mq-4.webp'},
+     {t:'DAT Destroyer',h:'orgoman.com',u:'https://orgoman.com/'},
+     {t:'Chad’s Prep — chem & orgo',h:'chadsprep.com',u:'https://chadsprep.com/',img:'slot-mq-8.webp'},
+     {t:'Free ADA practice test',h:'ada.org',u:'https://www.ada.org/education/testing/dat'}],
+    [{t:'Finding shadowing hours',h:'asdanet.org',u:'https://www.asdanet.org/index/get-involved/predental/shadowing',img:'slot-mq-9.webp'},
+     {t:'UNC Adams School of Dentistry',h:'dentistry.unc.edu',u:'https://www.dentistry.unc.edu/',img:'slot-mq-10.webp'},
+     {t:'SHAC student-run clinic',h:'shacunc.org',u:'https://www.shacunc.org/'},
+     {t:'How to email a dentist',h:'asdanet.org',u:'https://www.asdanet.org/'},
+     {t:'Hours log template',h:'docs.google.com',u:'https://docs.google.com/spreadsheets/',img:'slot-mq-11.webp'}],
+    [{t:'Chapter points & hours sheet',h:'docs.google.com',u:'https://docs.google.com/spreadsheets/d/1yXCL-EK5xeVeIATHolpgLdSzQcEDcndSCJL4bbnPFE4/',img:'slot-mq-12.webp'},
+     {t:'ASDA pre-dental membership',h:'asdanet.org',u:'https://www.asdanet.org/index/get-involved/predental',img:'slot-mq-1.webp'},
+     {t:'Meeting notes archive',h:'uncdds.org',u:'#meeting-notes'},
+     {t:'Event calendar',h:'uncdds.org',u:'#calendar',img:'slot-mq-2.webp'},
+     {t:'Instagram @unc_dds',h:'instagram.com',u:'https://www.instagram.com/unc_dds/',img:'slot-mq-3.webp'}],
+    [{t:'UNC Undergraduate Research',h:'our.unc.edu',u:'https://our.unc.edu/',img:'slot-mq-4.webp'},
+     {t:'Find a lab & grants',h:'our.unc.edu',u:'https://our.unc.edu/students/',img:'slot-mq-5.webp'},
+     {t:'Summer research programs',h:'our.unc.edu',u:'https://our.unc.edu/students/'},
+     {t:'Poster & abstract guide',h:'our.unc.edu',u:'https://our.unc.edu/',img:'slot-mq-8.webp'},
+     {t:'Journal of Dental Research',h:'sagepub.com',u:'https://journals.sagepub.com/home/jdr'}]
   ];
-  // rest positions around the centre card (diagonal framing, alternating sides)
-  const POS = [{rx:270,ry:-152,rot:15},{rx:-282,ry:138,rot:-15}];
-  const satEls = [];                         // satEls[topic] = [el,el]
+  // five rest slots — farther out, scattered, with imperfect rotation, depth
+  // and scale so the links feel hand-placed rather than snapped to a grid
+  const POS = [
+    { rx: 340, ry:-180, rot:-9,  rz: 30, s:1.02 },
+    { rx:-392, ry:-92,  rot: 12, rz:-26, s:.9  },
+    { rx: 404, ry: 150, rot: 5,  rz: 16, s:.98 },
+    { rx:-330, ry: 202, rot:-14, rz:-32, s:.9  },
+    { rx:  34, ry:-238, rot: 8,  rz: 22, s:1.0 }
+  ];
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const HOST_BASE = [159,182,206], TITLE_BASE = [234,241,248], HILITE = [196,240,255];
+  const satMeta = [];                        // satMeta[topic] = [{el,title,host}, ...]
   SATS.forEach((group, ti) => {
     const arr = [];
     group.forEach((s, si) => {
-      const p = POS[si % POS.length];
+      const p = POS[si];
       const a = document.createElement('a');
       a.className = 'tk-sat';
-      a.href = s.u; a.target = '_blank'; a.rel = 'noopener';
-      a.style.cssText = '--rx:' + p.rx + 'px;--ry2:' + p.ry + 'px;--rot:' + p.rot + 'deg;--sc:' + ACCENTS[ti] + ';';
-      a.innerHTML = '<div class="tk-sat-top"><span class="tk-sat-dot"></span><span class="tk-sat-host">' + s.h + '</span></div>' +
-        '<div class="tk-sat-title">' + s.t + ' ' + LINK_IC + '</div>';
+      if (s.u.charAt(0) === '#') { a.href = s.u; } else { a.href = s.u; a.target = '_blank'; a.rel = 'noopener'; }
+      a.style.cssText = '--rx:' + p.rx + 'px;--ry2:' + p.ry + 'px;--rot:' + p.rot + 'deg;--rz:' + p.rz + 'px;--s2:' + p.s + ';--sc:' + ACCENTS[ti] + ';';
+      a.innerHTML =
+        (s.img ? '<img class="tk-sat-photo" src="' + esc(s.img) + '" alt="" loading="lazy">' : '') +
+        '<div class="tk-sat-body">' +
+          '<div class="tk-sat-top"><span class="tk-sat-dot"></span><span class="tk-sat-host">' + esc(s.h) + '</span></div>' +
+          '<div class="tk-sat-title">' + esc(s.t) + ' ' + LINK_IC + '</div>' +
+        '</div>';
       orbit.appendChild(a);
-      arr.push(a);
+      arr.push({ el: a, title: a.querySelector('.tk-sat-title'), host: a.querySelector('.tk-sat-host') });
     });
-    satEls.push(arr);
+    satMeta.push(arr);
   });
 
   const setRadius = () => {
     const cw = cards[0].offsetWidth || 180;
-    const rad = Math.round((cw * 1.18) / Math.tan(Math.PI / N));
+    const rad = Math.round((cw * 1.2) / Math.tan(Math.PI / N));
     cards.forEach(c => c.style.setProperty('--rad', rad + 'px'));
   };
   setRadius();
   window.addEventListener('resize', setRadius, { passive: true });
 
-  // --- scroll → position with a dwell (parked) span on each of the 5 folders,
-  //     smooth eased transitions between them, and extra room at both ends ---
-  const DWELL = 1.5, TRANS = 1.0, ENDX = 1.1;
+  // --- scroll → position. Each folder gets a long dwell (parked, static while
+  //     you keep scrolling); transitions are long and gently eased so it's easy
+  //     to sit between two, and the neighbouring links overlap on the way. ---
+  const DWELL = 1.5, TRANS = 2.3, ENDX = 1.1;
   const phases = [];
   for (let i = 0; i < N; i++) {
     phases.push({ type: 'dwell', a: i, len: DWELL + (i === 0 || i === N - 1 ? ENDX : 0) });
@@ -2400,73 +2439,107 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   const totalUnits = phases.reduce((s, p) => s + p.len, 0);
   let acc = 0;
   phases.forEach(p => { p.t0 = acc / totalUnits; acc += p.len; p.t1 = acc / totalUnits; });
-  const easeInOut = u => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+  // gentler than cubic — a sine ease so the move between points is less steep
+  const easeInOut = u => -(Math.cos(Math.PI * u) - 1) / 2;
   const smooth = u => u * u * (3 - 2 * u);
-  const mapToPos = t => {
-    t = Math.max(0, Math.min(1, t));
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  // returns { pos, local } where local (-1..1) is progress through the current phase
+  const sample = t => {
+    t = clamp01(t);
     for (let k = 0; k < phases.length; k++) {
       const p = phases[k];
       if (t <= p.t1 || k === phases.length - 1) {
-        if (p.type === 'dwell') return p.a;                        // parked: stays put while scrolling
-        const u = Math.max(0, Math.min(1, (t - p.t0) / (p.t1 - p.t0)));
-        return p.a + easeInOut(u) * (p.b - p.a);
+        const u = clamp01((t - p.t0) / (p.t1 - p.t0));
+        const pos = p.type === 'dwell' ? p.a : p.a + easeInOut(u) * (p.b - p.a);
+        return { pos: pos, local: (u - 0.5) * 2 };
       }
     }
-    return N - 1;
+    return { pos: N - 1, local: 0 };
   };
 
-  let curPos = 0, mx = 0, my = 0, tMx = 0, tMy = 0, running = false, rafId = null;
+  // progress bar ticks at each of the five parking points
+  const ticks = phases.filter(p => p.type === 'dwell').map(p => {
+    const ct = (p.t0 + p.t1) / 2;
+    const el = document.createElement('span');
+    el.className = 'tk-tick'; el.style.left = (ct * 100).toFixed(2) + '%';
+    prog.appendChild(el);
+    return { el: el, t: ct };
+  });
+  const accAt = pos => {
+    const i = Math.max(0, Math.min(N - 1, Math.floor(pos))), j = Math.min(N - 1, i + 1), f = pos - i;
+    const a = ACC_RGB[i], b = ACC_RGB[j];
+    return 'rgb(' + Math.round(a[0]+(b[0]-a[0])*f) + ',' + Math.round(a[1]+(b[1]-a[1])*f) + ',' + Math.round(a[2]+(b[2]-a[2])*f) + ')';
+  };
+  const mixC = (base, f) => 'rgb(' + Math.round(base[0]+(HILITE[0]-base[0])*f) + ',' + Math.round(base[1]+(HILITE[1]-base[1])*f) + ',' + Math.round(base[2]+(HILITE[2]-base[2])*f) + ')';
+
+  let curPos = 0, mx = 0, my = 0, tMx = 0, tMy = 0, cX = 0, cY = 0, inSec = false, wasIn = false, running = false, rafId = null;
   const frame = () => {
     const total = wrap.offsetHeight - window.innerHeight;
-    const t = Math.max(0, Math.min(1, -wrap.getBoundingClientRect().top / total));
-    const target = mapToPos(t);
-    curPos += (target - curPos) * 0.16;                            // smoothing → no jumpiness
-    if (Math.abs(target - curPos) < 0.0004) curPos = target;
-    mx += (tMx - mx) * 0.07; my += (tMy - my) * 0.07;              // parallax easing
+    const t = clamp01(-wrap.getBoundingClientRect().top / total);
+    const s = sample(t);
+    curPos += (s.pos - curPos) * 0.12;                             // softer smoothing = slower move
+    if (Math.abs(s.pos - curPos) < 0.0004) curPos = s.pos;
+    mx += (tMx - mx) * 0.07; my += (tMy - my) * 0.07;
 
     ring.style.setProperty('--ry', (-curPos * 72) + 'deg');
     scene.style.setProperty('--mx', mx.toFixed(3));
     scene.style.setProperty('--my', my.toFixed(3));
 
-    let near = 0, nearD = 9;
+    // micro response: even while parked, the links drift a touch with the scroll
+    orbit.style.setProperty('--mox', (s.local * 10).toFixed(2) + 'px');
+    orbit.style.setProperty('--moy', (Math.sin(s.local * Math.PI) * 5).toFixed(2) + 'px');
+    orbit.style.setProperty('--moz', (s.local * 1.2).toFixed(2) + 'deg');
+
     cards.forEach((c, i) => {
       const d = curPos - i;
-      const settle = Math.max(0, 1 - Math.abs(d));                 // 1 when parked on i
+      const settle = Math.max(0, 1 - Math.abs(d));
       c.style.setProperty('--self', (Math.max(-1.3, Math.min(1.3, d)) * 70) + 'deg');
       c.style.setProperty('--settle', settle.toFixed(3));
       c.classList.toggle('front', settle > 0.55);
-      // satellites for this folder: enter as it settles, park at full settle
-      const sp = smooth(Math.max(0, Math.min(1, (settle - 0.5) / 0.5)));
-      satEls[i].forEach(el => {
-        el.style.setProperty('--p', sp.toFixed(3));
-        el.style.pointerEvents = sp > 0.6 ? 'auto' : 'none';
+      // wide visibility window so links from adjacent folders overlap in transit
+      const sp = smooth(clamp01((settle - 0.04) / 0.62));
+      satMeta[i].forEach(m => {
+        m.el.style.setProperty('--p', sp.toFixed(3));
+        m.el.style.pointerEvents = sp > 0.55 ? 'auto' : 'none';
+        // cursor proximity lights up nearby link text
+        if (inSec && sp > 0.05) {
+          [[m.title, TITLE_BASE], [m.host, HOST_BASE]].forEach(pair => {
+            const r = pair[0].getBoundingClientRect();
+            const dist = Math.hypot(cX - (r.left + r.width / 2), cY - (r.top + r.height / 2));
+            pair[0].style.color = mixC(pair[1], clamp01(1 - dist / 250));
+          });
+        } else if (!inSec && wasIn) { m.title.style.color = ''; m.host.style.color = ''; }
       });
-      if (Math.abs(d) < nearD) { nearD = Math.abs(d); near = i; }
     });
-    dots.forEach((dt, i) => dt.classList.toggle('on', i === near));
+    wasIn = inSec;
+
+    // progress bar: fill tracks the RAW scroll, so it keeps inching along even
+    // while the carousel is parked — proof the scroll is being registered
+    progFill.style.width = (t * 100).toFixed(2) + '%';
+    progFill.style.background = accAt(curPos);
+    ticks.forEach(tk => tk.el.classList.toggle('done', t >= tk.t - 0.001));
 
     if (running) rafId = requestAnimationFrame(frame);
   };
   const start = () => { if (!running) { running = true; rafId = requestAnimationFrame(frame); } };
   const stop = () => { running = false; if (rafId) cancelAnimationFrame(rafId); };
 
-  // run the loop only while the section is on screen
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? start() : stop()), { threshold: 0 }).observe(sec);
   } else { start(); }
 
-  // cursor drives the parallax tilt + the background glow
   sec.addEventListener('mousemove', (e) => {
     const r = sec.getBoundingClientRect();
+    cX = e.clientX; cY = e.clientY; inSec = true;
     tMx = ((e.clientX - r.left) / r.width - 0.5) * 2;
     tMy = ((e.clientY - r.top) / r.height - 0.5) * 2;
     if (glow) {
       glow.style.opacity = '1';
-      glow.style.transform = 'translate3d(' + (e.clientX - r.left - 320) + 'px,' + (e.clientY - r.top - 320) + 'px,0)';
+      glow.style.transform = 'translate3d(' + (e.clientX - r.left - 350) + 'px,' + (e.clientY - r.top - 350) + 'px,0)';
     }
     start();
   }, { passive: true });
-  sec.addEventListener('mouseleave', () => { tMx = 0; tMy = 0; if (glow) glow.style.opacity = '0'; });
+  sec.addEventListener('mouseleave', () => { inSec = false; tMx = 0; tMy = 0; if (glow) glow.style.opacity = '0'; });
 })();
 
 // ---- Our Members: auto-cycling cover-story spotlight ----
