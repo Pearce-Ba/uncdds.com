@@ -30,8 +30,8 @@
    5. Commit + push this file. Done — every browser now shares one backend.
 */
 window.DDS_CLOUD = {
-  projectId: '',   // e.g. 'uncdds-site'
-  apiKey: '',      // e.g. 'AIzaSyC...'
+  projectId: 'unc-dds',                              // Firebase project id
+  apiKey: 'AIzaSyCrVegvlm3N8psIsjY2c54EATlvsWxCAvU', // public web API key (safe to ship client-side)
 
   /* OPTIONAL — auto-push logged hours into the chapter Google Sheet.
      Leave empty and the "Log your hours" tool still works: entries live in the

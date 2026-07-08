@@ -1419,7 +1419,10 @@
   var albums = [], curAlb = null, lbList = [], lbIdx = -1;
 
   function mergedAlbums() {
-    var extras = readLS(GAL_KEY, { collections: [] }).collections || [];
+    var store = readLS(GAL_KEY, { collections: [] });
+    var extras = store.collections || [];
+    var hidden = store.hidden || [];
+    var overrides = store.overrides || {};
     var out = baseCols.map(function (c) {
       return { id: c.id, title: c.title, photos: c.photos.slice() };
     });
@@ -1428,7 +1431,52 @@
       if (hit) hit.photos = hit.photos.concat(x.photos || []);
       else out.push({ id: x.id, title: x.title, photos: (x.photos || []).slice() });
     });
+    // Removed photos drop out; edited title/caption override in place.
+    out.forEach(function (c) {
+      c.photos = c.photos.filter(function (p) { return hidden.indexOf(p.id) === -1; })
+        .map(function (p) {
+          var o = overrides[p.id]; if (!o) return p;
+          var np = {}; for (var k in p) np[k] = p[k];
+          if (o.title != null) np.title = o.title;
+          if (o.cap != null) np.cap = o.cap;
+          return np;
+        });
+    });
     return out;
+  }
+  function canManagePhoto(p) {
+    return !!((DDSAuth.isExec && DDSAuth.isExec()) || (p && p.byId && p.byId === ME.id));
+  }
+  /* Remove a photo: uploaded photos are spliced out (reclaims storage);
+     published-archive photos (no local copy) get hidden via an id list. */
+  function deletePhoto(p) {
+    var store = readLS(GAL_KEY, { collections: [] });
+    store.collections = store.collections || [];
+    var removed = false;
+    store.collections.forEach(function (c) {
+      var i = (c.photos || []).findIndex(function (x) { return x.id === p.id; });
+      if (i > -1) { c.photos.splice(i, 1); removed = true; }
+    });
+    if (!removed) {
+      store.hidden = store.hidden || [];
+      if (store.hidden.indexOf(p.id) === -1) store.hidden.push(p.id);
+    }
+    if (store.overrides) delete store.overrides[p.id];
+    writeLS(GAL_KEY, store);
+  }
+  function savePhotoEdit(p, title, cap) {
+    var store = readLS(GAL_KEY, { collections: [] });
+    var inPlace = false;
+    (store.collections || []).forEach(function (c) {
+      (c.photos || []).forEach(function (x) {
+        if (x.id === p.id) { x.title = title; x.cap = cap; inPlace = true; }
+      });
+    });
+    if (!inPlace) {
+      store.overrides = store.overrides || {};
+      store.overrides[p.id] = { title: title, cap: cap };
+    }
+    writeLS(GAL_KEY, store);
   }
   function galExtras() { return readLS(GAL_KEY, { collections: [] }); }
   function photoTitle(p, i) { return p.title || 'From the chapter archive'; }
@@ -1592,6 +1640,8 @@
       : 'Date not recorded';
     $('lb-cap').textContent = p.cap || '';
     $('lb-cap').style.display = p.cap ? '' : 'none';
+    $('lb-manage').hidden = !canManagePhoto(p);
+    $('lb-editform').hidden = true;
     renderLbComments();
     $('lb-cinput').value = '';
   }
@@ -1629,6 +1679,54 @@
     try { writeLS(COM_KEY, all); } catch (err) {}
     $('lb-cinput').value = '';
     renderLbComments();
+  });
+
+  /* --- manage a photo (remove / edit) — exec on any photo, uploader on own --- */
+  function refreshGalleryAfterChange(albumId, photoId) {
+    albums = mergedAlbums();
+    var alb = albums.find(function (c) { return c.id === albumId; });
+    if (!alb) {   // album vanished (e.g. an empty extra) — back to the album list
+      closeLightbox();
+      $('gal-open').hidden = true; $('gal-albums').hidden = false; curAlb = null;
+      renderAlbums();
+      return;
+    }
+    curAlb = alb;
+    renderPhotos();                       // refresh the open album grid in place
+    if (!$('lb').hidden) {                 // keep the lightbox flowing
+      lbList = curAlb.photos;
+      var idx = photoId ? curAlb.photos.findIndex(function (x) { return x.id === photoId; }) : -1;
+      if (idx > -1) { lbIdx = idx; showLb(); }
+      else if (curAlb.photos.length) { lbIdx = Math.min(lbIdx, curAlb.photos.length - 1); showLb(); }
+      else closeLightbox();
+    }
+  }
+  $('lb-del').addEventListener('click', function () {
+    var p = lbList[lbIdx]; if (!p || !canManagePhoto(p)) return;
+    if (!window.confirm('Remove this photo? It disappears from this album and the homepage gallery.')) return;
+    var albumId = curAlb.id;
+    deletePhoto(p);
+    refreshGalleryAfterChange(albumId, null);
+  });
+  $('lb-edit').addEventListener('click', function () {
+    var p = lbList[lbIdx]; if (!p || !canManagePhoto(p)) return;
+    $('lb-e-title').value = p.title || '';
+    $('lb-e-cap').value = p.cap || '';
+    $('lb-e-err').textContent = '';
+    $('lb-manage').hidden = true;
+    $('lb-editform').hidden = false;
+    $('lb-e-title').focus();
+  });
+  $('lb-e-cancel').addEventListener('click', function () {
+    $('lb-editform').hidden = true;
+    $('lb-manage').hidden = !canManagePhoto(lbList[lbIdx]);
+  });
+  $('lb-editform').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var p = lbList[lbIdx]; if (!p || !canManagePhoto(p)) return;
+    var albumId = curAlb.id, pid = p.id;
+    savePhotoEdit(p, $('lb-e-title').value.trim(), $('lb-e-cap').value.trim());
+    refreshGalleryAfterChange(albumId, pid);
   });
 
   /* Deep link from the homepage carousel: dashboard.html?album=<id>#gallery */
