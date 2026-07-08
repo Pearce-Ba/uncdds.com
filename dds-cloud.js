@@ -68,6 +68,23 @@
       toRows: function (v) { return Array.isArray(v) ? v : []; },
       fromRows: function (rows) { return rows; }
     },
+    content: {   // exec inline text edits (dds-edit.js): map id -> {t,by,at,up}
+      key: 'dds-content-v1', coll: 'content', every: 30,
+      when: function () { return true; },
+      toRows: function (v) {
+        v = v || {}; var rows = [];
+        Object.keys(v).forEach(function (id) {
+          var e = v[id] || {};
+          rows.push({ id: id, t: e.t || '', by: e.by || '', at: e.at || 0, up: e.up || 0 });
+        });
+        return rows;
+      },
+      fromRows: function (rows) {
+        var out = {};
+        rows.forEach(function (r) { if (r.id) out[r.id] = { t: r.t || '', by: r.by || '', at: r.at || 0, up: r.up || 0 }; });
+        return out;
+      }
+    },
     classes: {
       key: 'dds-classes-v1', coll: 'classes', every: 60,
       when: onDash,
