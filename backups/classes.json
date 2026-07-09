@@ -1,62 +1,62 @@
 [
  {
   "id": "xmr81e9zoep8zp",
+  "rating": 5,
   "code": "BIOL 252",
+  "up": 1783474712729,
+  "take": "Hard, but the anatomy unit carries straight into the DAT. Go to office hours early.",
+  "prof": "Dr. Griffith",
+  "byId": "seed-JordanReyes",
   "by": "Jordan Reyes",
   "kind": "prof",
-  "take": "Hard, but the anatomy unit carries straight into the DAT. Go to office hours early.",
-  "byId": "seed-JordanReyes",
-  "up": 1783474712729,
-  "rating": 5,
-  "at": 1777741208340,
-  "prof": "Dr. Griffith"
+  "at": 1777741208340
  },
  {
-  "take": "Statistics you’ll actually reuse on research apps. Take it before junior year.",
-  "kind": "prof",
-  "by": "Nia Thompson",
-  "code": "PSYC 210",
-  "id": "xmr81e9zogmq8q",
-  "at": 1781370008340,
-  "rating": 5,
-  "prof": "Dr. Payne",
   "up": 1783474712729,
-  "byId": "seed-NiaThompson"
+  "id": "xmr81e9zogmq8q",
+  "rating": 5,
+  "code": "PSYC 210",
+  "take": "Statistics you’ll actually reuse on research apps. Take it before junior year.",
+  "byId": "seed-NiaThompson",
+  "prof": "Dr. Payne",
+  "kind": "prof",
+  "at": 1781370008340,
+  "by": "Nia Thompson"
  },
  {
   "byId": "seed-SofiaMarin",
   "prof": "Dr. Griffith",
-  "rating": 4,
+  "by": "Sofia Marin",
   "at": 1778864408340,
-  "up": 1783474712729,
+  "kind": "prof",
   "code": "BIOL 252",
   "id": "xmr81e9zoi8ea4",
-  "take": "Heavy memorization — draw everything twice and you’re fine.",
-  "kind": "prof",
-  "by": "Sofia Marin"
- },
- {
-  "at": 1779210008340,
   "rating": 4,
-  "prof": "Dr. Austell",
   "up": 1783474712729,
-  "byId": "seed-ChrisOkafor",
-  "kind": "prof",
-  "take": "Mechanisms over memorizing. His practice sets are basically the exam.",
-  "by": "Chris Okafor",
-  "code": "CHEM 261",
-  "id": "xmr81e9zoimi6f"
+  "take": "Heavy memorization — draw everything twice and you’re fine."
  },
  {
-  "code": "BIOL 205",
-  "id": "xmr81e9zomf7fe",
-  "take": "Fair grader, dry lectures. The reading quizzes sneak up on you.",
+  "take": "Mechanisms over memorizing. His practice sets are basically the exam.",
+  "id": "xmr81e9zoimi6f",
+  "rating": 4,
+  "code": "CHEM 261",
+  "up": 1783474712729,
+  "by": "Chris Okafor",
   "kind": "prof",
-  "by": "Maya Feldman",
+  "at": 1779210008340,
+  "byId": "seed-ChrisOkafor",
+  "prof": "Dr. Austell"
+ },
+ {
+  "up": 1783474712729,
+  "rating": 3,
+  "id": "xmr81e9zomf7fe",
+  "code": "BIOL 205",
+  "take": "Fair grader, dry lectures. The reading quizzes sneak up on you.",
   "byId": "seed-MayaFeldman",
   "prof": "Dr. Ramesh",
+  "kind": "prof",
   "at": 1780678808340,
-  "rating": 3,
-  "up": 1783474712729
+  "by": "Maya Feldman"
  }
 ]
