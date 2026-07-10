@@ -71,7 +71,31 @@
 
     slug: function (tag) { return String(tag).toLowerCase().replace(/\s+/g, '-'); },
     fromSlug: function (slug) {
-      return TAGS.find(function (t) { return api.slug(t) === String(slug).toLowerCase(); }) || null;
+      var s = String(slug).toLowerCase();
+      return api.allTags().find(function (t) { return api.slug(t) === s; }) || null;
+    },
+
+    /* The living tag universe: base tags first, then every custom tag any
+       post uses (alphabetical). A custom tag becomes permanent + site-wide
+       the moment a post carrying it syncs. */
+    allTags: function () {
+      var seen = {}, out = [];
+      TAGS.forEach(function (t) { var k = t.toLowerCase(); if (!seen[k]) { seen[k] = 1; out.push(t); } });
+      var extra = [];
+      api.all().forEach(function (p) {
+        (p.tags || []).forEach(function (t) {
+          var k = String(t).toLowerCase();
+          if (k && !seen[k]) { seen[k] = 1; extra.push(t); }
+        });
+      });
+      extra.sort(function (a, b) { return a.toLowerCase() < b.toLowerCase() ? -1 : a.toLowerCase() > b.toLowerCase() ? 1 : 0; });
+      return out.concat(extra);
+    },
+
+    cleanTag: function (raw) {
+      var t = String(raw || '').replace(/\s+/g, ' ').trim().slice(0, 28);
+      if (!t) return '';
+      return t.replace(/\b\w/g, function (c) { return c.toUpperCase(); });
     },
 
     fmtDate: function (iso) {

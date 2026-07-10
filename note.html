@@ -18,7 +18,7 @@ body{margin:0;background:#0A1A30;-webkit-font-smoothing:antialiased;font-family:
 ::selection{background:#4B9CD3;color:#0A1A30;}
 a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #4B9CD3;outline-offset:3px;}
 
-/* Sub-page nav (matches archive.html) */
+/* Sub-page nav */
 .subnav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px clamp(20px,4vw,48px);background:rgba(9,20,38,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(75,156,211,.18);}
 .subnav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;}
 .subnav-brand img{width:40px;height:40px;border-radius:50%;display:block;box-shadow:0 4px 16px -5px rgba(0,0,0,.6);}
@@ -40,10 +40,28 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .band .no{font-family:'Courier Prime',monospace;font-weight:700;color:#B9975B;font-size:15px;}
 .band .no small{color:#7FB2E0;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;font-size:11px;margin-right:12px;}
 
-/* The minute sheet */
+/* The minute sheet + margin gutter */
 .sheet-wrap{position:relative;background:#F7F4EC;color:#13294B;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;z-index:5;min-height:70vh;padding:clamp(48px,7vw,84px) clamp(20px,4vw,48px) clamp(90px,12vw,150px);overflow:clip;}
 .sheet-grain{position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.18;mix-blend-mode:multiply;z-index:1;}
-.sheet{position:relative;z-index:2;max-width:860px;margin:0 auto;background:#FBF8F1;border-radius:10px;border:1px solid rgba(19,41,75,.08);box-shadow:0 40px 80px -36px rgba(19,41,75,.4),0 8px 22px -10px rgba(19,41,75,.2);padding:clamp(26px,4.6vw,58px);}
+.nt-stage{position:relative;z-index:2;max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) clamp(215px,20vw,270px);gap:clamp(22px,3vw,44px);align-items:start;}
+.nt-main{min-width:0;}
+.sheet{position:relative;max-width:840px;background:#FBF8F1;border-radius:10px;border:1px solid rgba(19,41,75,.08);box-shadow:0 40px 80px -36px rgba(19,41,75,.4),0 8px 22px -10px rgba(19,41,75,.2);padding:clamp(26px,4.6vw,58px);--pad:44px;--mast-top:58px;--mast-h:44px;--full:clamp(120px,15vw,150px);transition:box-shadow .45s cubic-bezier(.25,.1,.25,1),transform .45s cubic-bezier(.25,.1,.25,1);}
+
+/* Photo peek-and-lift: rest = a darkened slice sitting behind the MINUTES/Nº
+   bar (white text over it); hover = the whole photo lifts up out of that
+   strip to reveal above the sheet, and the bar text returns to dark. */
+.sheet.hasphoto{overflow:visible;}
+.nt-photo{position:absolute;left:var(--pad);right:var(--pad);top:var(--mast-top);height:var(--mast-h);overflow:hidden;border-radius:7px 7px 0 0;z-index:1;transition:top .55s cubic-bezier(.22,.61,.36,1),height .55s cubic-bezier(.22,.61,.36,1),box-shadow .55s ease;box-shadow:0 0 0 rgba(0,0,0,0);}
+.nt-photo-row{position:absolute;left:0;right:0;bottom:0;height:var(--full);display:flex;gap:2px;}
+.nt-photo-row .ph{flex:1;min-width:0;background-size:cover;background-position:center;}
+.nt-photo-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(9,18,36,.55),rgba(9,18,36,.82));transition:opacity .5s ease;z-index:2;}
+.sheet.hasphoto:hover .nt-photo{top:calc(var(--mast-top) - var(--full));height:var(--full);box-shadow:0 26px 50px -22px rgba(0,0,0,.6);}
+.sheet.hasphoto:hover .nt-photo-scrim{opacity:0;}
+.sheet.hasphoto:hover{transform:translateY(-2px);}
+.sheet.hasphoto .sheet-mast{position:relative;z-index:3;}
+.sheet.hasphoto .sheet-mast .nm{color:#F5F7FA;transition:color .4s ease;}
+.sheet.hasphoto:hover .sheet-mast .nm{color:#13294B;}
+
 .sheet-mast{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:2.5px solid #13294B;padding-bottom:12px;margin-bottom:20px;flex-wrap:wrap;}
 .sheet-mast .nm{font-weight:900;letter-spacing:3px;font-size:14px;}
 .sheet-mast .is{font-family:'Courier Prime',monospace;font-weight:700;font-size:13px;color:#B9975B;white-space:nowrap;}
@@ -63,6 +81,65 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .nt-admin button.danger:hover{background:rgba(190,60,60,.09);}
 .nt-admin button[hidden]{display:none;}
 
+/* Annotation-mode toggle — top-right of the note */
+.nt-anmode{position:absolute;top:clamp(12px,1.8vw,18px);right:clamp(12px,1.8vw,18px);z-index:6;display:inline-flex;align-items:center;gap:9px;background:rgba(251,248,241,.94);border:1px solid rgba(19,41,75,.2);border-radius:999px;padding:7px 12px 7px 14px;cursor:pointer;box-shadow:0 8px 22px -12px rgba(19,41,75,.5);font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;font-size:10px;color:#5A7798;transition:color .2s,border-color .2s;}
+.nt-anmode:hover{border-color:#B9975B;color:#8a6d38;}
+.nt-anmode .tk{position:relative;width:34px;height:19px;border-radius:999px;background:rgba(19,41,75,.22);transition:background .25s ease;flex:none;}
+.nt-anmode .tk::after{content:"";position:absolute;top:2px;left:2.5px;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.3);transition:transform .25s cubic-bezier(.25,.1,.25,1);}
+.nt-anmode[aria-pressed="true"]{color:#8a6d38;border-color:#B9975B;}
+.nt-anmode[aria-pressed="true"] .tk{background:#B9975B;}
+.nt-anmode[aria-pressed="true"] .tk::after{transform:translateX(15px);}
+.sheet.anmode .md-body{cursor:text;}
+.sheet.anmode .nt-body{box-shadow:inset 0 0 0 2px rgba(185,151,91,.28);border-radius:8px;padding:16px;margin-top:8px;}
+
+/* Annotation highlights inside the body */
+.an-hl{border-radius:3px;padding:0 2px;cursor:pointer;box-decoration-break:clone;-webkit-box-decoration-break:clone;transition:filter .15s ease;}
+.an-hl:hover{filter:brightness(.95);}
+.an-hl-yellow{background:#FBEBA6;}
+.an-hl-gold{background:#EBD9B4;}
+.an-hl-blue{background:#CDE4F6;}
+.an-hl-green{background:#D4ECCB;}
+.an-hl-pink{background:#F6D6E4;}
+.an-hl.pulse{animation:anpulse 1s ease;}
+@keyframes anpulse{0%,100%{box-shadow:0 0 0 0 rgba(185,151,91,0);}30%{box-shadow:0 0 0 4px rgba(185,151,91,.5);}}
+
+/* Right margin: annotation comments aligned to their highlights */
+.nt-margin{position:relative;min-height:40px;}
+.nt-margin-head{font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:10px;color:#B9975B;margin-bottom:14px;}
+.nt-margin-hint{color:#8296AE;font-size:11.5px;line-height:1.6;font-style:italic;font-family:'Lora',serif;}
+.nt-mnote{position:absolute;left:0;right:0;background:#FBF8F1;border:1px solid rgba(19,41,75,.12);border-left:3px solid #B9975B;border-radius:0 9px 9px 0;padding:10px 12px;box-shadow:0 14px 30px -22px rgba(19,41,75,.5);transition:top .4s cubic-bezier(.25,.1,.25,1),box-shadow .2s;cursor:pointer;}
+.nt-mnote:hover{box-shadow:0 18px 34px -20px rgba(19,41,75,.6);}
+.nt-mnote.an-c-yellow{border-left-color:#D9BE55;}
+.nt-mnote.an-c-gold{border-left-color:#B9975B;}
+.nt-mnote.an-c-blue{border-left-color:#4B9CD3;}
+.nt-mnote.an-c-green{border-left-color:#5FA86B;}
+.nt-mnote.an-c-pink{border-left-color:#C95E97;}
+.nt-mnote .who{display:flex;align-items:center;gap:6px;font-weight:700;font-size:10.5px;color:#13294B;letter-spacing:.3px;margin-bottom:4px;flex-wrap:wrap;}
+.nt-mnote .role{font-weight:700;letter-spacing:.8px;font-size:8px;text-transform:uppercase;color:#8a6d38;border:1px solid rgba(185,151,91,.55);border-radius:999px;padding:1px 6px;}
+.nt-mnote .qt{font-family:'Lora',serif;font-style:italic;font-size:11px;color:#7C8CA3;line-height:1.4;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.nt-mnote .cmt{font-family:'Lora',serif;font-size:12.5px;line-height:1.55;color:#2c4160;}
+.nt-mnote .cmt:empty::before{content:"Highlighted, no note added.";color:#9aa7b8;font-style:italic;font-size:11.5px;}
+.nt-mnote .mtools{display:flex;gap:10px;margin-top:7px;}
+.nt-mnote .mtools button{background:none;border:0;padding:0;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:#5A7798;}
+.nt-mnote .mtools .del{color:#A03030;}
+.nt-mnote .mtools button:hover{text-decoration:underline;}
+.nt-mnote .dt{font-family:'Courier Prime',monospace;font-size:9.5px;color:#9aa7b8;margin-top:6px;}
+
+/* Selection popup (create an annotation) */
+.nt-anpop{position:fixed;z-index:400;width:270px;background:#FBF8F1;color:#13294B;border-radius:12px;box-shadow:0 30px 70px -20px rgba(0,0,0,.7);border:1px solid rgba(19,41,75,.14);padding:14px;opacity:0;visibility:hidden;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease,visibility .18s;}
+.nt-anpop.open{opacity:1;visibility:visible;transform:none;}
+.nt-anpop h5{margin:0 0 10px;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;font-size:10px;color:#33719F;}
+.nt-anpop-sw{display:flex;gap:8px;margin-bottom:11px;}
+.nt-anpop-sw button{width:26px;height:26px;border-radius:7px;border:2px solid transparent;cursor:pointer;padding:0;transition:transform .15s;}
+.nt-anpop-sw button:hover{transform:scale(1.12);}
+.nt-anpop-sw button.on{border-color:#13294B;}
+.nt-anpop textarea{display:block;width:100%;min-height:66px;padding:9px 11px;border-radius:9px;border:1px solid rgba(19,41,75,.26);background:#fff;color:#13294B;font-family:'Lora',serif;font-size:13.5px;line-height:1.55;resize:vertical;box-sizing:border-box;}
+.nt-anpop textarea:focus{outline:none;border-color:#4B9CD3;box-shadow:0 0 0 3px rgba(75,156,211,.2);}
+.nt-anpop-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;}
+.nt-anpop-foot .cancel{background:none;border:0;color:#8296AE;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;}
+.nt-anpop-foot .save{background:#B9975B;border:0;border-radius:999px;padding:9px 20px;color:#0A1A30;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;cursor:pointer;transition:transform .2s;}
+.nt-anpop-foot .save:hover{transform:translateY(-1px);}
+
 /* Missing record */
 .nt-missing{text-align:center;padding:clamp(30px,5vw,60px) 10px;}
 .nt-missing h2{margin:0 0 10px;font-family:'Lora',serif;font-weight:600;color:#13294B;}
@@ -70,48 +147,38 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .back-btn{display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 10px 24px -10px rgba(185,151,91,.8);transition:transform .2s;}
 .back-btn:hover{transform:translateY(-2px);}
 
-/* ---- Annotations & comments ---- */
-.an{max-width:860px;margin:clamp(26px,3.6vw,40px) auto 0;position:relative;z-index:2;}
-.an-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
-.an-head h3{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-0.01em;font-size:clamp(1.15rem,2.2vw,1.5rem);color:#13294B;}
-.an-head .n{color:#B9975B;}
-/* the personal show/hide switch */
-.an-toggle{display:inline-flex;align-items:center;gap:10px;background:none;border:0;padding:0;cursor:pointer;color:#5A7798;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;font-size:10.5px;}
-.an-toggle .tk{position:relative;width:40px;height:22px;border-radius:999px;background:rgba(19,41,75,.22);transition:background .25s ease;flex:none;}
-.an-toggle .tk::after{content:"";position:absolute;top:2.5px;left:3px;width:17px;height:17px;border-radius:50%;background:#FBF8F1;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:transform .25s cubic-bezier(.25,.1,.25,1);}
-.an-toggle[aria-pressed="true"] .tk{background:#B9975B;}
-.an-toggle[aria-pressed="true"] .tk::after{transform:translateX(17px);}
-.an-list{display:flex;flex-direction:column;gap:12px;}
-.an-list[hidden]{display:none;}
-.an-card{position:relative;background:#FBF8F1;border:1px solid rgba(19,41,75,.1);border-left:3px solid #4B9CD3;border-radius:0 10px 10px 0;padding:14px 18px;box-shadow:0 14px 30px -22px rgba(19,41,75,.4);}
-.an-card.is-annotation{border-left-color:#B9975B;background:#FBF6E9;}
-.an-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
-.an-au{font-weight:700;font-size:12.5px;color:#13294B;letter-spacing:.3px;}
-.an-role{font-weight:700;letter-spacing:1px;font-size:9px;text-transform:uppercase;color:#8a6d38;border:1px solid rgba(185,151,91,.55);border-radius:999px;padding:1.5px 8px;}
-.an-kind{font-weight:700;letter-spacing:1px;font-size:9px;text-transform:uppercase;color:#4B9CD3;}
-.an-card.is-annotation .an-kind{color:#8a6d38;}
-.an-dt{margin-left:auto;font-family:'Courier Prime',monospace;font-size:11px;color:#8296AE;white-space:nowrap;}
-.an-body{font-family:'Lora',serif;font-size:.98rem;line-height:1.7;color:#2c4160;}
-.an-del{position:absolute;right:10px;bottom:8px;background:none;border:0;padding:4px;color:#A03030;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;opacity:.55;}
-.an-del:hover{opacity:1;text-decoration:underline;}
-.an-empty{color:#8296AE;font-size:.9rem;line-height:1.6;background:#FBF8F1;border:1px dashed rgba(19,41,75,.22);border-radius:10px;padding:18px 20px;}
-.an-hidden-note{color:#8296AE;font-size:.85rem;font-style:italic;font-family:'Lora',serif;}
-/* composer */
-.an-form{margin-top:16px;background:#FBF8F1;border:1px solid rgba(19,41,75,.12);border-radius:12px;padding:16px 18px;}
-.an-form[hidden]{display:none;}
-.an-kinds{display:flex;gap:8px;margin-bottom:10px;}
-.an-kbtn{padding:7px 15px;border-radius:999px;border:1px solid rgba(19,41,75,.3);background:transparent;color:#3E5F87;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.1px;font-size:10px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s,border-color .2s;}
-.an-kbtn.on{background:#13294B;border-color:#13294B;color:#F5F7FA;}
-.an-kbtn.on.gold{background:#B9975B;border-color:#B9975B;color:#0A1A30;}
-.an-form textarea{display:block;width:100%;min-height:84px;padding:12px 14px;border-radius:10px;border:1px solid rgba(19,41,75,.28);background:#fff;color:#13294B;font-family:'Lora',serif;font-size:14.5px;line-height:1.65;resize:vertical;}
-.an-form textarea:focus{outline:none;border-color:#4B9CD3;box-shadow:0 0 0 3px rgba(75,156,211,.22);}
-.an-form-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;}
-.an-as{color:#8296AE;font-size:11px;letter-spacing:.4px;}
-.an-post{display:inline-flex;align-items:center;padding:11px 24px;border-radius:999px;border:0;background:#13294B;color:#F5F7FA;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer;transition:transform .2s,background .2s;}
-.an-post:hover{transform:translateY(-2px);background:#1A3765;}
-.an-login{margin-top:16px;text-align:center;background:#FBF8F1;border:1px dashed rgba(185,151,91,.6);border-radius:12px;padding:18px 20px;color:#5A7798;font-size:.9rem;line-height:1.6;}
-.an-login[hidden]{display:none;}
-.an-login a{color:#33719F;font-weight:700;}
+/* ---- Bottom comments (separate from annotations) ---- */
+.cm{max-width:840px;margin:clamp(30px,4vw,46px) 0 0;position:relative;z-index:2;}
+.cm-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+.cm-head h3{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-0.01em;font-size:clamp(1.15rem,2.2vw,1.5rem);color:#13294B;}
+.cm-head .n{color:#B9975B;}
+.cm-list{display:flex;flex-direction:column;gap:12px;}
+.cm-card{position:relative;background:#FBF8F1;border:1px solid rgba(19,41,75,.1);border-radius:10px;padding:14px 18px;box-shadow:0 14px 30px -22px rgba(19,41,75,.4);}
+.cm-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.cm-au{font-weight:700;font-size:12.5px;color:#13294B;letter-spacing:.3px;}
+.cm-role{font-weight:700;letter-spacing:1px;font-size:9px;text-transform:uppercase;color:#8a6d38;border:1px solid rgba(185,151,91,.55);border-radius:999px;padding:1.5px 8px;}
+.cm-dt{margin-left:auto;font-family:'Courier Prime',monospace;font-size:11px;color:#8296AE;white-space:nowrap;}
+.cm-body{font-family:'Lora',serif;font-size:.98rem;line-height:1.7;color:#2c4160;}
+.cm-del{position:absolute;right:10px;bottom:8px;background:none;border:0;padding:4px;color:#A03030;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;opacity:.55;}
+.cm-del:hover{opacity:1;text-decoration:underline;}
+.cm-empty{color:#8296AE;font-size:.9rem;line-height:1.6;background:#FBF8F1;border:1px dashed rgba(19,41,75,.22);border-radius:10px;padding:18px 20px;}
+.cm-form{margin-top:16px;background:#FBF8F1;border:1px solid rgba(19,41,75,.12);border-radius:12px;padding:16px 18px;}
+.cm-form[hidden]{display:none;}
+.cm-form textarea{display:block;width:100%;min-height:84px;padding:12px 14px;border-radius:10px;border:1px solid rgba(19,41,75,.28);background:#fff;color:#13294B;font-family:'Lora',serif;font-size:14.5px;line-height:1.65;resize:vertical;box-sizing:border-box;}
+.cm-form textarea:focus{outline:none;border-color:#4B9CD3;box-shadow:0 0 0 3px rgba(75,156,211,.22);}
+.cm-form-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;}
+.cm-as{color:#8296AE;font-size:11px;letter-spacing:.4px;}
+.cm-post{display:inline-flex;align-items:center;padding:11px 24px;border-radius:999px;border:0;background:#13294B;color:#F5F7FA;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer;transition:transform .2s,background .2s;}
+.cm-post:hover{transform:translateY(-2px);background:#1A3765;}
+.cm-login{margin-top:16px;text-align:center;background:#FBF8F1;border:1px dashed rgba(185,151,91,.6);border-radius:12px;padding:18px 20px;color:#5A7798;font-size:.9rem;line-height:1.6;}
+.cm-login[hidden]{display:none;}
+.cm-login a{color:#33719F;font-weight:700;}
+
+@media(max-width:1023px){
+  .nt-stage{grid-template-columns:1fr;}
+  .nt-margin{position:static;margin-top:26px;padding-top:22px;border-top:1px solid rgba(19,41,75,.14);}
+  .nt-mnote{position:static !important;margin-bottom:12px;}
+}
 
 /* Footer strip */
 .foot{background:#08172B;padding:clamp(30px,4vw,44px) clamp(20px,4vw,48px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;}
@@ -143,37 +210,44 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 <main class="sheet-wrap">
   <div class="sheet-grain"></div>
 
-  <article class="sheet" id="sheet">
-    <!-- record renders here -->
-  </article>
+  <div class="nt-stage">
+    <div class="nt-main">
+      <article class="sheet" id="sheet"><!-- record renders here --></article>
 
-  <!-- Annotations & comments -->
-  <section class="an" id="an" hidden>
-    <div class="an-head">
-      <h3>Annotations &amp; Comments <span class="n" id="an-count"></span></h3>
-      <button type="button" class="an-toggle" id="an-toggle" aria-pressed="true">
-        <span id="an-toggle-lbl">Shown</span><span class="tk" aria-hidden="true"></span>
-      </button>
+      <!-- Bottom comments (separate from margin annotations) -->
+      <section class="cm" id="cm" hidden>
+        <div class="cm-head">
+          <h3>Comments <span class="n" id="cm-count"></span></h3>
+        </div>
+        <div class="cm-list" id="cm-list"></div>
+        <form class="cm-form" id="cm-form" hidden>
+          <textarea id="cm-text" placeholder="Add a comment on this meeting — questions, follow-ups, or your own recap. **bold**, *italic*, __underline__ and ==highlights== work here too."></textarea>
+          <div class="cm-form-foot">
+            <span class="cm-as" id="cm-as"></span>
+            <button type="submit" class="cm-post">Post comment&nbsp;→</button>
+          </div>
+        </form>
+        <div class="cm-login" id="cm-login" hidden>
+          Members can comment on and annotate every record — <a href="#" id="cm-login-link">sign in</a> to add yours.
+        </div>
+      </section>
     </div>
-    <div class="an-list" id="an-list"></div>
-    <p class="an-hidden-note" id="an-hidden-note" hidden>Comments and annotations are hidden — flip the switch to read the margins.</p>
 
-    <form class="an-form" id="an-form" hidden>
-      <div class="an-kinds" role="group" aria-label="What are you adding?">
-        <button type="button" class="an-kbtn on" data-kind="comment">💬 Comment</button>
-        <button type="button" class="an-kbtn gold" data-kind="annotation">✎ Annotation</button>
-      </div>
-      <textarea id="an-text" placeholder="Add to the record — reactions, corrections, or your own notes from this meeting. **bold**, *italic*, __underline__ and ==highlights== work here too."></textarea>
-      <div class="an-form-foot">
-        <span class="an-as" id="an-as"></span>
-        <button type="submit" class="an-post">Add to the margins&nbsp;→</button>
-      </div>
-    </form>
-    <div class="an-login" id="an-login" hidden>
-      Members can comment on and annotate every record — <a href="#" id="an-login-link">sign in</a> to add yours.
-    </div>
-  </section>
+    <!-- Right margin: annotations aligned to their highlights -->
+    <aside class="nt-margin" id="nt-margin" hidden></aside>
+  </div>
 </main>
+
+<!-- Selection popup: color + margin note -->
+<div class="nt-anpop" id="nt-anpop" role="dialog" aria-label="Annotate the selection">
+  <h5>Highlight &amp; annotate</h5>
+  <div class="nt-anpop-sw" id="nt-anpop-sw"></div>
+  <textarea id="nt-anpop-text" placeholder="Add a margin note (optional)…"></textarea>
+  <div class="nt-anpop-foot">
+    <button type="button" class="cancel" id="nt-anpop-cancel">Cancel</button>
+    <button type="button" class="save" id="nt-anpop-save">Save annotation</button>
+  </div>
+</div>
 
 <footer class="foot">
   <div class="foot-brand">
@@ -197,28 +271,30 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 document.querySelectorAll('[data-auth-mount]').forEach(function(el){ DDSAuth.mountNav(el); });
 
 var sheet = document.getElementById('sheet');
-var anSec = document.getElementById('an');
+var marginEl = document.getElementById('nt-margin');
+var stageEl = document.querySelector('.nt-stage');
 var noteId = (function(){
   var m = /[?&]id=([^&]+)/.exec(location.search);
   return m ? decodeURIComponent(m[1]) : null;
 })();
-var SHOW_KEY = 'dds-mn-show-annotations'; // personal UI preference, per browser
+var ANMODE_KEY = 'dds-mn-annotate-mode'; // personal, per browser
 function pad(no){ return no < 10 ? '0' + no : '' + no; }
-
-/* ---------- the record ---------- */
 function note(){ return noteId ? DDSMinutes.get(noteId) : null; }
 
+/* ================= the record ================= */
 function renderNote(){
   var n = note();
   if (!n) {
     document.getElementById('band-no').innerHTML = '<small>The Archive</small><span class="stamp">Record not found</span>';
+    sheet.className = 'sheet';
     sheet.innerHTML =
       '<div class="nt-missing">' +
         '<h2>This record isn’t in the minute book.</h2>' +
         '<p>It may have been removed, or the link is missing its id.</p>' +
         '<a class="back-btn" href="archive.html">Open The Archive&nbsp;→</a>' +
       '</div>';
-    anSec.hidden = true;
+    document.getElementById('cm').hidden = true;
+    marginEl.hidden = true;
     document.title = 'Record not found — The Archive | Delta Delta Sigma at UNC';
     return;
   }
@@ -226,8 +302,16 @@ function renderNote(){
   document.getElementById('band-no').innerHTML =
     '<small>The Archive</small><span class="stamp">Minute Record Nº ' + pad(n.no) + ' · ' + DDSMinutes.fmtDate(n.date) + '</span>';
 
+  var photos = (n.photos || []).filter(Boolean);
   var by = 'Recorded by ' + esc(n.author || 'Exec Board') + (n.authorTitle ? ' — ' + esc(n.authorTitle) : '');
+  sheet.className = 'sheet' + (photos.length ? ' hasphoto' : '') + (annMode ? ' anmode' : '');
   sheet.innerHTML =
+    (photos.length ?
+      '<div class="nt-photo"><div class="nt-photo-row">' +
+        photos.map(function(p){ return '<div class="ph" style="background-image:url(\'' + p + '\');"></div>'; }).join('') +
+      '</div><div class="nt-photo-scrim"></div></div>' : '') +
+    '<button type="button" class="nt-anmode" id="nt-anmode" aria-pressed="' + (annMode ? 'true' : 'false') + '" title="Highlight text to leave a margin note">' +
+      '<span id="nt-anmode-lbl">Annotate</span><span class="tk" aria-hidden="true"></span></button>' +
     '<div class="sheet-mast"><span class="nm">MINUTES</span><span class="is">Nº ' + pad(n.no) + ' · ' + DDSMinutes.fmtDate(n.date) + '</span></div>' +
     '<div class="nt-tags">' + (n.tags || []).map(function(t){ return '<span class="nt-tag">' + esc(t) + '</span>'; }).join('') + '</div>' +
     '<h1 class="nt-title">' + esc(n.title) +
@@ -236,14 +320,16 @@ function renderNote(){
     '<div class="nt-byline"><span>' + by + '</span>' +
       (n.editedAt ? '<span class="dot"></span><span>Edited ' + DDSMinutes.fmtDate(n.editedAt) + '</span>' : '') +
     '</div>' +
-    '<div class="nt-body"><div class="md-body">' + DDSMinutes.md(n.body) + '</div></div>' +
+    '<div class="nt-body"><div class="md-body" id="nt-mdbody">' + DDSMinutes.md(n.body) + '</div></div>' +
     '<div class="nt-admin">' +
       '<button type="button" id="nt-edit" hidden>Edit this record ✎</button>' +
       '<button type="button" id="nt-del" class="danger" hidden></button>' +
     '</div>';
 
-  // exec controls — seed records edit copy-on-write and can't be deleted;
-  // deleting an edited copy restores the original.
+  // photo geometry: pin the darkened strip to the MINUTES/Nº bar
+  if (photos.length) sizePhoto();
+
+  // exec controls
   var canWrite = DDSMinutes.canWrite();
   var edit = document.getElementById('nt-edit');
   var del = document.getElementById('nt-del');
@@ -252,121 +338,306 @@ function renderNote(){
   del.textContent = n.replaces ? 'Remove edits (restore original)' : 'Delete this record';
   edit.addEventListener('click', function(){
     DDSMinutesUI.openComposer(note(), function(saved){
-      if (saved.id !== noteId) {
-        noteId = saved.id;
-        history.replaceState(null, '', 'note.html?id=' + encodeURIComponent(saved.id));
-      }
-      renderNote(); renderComments();
+      if (saved.id !== noteId) { noteId = saved.id; history.replaceState(null, '', 'note.html?id=' + encodeURIComponent(saved.id)); }
+      renderNote(); renderAnnotations(); renderComments();
     });
   });
   del.addEventListener('click', function(){
-    var q = n.replaces
-      ? 'Remove your edits and restore the original record?'
-      : 'Delete “' + n.title + '” from The Archive?';
+    var q = n.replaces ? 'Remove your edits and restore the original record?' : 'Delete “' + n.title + '” from The Archive?';
     if (!confirm(q)) return;
     DDSMinutes.remove(n.id);
     location.href = n.replaces ? 'note.html?id=' + encodeURIComponent(n.replaces) : 'archive.html';
   });
-  anSec.hidden = false;
+
+  // annotation-mode toggle
+  document.getElementById('nt-anmode').addEventListener('click', toggleAnnMode);
+
+  document.getElementById('cm').hidden = false;
+  renderAnnotations();
 }
 
-/* ---------- annotations & comments ---------- */
-var listEl = document.getElementById('an-list');
-var toggle = document.getElementById('an-toggle');
-var form = document.getElementById('an-form');
-var loginBox = document.getElementById('an-login');
-var kind = 'comment';
+function sizePhoto(){
+  var mast = sheet.querySelector('.sheet-mast');
+  if (!mast) return;
+  sheet.style.setProperty('--pad', mast.offsetLeft + 'px');
+  sheet.style.setProperty('--mast-top', mast.offsetTop + 'px');
+  sheet.style.setProperty('--mast-h', mast.offsetHeight + 'px');
+}
 
-function shown(){ return localStorage.getItem(SHOW_KEY) !== '0'; }
+/* ================= annotation mode ================= */
+var annMode = localStorage.getItem(ANMODE_KEY) === '1';
+function toggleAnnMode(){
+  if (!DDSAuth.current()) { DDSAuth.requireLogin('note.html' + location.search); return; }
+  annMode = !annMode;
+  localStorage.setItem(ANMODE_KEY, annMode ? '1' : '0');
+  sheet.classList.toggle('anmode', annMode);
+  var btn = document.getElementById('nt-anmode');
+  if (btn) { btn.setAttribute('aria-pressed', annMode ? 'true' : 'false'); document.getElementById('nt-anmode-lbl').textContent = annMode ? 'Annotating' : 'Annotate'; }
+  if (!annMode) hideAnpop();
+}
+
+/* ---- offset-anchored highlight rendering ---- */
+function rangeOffsets(root, range){
+  var pre = document.createRange();
+  pre.selectNodeContents(root);
+  try { pre.setEnd(range.startContainer, range.startOffset); } catch (e) { return null; }
+  var start = pre.toString().length;
+  var len = range.toString().length;
+  return { start: start, len: len, quote: range.toString() };
+}
+function applyHighlights(root, anns){
+  if (!anns.length) return;
+  var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+  var nodes = [], pos = 0, n;
+  while ((n = walker.nextNode())) { nodes.push({ node: n, start: pos }); pos += n.nodeValue.length; }
+  nodes.forEach(function(item){
+    var text = item.node.nodeValue, base = item.start, L = text.length;
+    var owner = new Array(L);
+    var touched = false;
+    anns.forEach(function(a){
+      var from = Math.max(0, a.start - base), to = Math.min(L, a.start + a.len - base);
+      for (var i = from; i < to; i++) { if (owner[i] == null) { owner[i] = a; touched = true; } }
+    });
+    if (!touched) return;
+    var frag = document.createDocumentFragment(), i = 0;
+    while (i < L) {
+      var o = owner[i], j = i + 1;
+      while (j < L && owner[j] === o) j++;
+      var seg = text.slice(i, j);
+      if (o == null) frag.appendChild(document.createTextNode(seg));
+      else {
+        var m = document.createElement('mark');
+        m.className = 'an-hl an-hl-' + o.color;
+        m.setAttribute('data-an', o.id);
+        m.textContent = seg;
+        frag.appendChild(m);
+      }
+      i = j;
+    }
+    item.node.parentNode.replaceChild(frag, item.node);
+  });
+}
+
+function renderAnnotations(){
+  var body = document.getElementById('nt-mdbody');
+  var n = note();
+  if (!body || !n) { marginEl.hidden = true; return; }
+  var anns = DDSMinutes.annotationsFor(n.id);
+  // repaint body from source, then lay the highlights back on
+  body.innerHTML = DDSMinutes.md(n.body);
+  applyHighlights(body, anns);
+
+  var me = DDSAuth.current();
+  var withComments = anns; // every annotation gets a margin slot (bare highlights show a hint)
+  if (!withComments.length) {
+    marginEl.hidden = false;
+    marginEl.innerHTML = '<div class="nt-margin-head">In the margins</div>' +
+      '<div class="nt-margin-hint">' + (DDSAuth.current()
+        ? 'Turn on <b>Annotate</b> (top-right), then highlight any line to leave a colored margin note.'
+        : 'Members can highlight lines here and leave margin notes. Sign in and turn on Annotate to start.') + '</div>';
+    return;
+  }
+  marginEl.hidden = false;
+  marginEl.innerHTML = '<div class="nt-margin-head">In the margins · ' + withComments.length + '</div>' +
+    withComments.map(function(a){
+      return '<div class="nt-mnote an-c-' + a.color + '" data-for="' + esc(a.id) + '">' +
+        '<div class="who">' + esc(a.author) + (a.authorTitle ? '<span class="role">' + esc(a.authorTitle) + '</span>' : '') + '</div>' +
+        (a.quote ? '<div class="qt">“' + esc(a.quote) + '”</div>' : '') +
+        '<div class="cmt">' + (a.comment ? commentHtml(a.comment) : '') + '</div>' +
+        '<div class="dt stamp">' + fmtWhen(a.at) + '</div>' +
+        (DDSMinutes.canRemoveComment(a, me)
+          ? '<div class="mtools"><button type="button" class="edit" data-edit="' + esc(a.id) + '">Edit</button><button type="button" class="del" data-del="' + esc(a.id) + '">Remove</button></div>'
+          : '') +
+      '</div>';
+    }).join('');
+  layoutMargin();
+}
+
+function layoutMargin(){
+  if (!stageEl) return;
+  var narrow = window.matchMedia('(max-width:1023px)').matches;
+  if (narrow) {
+    Array.prototype.forEach.call(marginEl.querySelectorAll('.nt-mnote'), function(c){ c.style.top = ''; });
+    return;
+  }
+  var stageTop = stageEl.getBoundingClientRect().top;
+  var lastBottom = 34; // below the head
+  Array.prototype.forEach.call(marginEl.querySelectorAll('.nt-mnote'), function(card){
+    var id = card.getAttribute('data-for');
+    var mark = sheet.querySelector('.md-body mark[data-an="' + id + '"]');
+    var y = mark ? (mark.getBoundingClientRect().top - stageTop) : lastBottom + 8;
+    if (y < lastBottom + 10) y = lastBottom + 10;
+    card.style.top = y + 'px';
+    lastBottom = y + card.offsetHeight;
+  });
+  marginEl.style.minHeight = (lastBottom + 10) + 'px';
+}
+
+/* click a highlight → pulse + scroll its margin card */
+sheet.addEventListener('click', function(e){
+  var mk = e.target.closest('mark[data-an]');
+  if (!mk) return;
+  var id = mk.getAttribute('data-an');
+  sheet.querySelectorAll('mark[data-an="' + id + '"]').forEach(function(x){
+    x.classList.remove('pulse'); void x.offsetWidth; x.classList.add('pulse');
+  });
+  var card = marginEl.querySelector('.nt-mnote[data-for="' + id + '"]');
+  if (card) {
+    card.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+    card.style.boxShadow = '0 0 0 2px #B9975B';
+    setTimeout(function(){ card.style.boxShadow = ''; }, 900);
+  }
+});
+
+/* margin card tools (edit / remove) */
+marginEl.addEventListener('click', function(e){
+  var del = e.target.closest('[data-del]');
+  if (del) {
+    if (!confirm('Remove this annotation?')) return;
+    DDSMinutes.removeComment(del.getAttribute('data-del'));
+    renderAnnotations();
+    return;
+  }
+  var ed = e.target.closest('[data-edit]');
+  if (ed) { editAnnotation(ed.getAttribute('data-edit')); return; }
+});
+
+function editAnnotation(id){
+  var a = DDSMinutes.annotationsFor(noteId).find(function(x){ return x.id === id; });
+  if (!a) return;
+  var next = prompt('Edit your margin note:', a.comment || '');
+  if (next === null) return;
+  DDSMinutes.updateEntry(id, { comment: next.trim() });
+  renderAnnotations();
+}
+
+/* ---- selection → create popup ---- */
+var anpop = document.getElementById('nt-anpop');
+var anpopSw = document.getElementById('nt-anpop-sw');
+var anpopText = document.getElementById('nt-anpop-text');
+var pendingSel = null, pickedColor = 'yellow';
+var SWATCH = { yellow: '#FBEBA6', gold: '#EBD9B4', blue: '#CDE4F6', green: '#D4ECCB', pink: '#F6D6E4' };
+anpopSw.innerHTML = Object.keys(SWATCH).map(function(c){
+  return '<button type="button" data-c="' + c + '" style="background:' + SWATCH[c] + ';" aria-label="' + c + '"></button>';
+}).join('');
+function markColor(){
+  anpopSw.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-c') === pickedColor); });
+}
+anpopSw.addEventListener('click', function(e){
+  var b = e.target.closest('[data-c]'); if (!b) return;
+  pickedColor = b.getAttribute('data-c'); markColor();
+});
+function showAnpop(rect){
+  markColor();
+  anpopText.value = '';
+  anpop.classList.add('open');
+  var w = 270, ph = anpop.offsetHeight || 190;
+  var left = Math.min(window.innerWidth - w - 12, Math.max(12, rect.left + rect.width / 2 - w / 2));
+  var top = rect.bottom + 10;
+  if (top + ph > window.innerHeight - 12) top = Math.max(12, rect.top - ph - 10);
+  anpop.style.left = left + 'px';
+  anpop.style.top = top + 'px';
+}
+function hideAnpop(){ anpop.classList.remove('open'); pendingSel = null; }
+
+document.addEventListener('mouseup', onSelectionEnd);
+document.addEventListener('touchend', onSelectionEnd);
+function onSelectionEnd(e){
+  if (!annMode) return;
+  if (anpop.contains(e.target)) return;
+  setTimeout(function(){
+    var sel = window.getSelection();
+    var body = document.getElementById('nt-mdbody');
+    if (!sel || sel.isCollapsed || !sel.rangeCount || !body) { return; }
+    var range = sel.getRangeAt(0);
+    if (!body.contains(range.startContainer) || !body.contains(range.endContainer)) return;
+    var off = rangeOffsets(body, range);
+    if (!off || off.len < 1 || !off.quote.trim()) return;
+    pendingSel = off;
+    showAnpop(range.getBoundingClientRect());
+  }, 10);
+}
+document.getElementById('nt-anpop-cancel').addEventListener('click', function(){ hideAnpop(); window.getSelection().removeAllRanges(); });
+document.getElementById('nt-anpop-save').addEventListener('click', function(){
+  if (!pendingSel) return;
+  var me = DDSAuth.current();
+  if (!me) { DDSAuth.requireLogin('note.html' + location.search); return; }
+  DDSMinutes.addAnnotation(noteId, {
+    color: pickedColor, quote: pendingSel.quote, start: pendingSel.start, len: pendingSel.len,
+    comment: anpopText.value
+  }, me);
+  hideAnpop();
+  window.getSelection().removeAllRanges();
+  renderAnnotations();
+});
+document.addEventListener('mousedown', function(e){
+  if (anpop.classList.contains('open') && !anpop.contains(e.target)) hideAnpop();
+});
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') hideAnpop(); });
+
+/* ================= bottom comments (plain) ================= */
+var cmList = document.getElementById('cm-list');
+var cmForm = document.getElementById('cm-form');
+var cmLogin = document.getElementById('cm-login');
 function fmtWhen(at){
   var d = new Date(at || 0);
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' +
          d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
-/* comment bodies get inline markdown + line breaks, never block markup */
 function commentHtml(s){
   return String(s || '').split(/\n+/).map(function(p){ return DDSMinutes.inline(p); }).join('<br>');
 }
-
 function renderComments(){
   var n = note();
   if (!n) return;
   var me = DDSAuth.current();
-  var list = DDSMinutes.commentsFor(n.id);
-  document.getElementById('an-count').textContent = '(' + list.length + ')';
-
-  var on = shown();
-  toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
-  document.getElementById('an-toggle-lbl').textContent = on ? 'Shown' : 'Hidden';
-  listEl.hidden = !on;
-  document.getElementById('an-hidden-note').hidden = on;
-
-  listEl.innerHTML = list.length ? list.map(function(c){
-    var isAn = c.kind === 'annotation';
-    return '<div class="an-card' + (isAn ? ' is-annotation' : '') + '">' +
-      '<div class="an-top">' +
-        '<span class="an-au">' + esc(c.author) + '</span>' +
-        (c.authorTitle ? '<span class="an-role">' + esc(c.authorTitle) + '</span>' : '') +
-        '<span class="an-kind">' + (isAn ? '✎ Annotation' : '💬 Comment') + '</span>' +
-        '<span class="an-dt stamp">' + fmtWhen(c.at) + '</span>' +
+  var list = DDSMinutes.plainCommentsFor(n.id);
+  document.getElementById('cm-count').textContent = '(' + list.length + ')';
+  cmList.innerHTML = list.length ? list.map(function(c){
+    return '<div class="cm-card">' +
+      '<div class="cm-top">' +
+        '<span class="cm-au">' + esc(c.author) + '</span>' +
+        (c.authorTitle ? '<span class="cm-role">' + esc(c.authorTitle) + '</span>' : '') +
+        '<span class="cm-dt stamp">' + fmtWhen(c.at) + '</span>' +
       '</div>' +
-      '<div class="an-body">' + commentHtml(c.body) + '</div>' +
-      (DDSMinutes.canRemoveComment(c, me) ? '<button type="button" class="an-del" data-del="' + esc(c.id) + '">Remove</button>' : '') +
+      '<div class="cm-body">' + commentHtml(c.body) + '</div>' +
+      (DDSMinutes.canRemoveComment(c, me) ? '<button type="button" class="cm-del" data-del="' + esc(c.id) + '">Remove</button>' : '') +
     '</div>';
-  }).join('') :
-    '<div class="an-empty">The margins are empty — no comments or annotations on this record yet. Signed-in members can add the first one below.</div>';
+  }).join('') : '<div class="cm-empty">No comments yet. Signed-in members can start the conversation below — or turn on Annotate to leave notes in the margins.</div>';
 
-  form.hidden = !me;
-  loginBox.hidden = !!me;
-  if (me) {
-    document.getElementById('an-as').textContent = 'Posting as ' + me.name +
-      (DDSAuth.execTitle(me) ? ' · ' + DDSAuth.execTitle(me) : '');
-  }
+  cmForm.hidden = !me;
+  cmLogin.hidden = !!me;
+  if (me) document.getElementById('cm-as').textContent = 'Posting as ' + me.name + (DDSAuth.execTitle(me) ? ' · ' + DDSAuth.execTitle(me) : '');
 }
-
-toggle.addEventListener('click', function(){
-  localStorage.setItem(SHOW_KEY, shown() ? '0' : '1');
-  renderComments();
-});
-
-document.querySelectorAll('.an-kbtn').forEach(function(b){
-  b.addEventListener('click', function(){
-    kind = b.getAttribute('data-kind');
-    document.querySelectorAll('.an-kbtn').forEach(function(x){ x.classList.toggle('on', x === b); });
-  });
-});
-
-form.addEventListener('submit', function(e){
+cmForm.addEventListener('submit', function(e){
   e.preventDefault();
   var me = DDSAuth.current();
   if (!me) return;
-  var ta = document.getElementById('an-text');
-  var c = DDSMinutes.addComment(noteId, kind, ta.value, me);
+  var ta = document.getElementById('cm-text');
+  var c = DDSMinutes.addComment(noteId, 'comment', ta.value, me);
   if (!c) return;
   ta.value = '';
-  if (!shown()) localStorage.setItem(SHOW_KEY, '1'); // you'd want to see your own
   renderComments();
 });
-
-listEl.addEventListener('click', function(e){
+cmList.addEventListener('click', function(e){
   var b = e.target.closest('[data-del]');
   if (!b) return;
-  if (!confirm('Remove this from the margins?')) return;
+  if (!confirm('Remove this comment?')) return;
   DDSMinutes.removeComment(b.getAttribute('data-del'));
   renderComments();
 });
-
-document.getElementById('an-login-link').addEventListener('click', function(e){
+document.getElementById('cm-login-link').addEventListener('click', function(e){
   e.preventDefault();
   DDSAuth.requireLogin('note.html' + location.search);
 });
 
-// live refresh: sign-in state, other tabs, cloud pulls
+/* ================= live refresh ================= */
 DDSAuth.onChange(function(){ renderNote(); renderComments(); });
 window.addEventListener('storage', function(e){
   if (e.key === 'dds-minutes-v1') { renderNote(); renderComments(); }
-  else if (e.key === 'dds-minute-comments-v1') renderComments();
+  else if (e.key === 'dds-minute-comments-v1') { renderAnnotations(); renderComments(); }
 });
+window.addEventListener('resize', function(){ if (note() && (note().photos || []).length) sizePhoto(); layoutMargin(); });
 
 renderNote();
 renderComments();

@@ -99,9 +99,10 @@
       toRows: function (v) { return Array.isArray(v) ? v : []; },
       fromRows: function (rows) { return rows; }
     },
-    minutes: {   // The Archive — exec meeting notes (dds-minutes.js)
-      key: 'dds-minutes-v1', coll: 'minutes', every: 60,
-      when: function () { return true; },
+    minutes: {   // The Archive — exec meeting notes (dds-minutes.js). maxRowBytes
+      key: 'dds-minutes-v1', coll: 'minutes', every: 60,   // keeps records whose
+      when: function () { return true; },                  // photos would blow the
+      maxRowBytes: 900000,                                 // ~1MB doc cap local-only.
       toRows: function (v) { return Array.isArray(v) ? v : []; },
       fromRows: function (rows) { return rows; }
     },

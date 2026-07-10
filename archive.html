@@ -58,6 +58,19 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .mast-sub{margin:26px 0 0;font-family:'Lora',serif;font-style:italic;font-size:clamp(1rem,1.8vw,1.3rem);line-height:1.6;color:#C5D6E8;max-width:620px;}
 .mast-meta{display:flex;align-items:center;gap:16px;margin-top:26px;color:#7FB2E0;font-weight:600;letter-spacing:2.5px;font-size:11.5px;text-transform:uppercase;flex-wrap:wrap;justify-content:center;}
 .mast-meta .dot{width:5px;height:5px;border-radius:50%;background:#B9975B;}
+/* Baked-in filing motifs flanking the masthead */
+.mast-deco{position:absolute;bottom:clamp(24px,5vw,54px);opacity:.52;pointer-events:none;font-family:'Courier Prime',monospace;}
+.mast-deco-l{left:clamp(14px,5vw,66px);transform:rotate(-4deg);}
+.mast-deco-r{right:clamp(14px,5vw,66px);transform:rotate(3deg);}
+.deco-card{display:flex;flex-direction:column;gap:6px;padding:12px 15px;border:1px dashed rgba(185,151,91,.6);border-radius:4px;background:rgba(255,255,255,.03);width:154px;}
+.deco-tab{align-self:flex-start;background:rgba(185,151,91,.9);color:#0A1A30;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:8px;padding:2px 8px;border-radius:2px;}
+.deco-line{color:#9FB6CE;font-size:9.5px;letter-spacing:1px;border-bottom:1px solid rgba(159,182,206,.25);padding-bottom:6px;}
+.deco-code{color:#B9975B;font-weight:700;font-size:13px;}
+.deco-seal{width:104px;height:104px;border-radius:50%;border:1.5px dashed rgba(127,178,224,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.deco-seal-top{font-size:9px;letter-spacing:2px;color:#7FB2E0;}
+.deco-seal-no{font-size:30px;font-weight:700;color:#B9975B;line-height:1;}
+.deco-seal-bot{font-family:'Montserrat',sans-serif;font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;color:#5A7798;}
+@media(max-width:920px){.mast-deco{display:none;}}
 
 /* Minute book (paper) */
 .arch{position:relative;background:#F7F4EC;color:#13294B;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;z-index:5;min-height:100vh;padding:0 0 clamp(90px,12vw,150px);overflow:clip;}
@@ -72,6 +85,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .chip{padding:8px 16px;border-radius:999px;border:1px solid rgba(19,41,75,.3);background:transparent;color:#3E5F87;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.2px;font-size:10.5px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s;white-space:nowrap;}
 .chip:hover{border-color:#B9975B;transform:translateY(-1px);}
 .chip.active{background:#13294B;border-color:#13294B;color:#F5F7FA;}
+.match{display:inline-flex;align-items:center;gap:8px;margin-left:auto;color:#5A7798;font-weight:700;letter-spacing:1.4px;font-size:10px;text-transform:uppercase;white-space:nowrap;}
+.match[hidden]{display:none;}
+.match-seg{display:inline-flex;border:1px solid rgba(19,41,75,.28);border-radius:999px;overflow:hidden;}
+.match-seg button{border:0;background:transparent;padding:6px 13px;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1px;font-size:10px;text-transform:uppercase;color:#3E5F87;cursor:pointer;transition:background .2s,color .2s;}
+.match-seg button.on{background:#13294B;color:#F5F7FA;}
 
 /* mono "typed record" bits */
 .stamp{font-family:'Courier Prime',monospace;letter-spacing:.5px;}
@@ -79,7 +97,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 /* Featured record: the open page of the minute book — ruled lines and a
    gold margin rule, the way a real minute sheet is kept. */
 .feat{position:relative;display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:0;background:#FBF8F1;border-radius:8px;overflow:hidden;box-shadow:0 40px 80px -36px rgba(19,41,75,.45),0 8px 22px -10px rgba(19,41,75,.25);margin:clamp(40px,6vw,72px) 0 clamp(40px,6vw,64px);border:1px solid rgba(19,41,75,.08);}
-.feat-side{position:relative;background:#13294B;color:#EAF1F8;padding:clamp(26px,3.4vw,42px) clamp(22px,2.6vw,32px);display:flex;flex-direction:column;justify-content:space-between;gap:22px;}
+.feat-side{position:relative;overflow:hidden;background:#13294B;color:#EAF1F8;padding:clamp(26px,3.4vw,42px) clamp(22px,2.6vw,32px);display:flex;flex-direction:column;justify-content:space-between;gap:22px;}
+.feat-side>*{position:relative;z-index:1;}
+.feat-photobg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;opacity:.32;transition:opacity .55s ease,transform .55s ease;}
+.feat:hover .feat-photobg{opacity:.56;transform:scale(1.06);}
 .feat-side .no{font-family:'Courier Prime',monospace;font-weight:700;font-size:clamp(2.2rem,4vw,3.1rem);line-height:1;color:#B9975B;white-space:nowrap;}
 .feat-side .no small{display:block;font-size:.28em;letter-spacing:3px;color:#7FB2E0;font-family:'Montserrat',sans-serif;font-weight:700;text-transform:uppercase;margin-bottom:10px;}
 .feat-side .dt{font-family:'Courier Prime',monospace;font-size:15px;color:#C5D6E8;}
@@ -109,6 +130,20 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .pg-card:hover{transform:translateY(-8px);box-shadow:0 34px 64px -28px rgba(19,41,75,.5);}
 .pg-card::after{content:"";position:absolute;inset:0;border-radius:8px;background:url('grain.png') repeat;opacity:.12;mix-blend-mode:multiply;pointer-events:none;}
 .pg-card>*{position:relative;z-index:2;}
+/* Photo peek-and-lift: darkened strip behind the MINUTES/Nº bar in rest
+   (white text over it), the whole photo lifts up on hover to reveal above
+   the card, and the bar text returns to dark. Width = the bar width. */
+.pg-card{--full:130px;}
+.pg-card.hasphoto{overflow:visible;}
+.pg-photo{position:absolute;left:var(--pad,18px);right:var(--pad,18px);top:var(--mast-top,18px);height:var(--mast-h,26px);overflow:hidden;border-radius:6px 6px 0 0;z-index:1;transition:top .5s cubic-bezier(.22,.61,.36,1),height .5s cubic-bezier(.22,.61,.36,1),box-shadow .5s ease;}
+.pg-photo-row{position:absolute;left:0;right:0;bottom:0;height:var(--full,130px);display:flex;gap:2px;}
+.pg-photo-row .ph{flex:1;min-width:0;background-size:cover;background-position:center;}
+.pg-photo-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(9,18,36,.5),rgba(9,18,36,.8));transition:opacity .5s ease;z-index:2;}
+.pg-card.hasphoto:hover .pg-photo{top:calc(var(--mast-top,18px) - var(--full,130px));height:var(--full,130px);box-shadow:0 22px 44px -20px rgba(0,0,0,.6);}
+.pg-card.hasphoto:hover .pg-photo-scrim{opacity:0;}
+.pg-card.hasphoto .pg-mast{position:relative;z-index:3;}
+.pg-card.hasphoto .pg-mast .nm{color:#F5F7FA;transition:color .4s ease;}
+.pg-card.hasphoto:hover .pg-mast .nm{color:#13294B;}
 .pg-mast{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1.5px solid #13294B;padding-bottom:8px;}
 .pg-mast .nm{font-weight:900;letter-spacing:2px;font-size:11px;}
 .pg-mast .is{font-family:'Courier Prime',monospace;font-weight:700;font-size:11px;color:#B9975B;white-space:nowrap;}
@@ -170,6 +205,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
   <div class="mast-meta">
     <span class="stamp" id="mast-count">— records</span><span class="dot"></span><span>Filed by the exec board</span><span class="dot"></span><span>Est. 2026</span>
   </div>
+  <!-- Baked-in filing motifs flanking the title -->
+  <div class="mast-deco mast-deco-l" aria-hidden="true">
+    <div class="deco-card">
+      <span class="deco-tab">Ref</span>
+      <span class="deco-line">ΔΔΣ · CHAPTER MINUTES</span>
+      <span class="deco-code stamp">371.8 / D3</span>
+    </div>
+  </div>
+  <div class="mast-deco mast-deco-r" aria-hidden="true">
+    <div class="deco-seal">
+      <span class="deco-seal-top stamp">Vol. I</span>
+      <span class="deco-seal-no stamp" id="deco-count">—</span>
+      <span class="deco-seal-bot">On file</span>
+    </div>
+  </div>
 </header>
 
 <!-- MINUTE BOOK -->
@@ -179,6 +229,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     <div class="rail-in">
       <span class="rail-label">Filter by meeting type</span>
       <div class="chips" id="chips" role="group" aria-label="Filter records by tag"></div>
+      <div class="match" id="match" hidden>Match
+        <span class="match-seg">
+          <button type="button" data-mode="any" class="on">Any</button>
+          <button type="button" data-mode="all">All</button>
+        </span>
+      </div>
     </div>
   </div>
   <div class="arch-in">
@@ -216,30 +272,62 @@ var chipsEl = document.getElementById('chips');
 var featSlot = document.getElementById('feat-slot');
 var gridEl = document.getElementById('pg-grid');
 var countEl = document.getElementById('pg-count');
-var activeTag = null; // null = all
+var activeTags = []; // [] = all
+var matchMode = 'any'; // 'any' (OR) | 'all' (AND)
+var matchEl = document.getElementById('match');
+
+function isActive(tag){ return activeTags.indexOf(tag) !== -1; }
 
 // ---- Filter chips ----
 function renderChips(){
   var mk = function(label, tag){
-    var on = (tag === activeTag) || (tag === null && activeTag === null);
+    var on = (tag === null) ? !activeTags.length : isActive(tag);
     return '<button type="button" class="chip' + (on ? ' active' : '') + '" data-tag="' + (tag === null ? '' : esc(DDSMinutes.slug(tag))) + '">' + esc(label) + '</button>';
   };
-  chipsEl.innerHTML = mk('All', null) + DDSMinutes.TAGS.map(function(t){ return mk(t, t); }).join('');
+  chipsEl.innerHTML = mk('All', null) + DDSMinutes.allTags().map(function(t){ return mk(t, t); }).join('');
+  matchEl.hidden = activeTags.length < 2;
+  matchEl.querySelectorAll('[data-mode]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-mode') === matchMode); });
+}
+function syncUrl(){
+  var q = [];
+  if (activeTags.length) q.push('tags=' + activeTags.map(function(t){ return DDSMinutes.slug(t); }).join(','));
+  if (activeTags.length > 1 && matchMode === 'all') q.push('match=all');
+  history.replaceState(null, '', location.pathname + (q.length ? '?' + q.join('&') : ''));
 }
 chipsEl.addEventListener('click', function(e){
   var b = e.target.closest('.chip');
   if (!b) return;
   var slug = b.getAttribute('data-tag');
-  activeTag = slug ? DDSMinutes.fromSlug(slug) : null;
-  history.replaceState(null, '', location.pathname + (activeTag ? '?tag=' + DDSMinutes.slug(activeTag) : ''));
+  if (!slug) activeTags = [];
+  else {
+    var tag = DDSMinutes.fromSlug(slug);
+    if (!tag) return;
+    if (isActive(tag)) activeTags = activeTags.filter(function(t){ return t !== tag; });
+    else activeTags.push(tag);
+  }
+  syncUrl();
+  renderChips(); renderRecords();
+});
+matchEl.addEventListener('click', function(e){
+  var b = e.target.closest('[data-mode]');
+  if (!b) return;
+  matchMode = b.getAttribute('data-mode');
+  syncUrl();
   renderChips(); renderRecords();
 });
 
 // ---- Records ----
 function filtered(){
   var all = DDSMinutes.all();
-  return activeTag ? all.filter(function(n){ return (n.tags || []).indexOf(activeTag) !== -1; }) : all;
+  if (!activeTags.length) return all;
+  return all.filter(function(n){
+    var tags = n.tags || [];
+    return matchMode === 'all'
+      ? activeTags.every(function(t){ return tags.indexOf(t) !== -1; })
+      : activeTags.some(function(t){ return tags.indexOf(t) !== -1; });
+  });
 }
+function filterLabel(){ return activeTags.join(matchMode === 'all' ? ' + ' : ' / '); }
 function chipRow(n){
   return (n.tags || []).map(function(t){ return '<span class="chip-s">' + esc(t) + '</span>'; }).join('');
 }
@@ -253,17 +341,20 @@ function renderRecords(){
   var list = filtered();
   var total = DDSMinutes.all().length;
   document.getElementById('mast-count').textContent = total + ' record' + (total === 1 ? '' : 's');
+  var dc = document.getElementById('deco-count'); if (dc) dc.textContent = total;
 
   // Featured = newest in the current filter, laid out as the open minute page
   var f = list[0];
+  var fPhoto = f && (f.photos || []).filter(Boolean)[0];
   featSlot.innerHTML = !f ? '' :
     '<article class="feat">' +
       '<div class="feat-side">' +
+        (fPhoto ? '<div class="feat-photobg" style="background-image:url(\'' + fPhoto + '\');"></div>' : '') +
         '<div class="no"><small>Minute Record</small>Nº ' + pad(f.no) + '</div>' +
         '<div class="dt"><b>Meeting date</b>' + DDSMinutes.fmtDate(f.date) + '</div>' +
       '</div>' +
       '<div class="feat-body">' +
-        '<span class="feat-latest">' + (activeTag ? 'Latest in ' + esc(activeTag) : 'The Latest Record') + '</span>' +
+        '<span class="feat-latest">' + (activeTags.length ? 'Latest in ' + esc(filterLabel()) : 'The Latest Record') + '</span>' +
         '<h2>' + esc(f.title) + speakerHtml(f, 'spk') + '</h2>' +
         '<div class="chips-s">' + chipRow(f) + '</div>' +
         '<p class="feat-ex">' + esc(DDSMinutes.excerpt(f)) + '</p>' +
@@ -275,10 +366,14 @@ function renderRecords(){
     '</article>';
 
   var rest = list.slice(1);
-  countEl.textContent = list.length + ' record' + (list.length === 1 ? '' : 's') + (activeTag ? ' tagged ' + activeTag : '');
+  countEl.textContent = list.length + ' record' + (list.length === 1 ? '' : 's') + (activeTags.length ? ' tagged ' + filterLabel() : '');
   var cards = rest.map(function(n){
     var cm = DDSMinutes.commentCount(n.id);
-    return '<a class="pg-card" href="' + noteHref(n) + '">' +
+    var photos = (n.photos || []).filter(Boolean);
+    return '<a class="pg-card' + (photos.length ? ' hasphoto' : '') + '" href="' + noteHref(n) + '">' +
+      (photos.length ? '<div class="pg-photo"><div class="pg-photo-row">' +
+        photos.map(function(p){ return '<div class="ph" style="background-image:url(\'' + p + '\');"></div>'; }).join('') +
+        '</div><div class="pg-photo-scrim"></div></div>' : '') +
       '<div class="pg-mast"><span class="nm">MINUTES</span><span class="is">Nº ' + pad(n.no) + '</span></div>' +
       '<span class="pg-date stamp">' + DDSMinutes.fmtDate(n.date) + '</span>' +
       '<div class="chips-s">' + chipRow(n) + '</div>' +
@@ -290,13 +385,26 @@ function renderRecords(){
     '</a>';
   });
   if (!list.length) {
-    cards = ['<div class="pg-empty"><h4>No meetings tagged ' + esc(activeTag || '') + ' yet.</h4><p>When the exec board files one, it lands here.</p></div>'];
+    cards = ['<div class="pg-empty"><h4>No meetings match ' + esc(filterLabel()) + ' yet.</h4><p>Try switching Match to “Any”, or check back when the exec board files one.</p></div>'];
   }
   if (DDSMinutes.canWrite()) {
     cards.push('<button type="button" class="pg-add" id="pg-add-tile"><span class="plus">＋</span><span class="lbl">File new<br>meeting notes</span></button>');
   }
   gridEl.innerHTML = cards.join('');
+  sizeCardPhotos();
 }
+
+// Pin each card's darkened photo strip to its MINUTES/Nº bar.
+function sizeCardPhotos(){
+  gridEl.querySelectorAll('.pg-card.hasphoto').forEach(function(card){
+    var mast = card.querySelector('.pg-mast');
+    if (!mast) return;
+    card.style.setProperty('--pad', mast.offsetLeft + 'px');
+    card.style.setProperty('--mast-top', mast.offsetTop + 'px');
+    card.style.setProperty('--mast-h', mast.offsetHeight + 'px');
+  });
+}
+window.addEventListener('resize', sizeCardPhotos, { passive: true });
 
 // ---- Exec: add-record entry points ----
 function openAdd(){
@@ -320,8 +428,17 @@ window.addEventListener('storage', function(e){
 });
 
 // ---- Boot ----
+// Multi-tag ?tags=a,b&match=all, with back-compat ?tag=single.
+var tagsMatch = /[?&]tags=([^&]+)/.exec(location.search);
 var tagMatch = /[?&]tag=([^&]+)/.exec(location.search);
-if (tagMatch) activeTag = DDSMinutes.fromSlug(decodeURIComponent(tagMatch[1]));
+if (tagsMatch) {
+  decodeURIComponent(tagsMatch[1]).split(',').forEach(function(s){
+    var t = DDSMinutes.fromSlug(s); if (t && activeTags.indexOf(t) === -1) activeTags.push(t);
+  });
+} else if (tagMatch) {
+  var t0 = DDSMinutes.fromSlug(decodeURIComponent(tagMatch[1])); if (t0) activeTags.push(t0);
+}
+if (/[?&]match=all/.test(location.search)) matchMode = 'all';
 renderChips();
 syncExec();
 })();

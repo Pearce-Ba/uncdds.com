@@ -48,10 +48,28 @@
     '.mnc-in input[type=text],.mnc-in input[type=date],.mnc-in textarea{display:block;width:100%;margin-top:6px;padding:12px 14px;border-radius:11px;border:1px solid rgba(19,41,75,.28);background:#fff;color:#13294B;font-family:"Montserrat",sans-serif;font-size:14px;letter-spacing:normal;text-transform:none;font-weight:500;transition:border-color .2s,box-shadow .2s;resize:vertical;box-sizing:border-box;}',
     '.mnc-in textarea{min-height:240px;line-height:1.7;font-family:"Lora",serif;font-size:15px;border-top-left-radius:0;border-top-right-radius:0;margin-top:0;}',
     '.mnc-in input:focus,.mnc-in textarea:focus{outline:none;border-color:#4B9CD3;box-shadow:0 0 0 3px rgba(75,156,211,.22);}',
+    '.mnc-in input[type=file]{margin-top:6px;padding:9px;font-size:12.5px;color:#5A7798;display:block;width:100%;border:1px solid rgba(19,41,75,.28);border-radius:11px;background:#fff;box-sizing:border-box;}',
     '.mnc-hint{display:block;margin-top:5px;color:#8296AE;font-weight:500;font-size:10px;letter-spacing:.6px;text-transform:none;}',
-    '.mnc-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}',
+    '.mnc-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}',
     '.mnc-tag{padding:7px 14px;border-radius:999px;border:1px solid rgba(19,41,75,.3);background:transparent;color:#3E5F87;font-family:"Montserrat",sans-serif;font-weight:700;letter-spacing:1.1px;font-size:10px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s,border-color .2s;}',
     '.mnc-tag.on{background:#B9975B;border-color:#B9975B;color:#0A1A30;}',
+    '.mnc-tag.on::after{content:" ✕";font-size:9px;opacity:.7;}',
+    '/* custom-tag typeahead */',
+    '.mnc-tagfield{position:relative;margin-top:6px;}',
+    '.mnc-taginput{display:block;width:100%;padding:11px 14px;border-radius:11px;border:1px solid rgba(19,41,75,.28);background:#fff;color:#13294B;font-family:"Montserrat",sans-serif;font-size:13px;box-sizing:border-box;}',
+    '.mnc-taginput:focus{outline:none;border-color:#4B9CD3;box-shadow:0 0 0 3px rgba(75,156,211,.22);}',
+    '.mnc-tagsug{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:8;background:#fff;border:1px solid rgba(19,41,75,.2);border-radius:11px;box-shadow:0 18px 40px -16px rgba(19,41,75,.5);max-height:220px;overflow-y:auto;padding:5px;}',
+    '.mnc-tagsug[hidden]{display:none;}',
+    '.mnc-sug{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;cursor:pointer;font-size:12.5px;color:#13294B;font-weight:600;}',
+    '.mnc-sug:hover,.mnc-sug.active{background:#EEF4FA;}',
+    '.mnc-sug .new{color:#8a6d38;font-weight:700;}',
+    '.mnc-sug small{margin-left:auto;color:#8296AE;font-weight:600;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;}',
+    '/* photo strip */',
+    '.mnc-photostrip{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 4px;}',
+    '.mnc-photostrip:empty{display:none;}',
+    '.mnc-pth{position:relative;width:92px;height:64px;border-radius:9px;overflow:hidden;border:1px solid rgba(19,41,75,.2);background:#0c2042;}',
+    '.mnc-pth img{width:100%;height:100%;object-fit:cover;display:block;}',
+    '.mnc-pth button{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(10,20,40,.82);color:#fff;font-size:10px;line-height:20px;text-align:center;cursor:pointer;padding:0;}',
     '/* markdown toolbar */',
     '.mnc-bar{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:6px;padding:7px 9px;border:1px solid rgba(19,41,75,.28);border-bottom:0;border-radius:11px 11px 0 0;background:#F2EDE1;}',
     '.mnc-b{min-width:32px;height:30px;padding:0 8px;border-radius:7px;border:1px solid transparent;background:transparent;color:#13294B;font-family:"Lora",serif;font-size:14px;cursor:pointer;transition:background .15s,border-color .15s;display:inline-flex;align-items:center;justify-content:center;}',
@@ -77,6 +95,88 @@
 
   /* ---------- overlay (built lazily, once) ---------- */
   var ov = null, ta = null, onSaveCb = null, editingId = null;
+  var selectedTags = [], pendingTags = [], photoData = [];
+
+  /* ---------- tags (visual chips + typeahead + create-your-own) ---------- */
+  function tagUniverse() {
+    var seen = {}, out = [];
+    DDSMinutes.allTags().concat(pendingTags).concat(selectedTags).forEach(function (t) {
+      var k = String(t).toLowerCase();
+      if (t && !seen[k]) { seen[k] = 1; out.push(t); }
+    });
+    return out;
+  }
+  function isSelected(t) {
+    var k = String(t).toLowerCase();
+    return selectedTags.some(function (s) { return s.toLowerCase() === k; });
+  }
+  function renderTagChips() {
+    ov.querySelector('#mnc-tags').innerHTML = tagUniverse().map(function (t) {
+      return '<button type="button" class="mnc-tag' + (isSelected(t) ? ' on' : '') + '" data-t="' + esc(t) + '">' + esc(t) + '</button>';
+    }).join('');
+  }
+  function toggleTag(t) {
+    var k = String(t).toLowerCase();
+    if (isSelected(t)) selectedTags = selectedTags.filter(function (s) { return s.toLowerCase() !== k; });
+    else selectedTags.push(t);
+    renderTagChips();
+  }
+  function addTypedTag(raw) {
+    var t = DDSMinutes.cleanTag(raw);
+    if (!t) return;
+    var canon = tagUniverse().find(function (u) { return u.toLowerCase() === t.toLowerCase(); });
+    if (canon) { if (!isSelected(canon)) selectedTags.push(canon); }
+    else { pendingTags.push(t); selectedTags.push(t); }
+    var input = ov.querySelector('#mnc-taginput');
+    input.value = ''; hideSug(); renderTagChips();
+  }
+  var sugIdx = -1;
+  function sugMatches() {
+    var input = ov.querySelector('#mnc-taginput');
+    var q = input.value.trim().toLowerCase();
+    var pool = tagUniverse().filter(function (t) { return !isSelected(t); });
+    if (q) pool = pool.filter(function (t) { return t.toLowerCase().indexOf(q) !== -1; });
+    return pool.slice(0, 8);
+  }
+  function renderSug() {
+    var input = ov.querySelector('#mnc-taginput');
+    var sug = ov.querySelector('#mnc-tagsug');
+    var list = sugMatches();
+    var html = list.map(function (t, i) {
+      return '<div class="mnc-sug' + (i === sugIdx ? ' active' : '') + '" data-sug="' + esc(t) + '">' + esc(t) + '<small>add</small></div>';
+    });
+    var qc = DDSMinutes.cleanTag(input.value);
+    var exists = qc && tagUniverse().some(function (t) { return t.toLowerCase() === qc.toLowerCase(); });
+    if (qc && !exists) html.push('<div class="mnc-sug" data-new="' + esc(qc) + '"><span class="new">＋ Create “' + esc(qc) + '”</span></div>');
+    if (!html.length) { sug.hidden = true; return; }
+    sug.innerHTML = html.join(''); sug.hidden = false;
+  }
+  function hideSug() {
+    var sug = ov && ov.querySelector('#mnc-tagsug');
+    if (sug) sug.hidden = true;
+    sugIdx = -1;
+  }
+
+  /* ---------- photos ---------- */
+  function renderPhotoStrip() {
+    ov.querySelector('#mnc-photostrip').innerHTML = photoData.map(function (d, i) {
+      return '<div class="mnc-pth"><img src="' + d + '" alt=""><button type="button" data-ph="' + i + '" aria-label="Remove photo">✕</button></div>';
+    }).join('');
+  }
+  function compressImage(file, cb) {
+    if (!file || !/^image\//.test(file.type)) return cb(null);
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function () {
+      var w = Math.min(1000, img.naturalWidth);
+      var h = Math.round(w * img.naturalHeight / img.naturalWidth);
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      try { cb(c.toDataURL('image/jpeg', 0.72)); } catch (e) { cb(null); }
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); cb(null); };
+    img.src = url;
+  }
 
   function build() {
     if (ov) return;
@@ -98,9 +198,16 @@
             '</div>' +
             '<label>Secondary heading<span class="mnc-hint">The speaker or context — shows beside the title, e.g. “Dr. Marsh, UNC Adams School”.</span>' +
               '<input type="text" id="mnc-speaker" placeholder="Speaker, panel, or what this meeting was" maxlength="90"></label>' +
-            '<label>Tags<span class="mnc-hint">Pick every kind of meeting this was — they power the archive filters.</span>' +
-              '<div class="mnc-tags" id="mnc-tags"></div>' +
+            '<label>Tags<span class="mnc-hint">Pick from the list, or type your own and press Enter — custom tags join the archive filters for everyone.</span></label>' +
+            '<div class="mnc-tagfield">' +
+              '<input type="text" id="mnc-taginput" autocomplete="off" spellcheck="false" placeholder="Type a tag and press Enter…">' +
+              '<div class="mnc-tagsug" id="mnc-tagsug" hidden></div>' +
+            '</div>' +
+            '<div class="mnc-tags" id="mnc-tags"></div>' +
+            '<label style="margin-top:15px;">Photos<span class="mnc-hint">Optional. They ride darkened along the top of this record and lift on hover — add one or several.</span>' +
+              '<input type="file" id="mnc-photos" accept="image/*" multiple>' +
             '</label>' +
+            '<div class="mnc-photostrip" id="mnc-photostrip"></div>' +
             '<label>The notes<span class="mnc-hint">Paste your notes — **bold**, *italic*, __underline__, ==highlights==, “- ” bullets, “1. ” numbered lists, “## ” headings.</span></label>' +
             '<div class="mnc-bar" id="mnc-bar">' +
               '<button type="button" class="mnc-b" data-md="bold" title="Bold — **text**"><strong>B</strong></button>' +
@@ -130,13 +237,59 @@
     document.body.appendChild(ov);
     ta = ov.querySelector('#mnc-body');
 
-    // tag chips
-    ov.querySelector('#mnc-tags').innerHTML = DDSMinutes.TAGS.map(function (t) {
-      return '<button type="button" class="mnc-tag" data-t="' + esc(t) + '">' + esc(t) + '</button>';
-    }).join('');
+    // tag chips (toggle) + typeahead input
     ov.querySelector('#mnc-tags').addEventListener('click', function (e) {
       var b = e.target.closest('.mnc-tag');
-      if (b) b.classList.toggle('on');
+      if (b) toggleTag(b.getAttribute('data-t'));
+    });
+    var tagInput = ov.querySelector('#mnc-taginput');
+    var sug = ov.querySelector('#mnc-tagsug');
+    tagInput.addEventListener('input', function () { sugIdx = -1; renderSug(); });
+    tagInput.addEventListener('focus', renderSug);
+    tagInput.addEventListener('blur', function () { setTimeout(hideSug, 140); });
+    tagInput.addEventListener('keydown', function (e) {
+      var items = sug.hidden ? [] : Array.prototype.slice.call(sug.children);
+      if (e.key === 'ArrowDown') { e.preventDefault(); sugIdx = Math.min(items.length - 1, sugIdx + 1); renderSug(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); sugIdx = Math.max(0, sugIdx - 1); renderSug(); }
+      else if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        if (sugIdx >= 0 && items[sugIdx]) items[sugIdx].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        else addTypedTag(tagInput.value);
+      } else if (e.key === 'Backspace' && !tagInput.value && selectedTags.length) {
+        selectedTags.pop(); renderTagChips();
+      } else if (e.key === 'Escape') { hideSug(); }
+    });
+    sug.addEventListener('mousedown', function (e) {
+      var it = e.target.closest('[data-sug],[data-new]');
+      if (!it) return;
+      e.preventDefault();
+      if (it.hasAttribute('data-new')) addTypedTag(it.getAttribute('data-new'));
+      else {
+        var t = it.getAttribute('data-sug');
+        if (!isSelected(t)) selectedTags.push(t);
+        tagInput.value = ''; hideSug(); renderTagChips();
+      }
+    });
+
+    // photos
+    var photoInput = ov.querySelector('#mnc-photos');
+    photoInput.addEventListener('change', function () {
+      var files = Array.prototype.slice.call(photoInput.files || []);
+      photoInput.value = '';
+      (function next() {
+        if (!files.length) return;
+        compressImage(files.shift(), function (d) {
+          if (d && photoData.length < 8) photoData.push(d);
+          renderPhotoStrip();
+          next();
+        });
+      })();
+    });
+    ov.querySelector('#mnc-photostrip').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ph]');
+      if (!b) return;
+      photoData.splice(+b.getAttribute('data-ph'), 1);
+      renderPhotoStrip();
     });
 
     // toolbar
@@ -213,18 +366,19 @@
     var speaker = ov.querySelector('#mnc-speaker').value.trim();
     var date = ov.querySelector('#mnc-date').value;
     var body = ta.value.trim();
-    var tags = Array.prototype.map.call(ov.querySelectorAll('.mnc-tag.on'), function (b) { return b.getAttribute('data-t'); });
+    var tags = selectedTags.slice();
+    var photos = photoData.slice();
     if (!title) return fail('Give the meeting a title.');
     if (!date) return fail('Set the meeting date.');
-    if (!tags.length) return fail('Tag what kind of meeting this was — pick at least one.');
+    if (!tags.length) return fail('Tag what kind of meeting this was — pick or type at least one.');
     if (body.length < 30) return fail('Paste in the notes — a record needs more than a headline.');
     var saved;
     if (editingId) {
-      saved = DDSMinutes.update(editingId, { title: title, speaker: speaker, date: date, body: body, tags: tags });
+      saved = DDSMinutes.update(editingId, { title: title, speaker: speaker, date: date, body: body, tags: tags, photos: photos });
       if (!saved) return fail('That record can’t be found any more — close and try again.');
     } else {
       saved = DDSMinutes.add({
-        title: title, speaker: speaker, date: date, body: body, tags: tags,
+        title: title, speaker: speaker, date: date, body: body, tags: tags, photos: photos,
         author: me.name, authorId: me.id,
         authorTitle: DDSAuth.execTitle(me) || ''
       });
@@ -255,9 +409,13 @@
     ov.querySelector('#mnc-speaker').value = editingId ? (note.speaker || '') : '';
     ov.querySelector('#mnc-date').value = editingId ? (note.date || '') : new Date().toISOString().slice(0, 10);
     ta.value = editingId ? (note.body || '') : '';
-    ov.querySelectorAll('.mnc-tag').forEach(function (b) {
-      b.classList.toggle('on', !!(editingId && (note.tags || []).indexOf(b.getAttribute('data-t')) > -1));
-    });
+    selectedTags = editingId ? (note.tags || []).slice() : [];
+    pendingTags = [];
+    photoData = editingId ? (note.photos || []).slice() : [];
+    ov.querySelector('#mnc-taginput').value = '';
+    hideSug();
+    renderTagChips();
+    renderPhotoStrip();
     ov.querySelector('#mnc-submit').innerHTML = editingId ? 'Save changes&nbsp;→' : 'Publish to The Archive&nbsp;→';
     ov.querySelector('#mnc-err').classList.remove('show');
     // reset preview state

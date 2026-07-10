@@ -76,6 +76,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .chip{padding:8px 16px;border-radius:999px;border:1px solid rgba(19,41,75,.3);background:transparent;color:#3E5F87;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.2px;font-size:10.5px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s;white-space:nowrap;}
 .chip:hover{border-color:#B9975B;transform:translateY(-1px);}
 .chip.active{background:#13294B;border-color:#13294B;color:#F5F7FA;}
+.match{display:inline-flex;align-items:center;gap:8px;margin-left:auto;color:#5A7798;font-weight:700;letter-spacing:1.4px;font-size:10px;text-transform:uppercase;white-space:nowrap;}
+.match[hidden]{display:none;}
+.match-seg{display:inline-flex;border:1px solid rgba(19,41,75,.28);border-radius:999px;overflow:hidden;}
+.match-seg button{border:0;background:transparent;padding:6px 13px;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1px;font-size:10px;text-transform:uppercase;color:#3E5F87;cursor:pointer;transition:background .2s,color .2s;}
+.match-seg button.on{background:#13294B;color:#F5F7FA;}
 
 /* Featured spread */
 .feat{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;background:#FBF8F1;border-radius:8px;overflow:hidden;box-shadow:0 40px 80px -36px rgba(19,41,75,.45),0 8px 22px -10px rgba(19,41,75,.25);margin:clamp(40px,6vw,72px) 0 clamp(40px,6vw,64px);border:1px solid rgba(19,41,75,.08);}
@@ -171,6 +176,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .cp-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
 .cp-tag{padding:7px 14px;border-radius:999px;border:1px solid rgba(19,41,75,.3);background:transparent;color:#3E5F87;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.1px;font-size:10px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s,border-color .2s;}
 .cp-tag.on{background:#B9975B;border-color:#B9975B;color:#0A1A30;}
+.cp-tag.on::after{content:" ✕";font-size:9px;opacity:.7;}
+.cp-tagfield{position:relative;margin-top:6px;}
+.cp-taginput{display:block;width:100%;padding:11px 14px;border-radius:11px;border:1px solid rgba(19,41,75,.28);background:#fff;color:#13294B;font-family:'Montserrat',sans-serif;font-size:13px;box-sizing:border-box;}
+.cp-taginput:focus{outline:none;border-color:#4B9CD3;box-shadow:0 0 0 3px rgba(75,156,211,.22);}
+.cp-tagsug{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:8;background:#fff;border:1px solid rgba(19,41,75,.2);border-radius:11px;box-shadow:0 18px 40px -16px rgba(19,41,75,.5);max-height:220px;overflow-y:auto;padding:5px;}
+.cp-tagsug[hidden]{display:none;}
+.cp-sug{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;cursor:pointer;font-size:12.5px;color:#13294B;font-weight:600;}
+.cp-sug:hover,.cp-sug.active{background:#EEF4FA;}
+.cp-sug .new{color:#8a6d38;font-weight:700;}
+.cp-sug small{margin-left:auto;color:#8296AE;font-weight:600;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;}
+.cp-tags{margin-top:10px;}
 .cp-prev{display:flex;align-items:center;gap:14px;margin:-4px 0 16px;padding:10px;border:1px solid rgba(19,41,75,.2);border-radius:12px;background:#fff;}
 .cp-prev[hidden]{display:none;}
 .cp-prev img{display:block;width:92px;height:58px;object-fit:cover;border-radius:8px;background:#0c2042;}
@@ -226,6 +242,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     <div class="rail-in">
       <span class="rail-label">Filter the archive</span>
       <div class="chips" id="chips" role="group" aria-label="Filter posts by tag"></div>
+      <div class="match" id="match" hidden>Match
+        <span class="match-seg">
+          <button type="button" data-mode="any" class="on">Any</button>
+          <button type="button" data-mode="all">All</button>
+        </span>
+      </div>
     </div>
   </div>
   <div class="arch-in">
@@ -264,9 +286,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
       <p class="cp-sub" id="cp-sub">Your post publishes under your member name and shows up on the front page instantly.</p>
       <form id="cp-form" novalidate>
         <label>Title<input type="text" id="cp-title" placeholder="Give it a headline worth biting into" maxlength="90"></label>
-        <label>Tags<span class="cp-hint">Pick at least one — they power the archive filters.</span>
-          <div class="cp-tags" id="cp-tags"></div>
-        </label>
+        <label>Tags<span class="cp-hint">Pick from the list, or type your own and press Enter — custom tags join the archive filters for everyone.</span></label>
+        <div class="cp-tagfield">
+          <input type="text" id="cp-taginput" autocomplete="off" spellcheck="false" placeholder="Type a tag and press Enter…">
+          <div class="cp-tagsug" id="cp-tagsug" hidden></div>
+        </div>
+        <div class="cp-tags" id="cp-tags"></div>
         <label>Cover image (optional)<input type="file" id="cp-img" accept="image/*"></label>
         <div class="cp-prev" id="cp-prev" hidden>
           <img id="cp-prev-img" alt="Cover preview">
@@ -310,31 +335,62 @@ var chipsEl = document.getElementById('chips');
 var featSlot = document.getElementById('feat-slot');
 var gridEl = document.getElementById('pg-grid');
 var countEl = document.getElementById('pg-count');
-var activeTag = null; // null = all
+var activeTags = []; // [] = all
+var matchMode = 'any'; // 'any' (OR) | 'all' (AND)
+var matchEl = document.getElementById('match');
+
+function isActive(tag){ return activeTags.indexOf(tag) !== -1; }
 
 // ---- Filter chips ----
 function renderChips(){
   var mk = function(label, tag){
-    var on = (tag === activeTag) || (tag === null && activeTag === null);
+    var on = (tag === null) ? !activeTags.length : isActive(tag);
     return '<button type="button" class="chip' + (on ? ' active' : '') + '" data-tag="' + (tag === null ? '' : esc(DDSNews.slug(tag))) + '">' + esc(label) + '</button>';
   };
-  chipsEl.innerHTML = mk('All', null) + DDSNews.TAGS.map(function(t){ return mk(t, t); }).join('');
+  chipsEl.innerHTML = mk('All', null) + DDSNews.allTags().map(function(t){ return mk(t, t); }).join('');
+  matchEl.hidden = activeTags.length < 2;
+  matchEl.querySelectorAll('[data-mode]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-mode') === matchMode); });
+}
+function syncUrl(){
+  var q = [];
+  if (activeTags.length) q.push('tags=' + activeTags.map(function(t){ return DDSNews.slug(t); }).join(','));
+  if (activeTags.length > 1 && matchMode === 'all') q.push('match=all');
+  history.replaceState(null, '', location.pathname + (q.length ? '?' + q.join('&') : ''));
 }
 chipsEl.addEventListener('click', function(e){
   var b = e.target.closest('.chip');
   if (!b) return;
   var slug = b.getAttribute('data-tag');
-  activeTag = slug ? DDSNews.fromSlug(slug) : null;
-  var url = location.pathname + (activeTag ? '?tag=' + DDSNews.slug(activeTag) : '');
-  history.replaceState(null, '', url);
+  if (!slug) activeTags = [];
+  else {
+    var tag = DDSNews.fromSlug(slug);
+    if (!tag) return;
+    if (isActive(tag)) activeTags = activeTags.filter(function(t){ return t !== tag; });
+    else activeTags.push(tag);
+  }
+  syncUrl();
+  renderChips(); renderPosts();
+});
+matchEl.addEventListener('click', function(e){
+  var b = e.target.closest('[data-mode]');
+  if (!b) return;
+  matchMode = b.getAttribute('data-mode');
+  syncUrl();
   renderChips(); renderPosts();
 });
 
 // ---- Post rendering ----
 function filtered(){
   var all = DDSNews.all();
-  return activeTag ? all.filter(function(p){ return (p.tags || []).indexOf(activeTag) !== -1; }) : all;
+  if (!activeTags.length) return all;
+  return all.filter(function(p){
+    var tags = p.tags || [];
+    return matchMode === 'all'
+      ? activeTags.every(function(t){ return tags.indexOf(t) !== -1; })
+      : activeTags.some(function(t){ return tags.indexOf(t) !== -1; });
+  });
 }
+function filterLabel(){ return activeTags.join(matchMode === 'all' ? ' + ' : ' / '); }
 function chipRow(p, cls){
   return (p.tags || []).map(function(t){
     return '<span class="' + cls + (t === 'Newsletter' || t === 'Blog Post' ? ' gold' : '') + '">' + esc(t) + '</span>';
@@ -353,7 +409,7 @@ function renderPosts(){
       (f.img ? '<div class="feat-photo"><img src="' + esc(f.img) + '" alt=""></div>' : '') +
       '<div class="feat-body">' +
         '<div class="feat-mast"><span class="nm">THE BITE</span><span class="is">Issue Nº ' + f.issue + ' · ' + DDSNews.fmtDate(f.date) + '</span></div>' +
-        '<span class="feat-latest">' + (activeTag ? 'Latest in ' + esc(activeTag) : 'The Latest Issue') + '</span>' +
+        '<span class="feat-latest">' + (activeTags.length ? 'Latest in ' + esc(filterLabel()) : 'The Latest Issue') + '</span>' +
         '<h2>' + esc(f.title) + '</h2>' +
         '<div class="chips-s">' + chipRow(f, 'chip-s') + '</div>' +
         '<p class="feat-ex">' + esc(firstPara(f)) + '</p>' +
@@ -365,7 +421,7 @@ function renderPosts(){
     '</article>';
 
   var rest = list.slice(1);
-  countEl.textContent = list.length + (list.length === 1 ? ' post' : ' posts') + (activeTag ? ' tagged ' + activeTag : '');
+  countEl.textContent = list.length + (list.length === 1 ? ' post' : ' posts') + (activeTags.length ? ' tagged ' + filterLabel() : '');
   var cards = rest.map(function(p){
     return '<button type="button" class="pg-card" data-read="' + esc(p.id) + '">' +
       '<div class="pg-mast"><span class="nm">THE BITE</span><span class="is">Nº ' + p.issue + '</span></div>' +
@@ -377,7 +433,7 @@ function renderPosts(){
     '</button>';
   });
   if (!list.length) {
-    cards = ['<div class="pg-empty"><h4>Nothing tagged ' + esc(activeTag || '') + ' yet.</h4><p>The archive is hungry — be the first member to write one.</p><button type="button" class="read-btn" data-write>Write the first post&nbsp;→</button></div>'];
+    cards = ['<div class="pg-empty"><h4>Nothing matches ' + esc(filterLabel()) + ' yet.</h4><p>Try switching Match to “Any”, or be the first member to write one.</p><button type="button" class="read-btn" data-write>Write the first post&nbsp;→</button></div>'];
   }
   cards.push('<button type="button" class="pg-add" data-write><span class="plus">＋</span><span class="lbl">Add your post<br>to The Bite</span></button>');
   gridEl.innerHTML = cards.join('');
@@ -432,12 +488,81 @@ var cpTags = document.getElementById('cp-tags');
 var cpImgInput = document.getElementById('cp-img');
 var cpPrev = document.getElementById('cp-prev');
 var coverData = null;
-cpTags.innerHTML = DDSNews.TAGS.map(function(t){
-  return '<button type="button" class="cp-tag" data-t="' + esc(t) + '">' + esc(t) + '</button>';
-}).join('');
+
+// ---- Tags: visual chips + typeahead + create-your-own ----
+var selTags = [], pendTags = [], sugIdx = -1;
+var tagInput = document.getElementById('cp-taginput');
+var tagSug = document.getElementById('cp-tagsug');
+function tagUniverse(){
+  var seen = {}, out = [];
+  DDSNews.allTags().concat(pendTags).concat(selTags).forEach(function(t){
+    var k = String(t).toLowerCase();
+    if (t && !seen[k]) { seen[k] = 1; out.push(t); }
+  });
+  return out;
+}
+function tagSelected(t){ var k = String(t).toLowerCase(); return selTags.some(function(s){ return s.toLowerCase() === k; }); }
+function renderTagChips(){
+  cpTags.innerHTML = tagUniverse().map(function(t){
+    return '<button type="button" class="cp-tag' + (tagSelected(t) ? ' on' : '') + '" data-t="' + esc(t) + '">' + esc(t) + '</button>';
+  }).join('');
+}
+function toggleTag(t){
+  var k = String(t).toLowerCase();
+  if (tagSelected(t)) selTags = selTags.filter(function(s){ return s.toLowerCase() !== k; });
+  else selTags.push(t);
+  renderTagChips();
+}
+function addTypedTag(raw){
+  var t = DDSNews.cleanTag(raw);
+  if (!t) return;
+  var canon = tagUniverse().find(function(u){ return u.toLowerCase() === t.toLowerCase(); });
+  if (canon) { if (!tagSelected(canon)) selTags.push(canon); }
+  else { pendTags.push(t); selTags.push(t); }
+  tagInput.value = ''; hideTagSug(); renderTagChips();
+}
+function tagMatches(){
+  var q = tagInput.value.trim().toLowerCase();
+  var pool = tagUniverse().filter(function(t){ return !tagSelected(t); });
+  if (q) pool = pool.filter(function(t){ return t.toLowerCase().indexOf(q) !== -1; });
+  return pool.slice(0, 8);
+}
+function renderTagSug(){
+  var list = tagMatches();
+  var html = list.map(function(t, i){
+    return '<div class="cp-sug' + (i === sugIdx ? ' active' : '') + '" data-sug="' + esc(t) + '">' + esc(t) + '<small>add</small></div>';
+  });
+  var qc = DDSNews.cleanTag(tagInput.value);
+  var exists = qc && tagUniverse().some(function(t){ return t.toLowerCase() === qc.toLowerCase(); });
+  if (qc && !exists) html.push('<div class="cp-sug" data-new="' + esc(qc) + '"><span class="new">＋ Create “' + esc(qc) + '”</span></div>');
+  if (!html.length) { tagSug.hidden = true; return; }
+  tagSug.innerHTML = html.join(''); tagSug.hidden = false;
+}
+function hideTagSug(){ tagSug.hidden = true; sugIdx = -1; }
 cpTags.addEventListener('click', function(e){
   var b = e.target.closest('.cp-tag');
-  if (b) b.classList.toggle('on');
+  if (b) toggleTag(b.getAttribute('data-t'));
+});
+tagInput.addEventListener('input', function(){ sugIdx = -1; renderTagSug(); });
+tagInput.addEventListener('focus', renderTagSug);
+tagInput.addEventListener('blur', function(){ setTimeout(hideTagSug, 140); });
+tagInput.addEventListener('keydown', function(e){
+  var items = tagSug.hidden ? [] : Array.prototype.slice.call(tagSug.children);
+  if (e.key === 'ArrowDown') { e.preventDefault(); sugIdx = Math.min(items.length - 1, sugIdx + 1); renderTagSug(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); sugIdx = Math.max(0, sugIdx - 1); renderTagSug(); }
+  else if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    if (sugIdx >= 0 && items[sugIdx]) items[sugIdx].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    else addTypedTag(tagInput.value);
+  } else if (e.key === 'Backspace' && !tagInput.value && selTags.length) { selTags.pop(); renderTagChips(); }
+  else if (e.key === 'Escape') { hideTagSug(); }
+});
+tagSug.addEventListener('mousedown', function(e){
+  var it = e.target.closest('[data-sug],[data-new]');
+  if (!it) return;
+  e.preventDefault();
+  if (it.hasAttribute('data-new')) addTypedTag(it.getAttribute('data-new'));
+  else { var t = it.getAttribute('data-sug'); if (!tagSelected(t)) selTags.push(t); tagInput.value = ''; hideTagSug(); renderTagChips(); }
 });
 function setCover(data){
   coverData = data;
@@ -476,9 +601,9 @@ function openComposer(editPost){
     : 'Publishing as ' + me.name + ' — your post shows up on the front page instantly.';
   document.getElementById('cp-title').value = editingId ? (editPost.title || '') : '';
   document.getElementById('cp-body').value = editingId ? (editPost.body || '') : '';
-  cpTags.querySelectorAll('.cp-tag').forEach(function(b){
-    b.classList.toggle('on', !!(editingId && (editPost.tags || []).indexOf(b.getAttribute('data-t')) > -1));
-  });
+  selTags = editingId ? (editPost.tags || []).slice() : [];
+  pendTags = [];
+  tagInput.value = ''; hideTagSug(); renderTagChips();
   setCover(editingId ? (editPost.img || null) : null);
   composer.classList.add('open'); composer.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
@@ -491,10 +616,10 @@ document.getElementById('cp-form').addEventListener('submit', function(e){
   if (!me) { DDSAuth.requireLogin('newsletter.html#write'); return; }
   var title = document.getElementById('cp-title').value.trim();
   var body = document.getElementById('cp-body').value.trim();
-  var tags = Array.prototype.map.call(cpTags.querySelectorAll('.cp-tag.on'), function(b){ return b.getAttribute('data-t'); });
+  var tags = selTags.slice();
   var fail = function(m){ cpErr.textContent = m; cpErr.classList.add('show'); };
   if (!title) return fail('Give your post a title.');
-  if (!tags.length) return fail('Pick at least one tag so members can find it.');
+  if (!tags.length) return fail('Pick or type at least one tag so members can find it.');
   if (body.length < 40) return fail('Write a little more — posts need at least a few sentences.');
   var post;
   if (editingId) {
@@ -510,10 +635,10 @@ document.getElementById('cp-form').addEventListener('submit', function(e){
   }
   document.getElementById('cp-title').value = '';
   document.getElementById('cp-body').value = '';
-  cpTags.querySelectorAll('.cp-tag.on').forEach(function(b){ b.classList.remove('on'); });
+  selTags = []; pendTags = []; tagInput.value = ''; hideTagSug(); renderTagChips();
   setCover(null);
   closeOv(composer);
-  activeTag = null; renderChips(); renderPosts();
+  activeTags = []; matchMode = 'any'; renderChips(); renderPosts();
   window.scrollTo({ top: document.getElementById('archive').offsetTop - 40, behavior: 'smooth' });
   openReader(post.id);
 });
@@ -575,8 +700,17 @@ function injectStructuredData(){
 }
 
 // ---- Boot: URL params + deep links ----
+// New multi-tag form ?tags=a,b&match=all — plus back-compat ?tag=single.
+var tagsMatch = /[?&]tags=([^&]+)/.exec(location.search);
 var tagMatch = /[?&]tag=([^&]+)/.exec(location.search);
-if (tagMatch) activeTag = DDSNews.fromSlug(decodeURIComponent(tagMatch[1]));
+if (tagsMatch) {
+  decodeURIComponent(tagsMatch[1]).split(',').forEach(function(s){
+    var t = DDSNews.fromSlug(s); if (t && activeTags.indexOf(t) === -1) activeTags.push(t);
+  });
+} else if (tagMatch) {
+  var t0 = DDSNews.fromSlug(decodeURIComponent(tagMatch[1])); if (t0) activeTags.push(t0);
+}
+if (/[?&]match=all/.test(location.search)) matchMode = 'all';
 renderChips();
 renderPosts();
 injectStructuredData();

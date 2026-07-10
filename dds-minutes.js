@@ -191,7 +191,34 @@
 
     slug: function (tag) { return String(tag).toLowerCase().replace(/\s+/g, '-'); },
     fromSlug: function (slug) {
-      return TAGS.find(function (t) { return api.slug(t) === String(slug).toLowerCase(); }) || null;
+      var s = String(slug).toLowerCase();
+      return api.allTags().find(function (t) { return api.slug(t) === s; }) || null;
+    },
+
+    /* The living tag universe: the base list, then every custom tag any
+       note actually uses (alphabetical). Custom tags become permanent and
+       chapter-wide the moment a note carrying one syncs — no separate store
+       to keep in step. */
+    allTags: function () {
+      var seen = {}, out = [];
+      TAGS.forEach(function (t) { var k = t.toLowerCase(); if (!seen[k]) { seen[k] = 1; out.push(t); } });
+      var extra = [];
+      api.all().forEach(function (n) {
+        (n.tags || []).forEach(function (t) {
+          var k = String(t).toLowerCase();
+          if (k && !seen[k]) { seen[k] = 1; extra.push(t); }
+        });
+      });
+      extra.sort(function (a, b) { return a.toLowerCase() < b.toLowerCase() ? -1 : a.toLowerCase() > b.toLowerCase() ? 1 : 0; });
+      return out.concat(extra);
+    },
+
+    /* Tidy a typed custom tag: trim, collapse spaces, Title Case, cap length.
+       Returns '' for junk so the composer can reject it. */
+    cleanTag: function (raw) {
+      var t = String(raw || '').replace(/\s+/g, ' ').trim().slice(0, 28);
+      if (!t) return '';
+      return t.replace(/\b\w/g, function (c) { return c.toUpperCase(); });
     },
 
     fmtDate: function (iso) {
@@ -230,7 +257,7 @@
        (new id, replaces:<seed-id>) so the edit can sync — deleting the
        copy restores the original record. */
     update: function (id, fields) {
-      var EDITABLE = ['title', 'speaker', 'body', 'tags', 'date'];
+      var EDITABLE = ['title', 'speaker', 'body', 'tags', 'date', 'photos'];
       var list = loadSaved();
       var mine = list.find(function (p) { return p.id === id; });
       if (mine) {
@@ -264,11 +291,15 @@
     },
 
     /* ---------- comments & annotations ---------- */
-    /* Row: { id, noteId, kind:'comment'|'annotation', body, author,
-       authorId, authorTitle, at } — one row per comment so two members
-       writing at once never clobber each other in the cloud. */
-    commentsFor: function (noteId) {
-      // an edited seed keeps its comments: they were filed under the seed id
+    /* Two shapes share one store (one row each, so concurrent writers never
+       clobber in the cloud):
+         comment    { id, noteId, kind:'comment', body, author… , at }
+         annotation { id, noteId, kind:'annotation', color, quote, start,
+                      len, comment, author… , at }
+       Annotations anchor to a character range [start, start+len) in the
+       note body's rendered text and carry a margin comment. */
+    entriesFor: function (noteId) {
+      // an edited seed keeps its entries: they were filed under the seed id
       var note = api.get(noteId);
       var ids = [noteId];
       if (note && note.replaces) ids.push(note.replaces);
@@ -277,7 +308,17 @@
         .sort(function (a, b) { return (a.at || 0) - (b.at || 0); });
     },
 
-    commentCount: function (noteId) { return api.commentsFor(noteId).length; },
+    // back-compat alias
+    commentsFor: function (noteId) { return api.entriesFor(noteId); },
+
+    plainCommentsFor: function (noteId) {
+      return api.entriesFor(noteId).filter(function (c) { return c.kind !== 'annotation'; });
+    },
+    annotationsFor: function (noteId) {
+      return api.entriesFor(noteId).filter(function (c) { return c.kind === 'annotation'; });
+    },
+
+    commentCount: function (noteId) { return api.entriesFor(noteId).length; },
 
     addComment: function (noteId, kind, body, member) {
       var m = member || (window.DDSAuth && DDSAuth.current());
@@ -293,6 +334,37 @@
       if (!c.body) return null;
       var list = loadComments();
       list.push(c);
+      saveComments(list);
+      return c;
+    },
+
+    /* Create a highlight annotation anchored to [start, start+len). A blank
+       comment is allowed — a bare colored highlight is a valid annotation. */
+    addAnnotation: function (noteId, data, member) {
+      var m = member || (window.DDSAuth && DDSAuth.current());
+      if (!m) return null;
+      if (!data || !(data.len > 0)) return null;
+      var c = {
+        id: uid('ma'), noteId: noteId, kind: 'annotation',
+        color: HL_COLORS.indexOf(data.color) !== -1 ? data.color : 'yellow',
+        quote: String(data.quote || '').slice(0, 500),
+        start: data.start | 0, len: data.len | 0,
+        comment: String(data.comment || '').trim(),
+        author: m.name, authorId: m.id,
+        authorTitle: (window.DDSAuth && DDSAuth.execTitle(m)) || '',
+        at: Date.now()
+      };
+      var list = loadComments();
+      list.push(c);
+      saveComments(list);
+      return c;
+    },
+
+    updateEntry: function (id, fields) {
+      var list = loadComments();
+      var c = list.find(function (x) { return x.id === id; });
+      if (!c) return null;
+      ['body', 'comment', 'color'].forEach(function (k) { if (k in fields) c[k] = fields[k]; });
       saveComments(list);
       return c;
     },
