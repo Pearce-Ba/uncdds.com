@@ -99,6 +99,18 @@
       toRows: function (v) { return Array.isArray(v) ? v : []; },
       fromRows: function (rows) { return rows; }
     },
+    minutes: {   // The Archive — exec meeting notes (dds-minutes.js)
+      key: 'dds-minutes-v1', coll: 'minutes', every: 60,
+      when: function () { return true; },
+      toRows: function (v) { return Array.isArray(v) ? v : []; },
+      fromRows: function (rows) { return rows; }
+    },
+    minuteComments: {   // member comments/annotations on meeting notes
+      key: 'dds-minute-comments-v1', coll: 'minutecomments', every: 45,
+      when: function () { return true; },
+      toRows: function (v) { return Array.isArray(v) ? v : []; },
+      fromRows: function (rows) { return rows; }
+    },
     classes: {
       key: 'dds-classes-v1', coll: 'classes', every: 60,
       when: onDash,

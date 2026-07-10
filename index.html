@@ -391,15 +391,41 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .bl-meta{display:flex;flex-direction:column;align-items:center;gap:6px;}
 .bl-note{max-width:640px;margin:clamp(44px,6vw,72px) auto 0;text-align:center;}
 @media(max-width:560px){.bl-tier-big{margin-bottom:64px;}}
-/* Meeting notes archive */
-.mn-row{display:grid;grid-template-columns:110px 1fr auto;gap:clamp(16px,3vw,40px);align-items:baseline;border-top:1px solid rgba(19,41,75,.15);padding:clamp(20px,2.6vw,32px) 10px;transition:background .25s ease;border-radius:12px;scroll-margin-top:90px;}
-.mn-row:hover{background:rgba(75,156,211,.08);}
+/* Meeting notes — front-page minute book. The pane shows exactly three
+   records (JS sizes it to the first three rows); the rest scroll inside
+   it with snap, driven by the up/down arrows or the wheel. */
+.mn-shell{display:flex;align-items:stretch;gap:clamp(10px,1.8vw,20px);}
+.mn-view{position:relative;flex:1;min-width:0;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none;border-top:1px solid rgba(19,41,75,.18);border-bottom:1px solid rgba(19,41,75,.18);}
+.mn-view::-webkit-scrollbar{display:none;}
+.mn-row{display:grid;grid-template-columns:110px 1fr auto;gap:clamp(16px,3vw,40px);align-items:center;border-bottom:1px solid rgba(19,41,75,.12);padding:clamp(18px,2.4vw,28px) 10px;transition:background .25s ease;scroll-snap-align:start;}
+.mn-row:last-child{border-bottom:0;}
+.mn-row:hover{background:rgba(75,156,211,.07);}
 .mn-date{font-weight:700;letter-spacing:1.5px;font-size:12px;text-transform:uppercase;color:#4B9CD3;white-space:nowrap;}
-.mn-title{margin:0 0 6px;font-weight:700;font-size:clamp(1.05rem,1.8vw,1.4rem);color:#13294B;letter-spacing:.2px;}
-.mn-sum{margin:0;color:#5A7798;font-weight:400;line-height:1.6;font-size:clamp(.9rem,1.2vw,1.02rem);max-width:640px;}
-.mn-link{color:#B9975B;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:11.5px;text-decoration:none;white-space:nowrap;transition:transform .2s;display:inline-block;}
-.mn-link:hover{transform:translateX(4px);}
-@media(max-width:700px){.mn-row{grid-template-columns:1fr;gap:8px;}}
+.mn-title{margin:0 0 8px;font-weight:700;font-size:clamp(1.05rem,1.8vw,1.4rem);color:#13294B;letter-spacing:.2px;line-height:1.3;}
+.mn-speaker{font-weight:600;font-size:.64em;color:#5A7798;letter-spacing:.4px;}
+.mn-speaker b{font-weight:400;color:#B9975B;}
+.mn-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 9px;}
+.mn-tag{font-weight:700;letter-spacing:1px;font-size:9.5px;text-transform:uppercase;color:#4B9CD3;border:1px solid rgba(75,156,211,.5);border-radius:999px;padding:2.5px 9px;white-space:nowrap;}
+.mn-sum{margin:0;color:#5A7798;font-weight:400;line-height:1.6;font-size:clamp(.9rem,1.2vw,1.02rem);max-width:640px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mn-btn{display:inline-flex;align-items:center;gap:9px;padding:12px 24px;border-radius:999px;background:#13294B;color:#F5F7FA;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;font-size:11px;text-decoration:none;white-space:nowrap;box-shadow:0 12px 26px -12px rgba(19,41,75,.65);transition:transform .2s,box-shadow .2s,background .2s;}
+.mn-btn span{color:#B9975B;transition:transform .2s;}
+.mn-btn:hover{transform:translateY(-2px);background:#1A3765;box-shadow:0 16px 32px -12px rgba(19,41,75,.75);}
+.mn-btn:hover span{transform:translateX(4px);}
+.mn-arrows{display:flex;flex-direction:column;justify-content:center;gap:12px;flex:none;}
+.mn-arrow{width:46px;height:46px;border-radius:50%;border:1px solid rgba(185,151,91,.55);background:rgba(255,255,255,.6);color:#8a6d38;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s ease,color .2s ease,opacity .2s ease,transform .2s ease;}
+.mn-arrow:hover:not([disabled]){background:#B9975B;color:#0A1A30;transform:scale(1.08);}
+.mn-arrow[disabled]{opacity:.25;cursor:default;}
+.mn-actions{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:clamp(26px,3.6vw,40px);}
+.mn-add{width:54px;height:54px;border-radius:50%;border:2px dashed rgba(185,151,91,.7);background:rgba(185,151,91,.06);color:#8a6d38;font-size:26px;font-weight:300;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;transition:background .2s,border-color .2s,transform .2s;}
+.mn-add:hover{background:rgba(185,151,91,.14);border-color:#B9975B;transform:translateY(-2px);}
+.mn-add[hidden]{display:none;}
+.mn-all{display:inline-flex;align-items:center;gap:9px;padding:16px 34px;border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:12.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 14px 30px -12px rgba(185,151,91,.8);transition:transform .2s,box-shadow .2s;}
+.mn-all:hover{transform:translateY(-2px);box-shadow:0 18px 36px -12px rgba(185,151,91,.9);}
+@media(max-width:700px){
+  .mn-row{grid-template-columns:1fr;gap:8px;}
+  .mn-arrows{display:none;}
+  .mn-btn{justify-self:start;}
+}
 /* Join accordions */
 .join-toggle{display:block;width:100%;text-align:left;background:transparent;border:0;color:inherit;font-family:inherit;padding:clamp(22px,3vw,30px);cursor:pointer;}
 .join-drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s cubic-bezier(.25,.1,.25,1);}
@@ -536,6 +562,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <a href="newsletter.html?tag=blog-post" class="nav-dd-link" role="menuitem">Blog<span>&rarr;</span></a>
         <a href="#toolkit" class="nav-dd-link" role="menuitem">Toolkit<span>&rarr;</span></a>
         <a href="#meeting-notes" class="nav-dd-link" role="menuitem">Meeting Notes<span>&rarr;</span></a>
+        <a href="archive.html" class="nav-dd-link" role="menuitem">The Archive<span>&rarr;</span></a>
       </div>
     </div>
     <!-- People: top-level links to the members page -->
@@ -573,6 +600,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <a href="newsletter.html?tag=blog-post">Blog</a>
     <a href="#toolkit">Toolkit</a>
     <a href="#meeting-notes">Meeting Notes</a>
+    <a href="archive.html">The Archive</a>
     <a href="newsletter.html">The Bite</a>
     <span class="nav-mobile-group">People</span>
     <a href="#members-preview">Members</a>
@@ -1309,19 +1337,18 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <div data-reveal="0" style="text-align:center;margin-bottom:clamp(48px,7vw,84px);">
       <div style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">The Archive</div>
       <h2 style="margin:0 0 20px;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2.4rem,7vw,5.5rem);background:linear-gradient(165deg,#13294B 18%,#4B9CD3 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Meeting Notes</h2>
-      <p style="margin:0 auto;max-width:560px;color:#5A7798;font-weight:400;line-height:1.65;font-size:clamp(.95rem,1.4vw,1.15rem);">Every general body meeting, documented. Missed a Monday? Catch up here — notes are posted by the Secretary within a week of each meeting.</p>
+      <p style="margin:0 auto;max-width:560px;color:#5A7798;font-weight:400;line-height:1.65;font-size:clamp(.95rem,1.4vw,1.15rem);">Every general body meeting, documented. The three freshest records sit on top — scroll or use the arrows for the rest, or open The Archive for the full minute book.</p>
     </div>
-    <div data-reveal="0.05">
-      <div class="mn-row" id="mn-1"><span class="mn-date">Apr 20, 2026</span><div><h3 class="mn-title">Senior Sendoff</h3><p class="mn-sum">Celebrating our graduating members — dental school commitments, superlatives, and a look back at the year in photos.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
-      <div class="mn-row" id="mn-2"><span class="mn-date">Apr 6, 2026</span><div><h3 class="mn-title">Elections &amp; Awards</h3><p class="mn-sum">The 2026–27 executive board election results, plus annual service award recipients and end-of-year points standings.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
-      <div class="mn-row" id="mn-3"><span class="mn-date">Mar 30, 2026</span><div><h3 class="mn-title">DAT Prep Panel</h3><p class="mn-sum">Upperclassmen shared study timelines, resource picks, and score breakdowns — full panel Q&amp;A captured in the notes.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
-      <div class="mn-row" id="mn-4"><span class="mn-date">Mar 23, 2026</span><div><h3 class="mn-title">Service Recap</h3><p class="mn-sum">Give Kids a Smile day results, spring service hour totals, and how to log remaining points before the deadline.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
-      <div class="mn-row" id="mn-5"><span class="mn-date">Mar 2, 2026</span><div><h3 class="mn-title">Service Day Planning</h3><p class="mn-sum">Sign-ups and logistics for the spring community service events, plus carpools and what to bring.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
-      <div class="mn-row" id="mn-6"><span class="mn-date">Feb 23, 2026</span><div><h3 class="mn-title">Alumni Q&amp;A</h3><p class="mn-sum">DDS alumni now in dental school answered questions on applications, interviews, and first-year life.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
-      <div class="mn-row" id="mn-7"><span class="mn-date">Feb 16, 2026</span><div><h3 class="mn-title">Specialties Night</h3><p class="mn-sum">Guest lecturer overview of the dental specialties — orthodontics, OMFS, pediatrics, endo, and public health paths.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
-      <div class="mn-row" id="mn-8"><span class="mn-date">Feb 9, 2026</span><div><h3 class="mn-title">Rush Week Recap</h3><p class="mn-sum">Welcome to our newest rush class! Bid results, family reveals, and the semester calendar walkthrough.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
-      <div class="mn-row" id="mn-9"><span class="mn-date">Jan 26, 2026</span><div><h3 class="mn-title">Points Overview</h3><p class="mn-sum">How the points system works — service, professional, and social categories, minimums, and submission forms.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
-      <div class="mn-row" id="mn-10" style="border-bottom:1px solid rgba(19,41,75,.15);"><span class="mn-date">Jan 12, 2026</span><div><h3 class="mn-title">Spring Kickoff</h3><p class="mn-sum">Spring 2026 welcome meeting — semester goals, rush timeline, and introductions from the executive board.</p></div><a class="mn-link" href="#">Read Notes&nbsp;→</a></div>
+    <div class="mn-shell" data-reveal="0.05">
+      <div class="mn-view" id="mn-view" tabindex="0" aria-label="Meeting notes — three latest shown, scroll for the rest"></div>
+      <div class="mn-arrows" aria-hidden="false">
+        <button class="mn-arrow" id="mn-up" type="button" aria-label="Scroll to newer meeting notes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button>
+        <button class="mn-arrow" id="mn-down" type="button" aria-label="Scroll to older meeting notes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+      </div>
+    </div>
+    <div class="mn-actions" data-reveal="0.08">
+      <button class="mn-add" id="mn-add" type="button" hidden title="Exec: add meeting notes" aria-label="Add meeting notes">＋</button>
+      <a class="mn-all" href="archive.html">View All Notes<span aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>
@@ -1434,8 +1461,80 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 <script src="dds-auth.js"></script>
 <script src="dds-family.js"></script>
 <script src="dds-news.js"></script>
+<script src="dds-minutes.js"></script>
+<script src="dds-minutes-ui.js"></script>
 <script src="dds-events.js"></script>
 <script src="dds-edit.js"></script>
+<script>
+// ---- Meeting notes: front-page minute book (3 records visible, scroll for more) ----
+(function initMinutes(){
+  var view = document.getElementById('mn-view');
+  if (!view || !window.DDSMinutes) return;
+  var esc = DDSMinutes.esc;
+  var up = document.getElementById('mn-up'), down = document.getElementById('mn-down');
+  var add = document.getElementById('mn-add');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function render(){
+    view.innerHTML = DDSMinutes.all().map(function(n){
+      return '<article class="mn-row">' +
+        '<span class="mn-date">' + DDSMinutes.fmtDate(n.date) + '</span>' +
+        '<div>' +
+          '<h3 class="mn-title">' + esc(n.title) +
+            (n.speaker ? '<span class="mn-speaker"> <b>|</b> ' + esc(n.speaker) + '</span>' : '') +
+          '</h3>' +
+          '<div class="mn-tags">' + (n.tags || []).map(function(t){ return '<span class="mn-tag">' + esc(t) + '</span>'; }).join('') + '</div>' +
+          '<p class="mn-sum">' + esc(DDSMinutes.excerpt(n, 160)) + '</p>' +
+        '</div>' +
+        '<a class="mn-btn" href="note.html?id=' + encodeURIComponent(n.id) + '">Read Notes<span aria-hidden="true">→</span></a>' +
+      '</article>';
+    }).join('');
+    size(); syncArrows();
+  }
+  // the pane is exactly as tall as the first three rows
+  function size(){
+    var r = view.children;
+    view.style.height = r.length > 3 ? (r[3].offsetTop - r[0].offsetTop) + 'px' : 'auto';
+  }
+  function rowH(){
+    var r = view.children;
+    return r.length > 1 ? (r[1].offsetTop - r[0].offsetTop) : 0;
+  }
+  function syncArrows(){
+    up.disabled = view.scrollTop <= 2;
+    down.disabled = view.scrollTop >= view.scrollHeight - view.clientHeight - 2;
+  }
+  function step(dir){
+    var h = rowH();
+    if (!h) return;
+    var i = Math.round(view.scrollTop / h) + dir;
+    view.scrollTo({ top: Math.max(0, i * h), behavior: reduce.matches ? 'auto' : 'smooth' });
+  }
+  up.addEventListener('click', function(){ step(-1); });
+  down.addEventListener('click', function(){ step(1); });
+  view.addEventListener('scroll', syncArrows, { passive: true });
+  window.addEventListener('resize', size, { passive: true });
+  setTimeout(size, 500);
+
+  // exec-only: the + files a new record, then opens it
+  add.addEventListener('click', function(){
+    DDSMinutesUI.openComposer(null, function(saved){
+      render();
+      location.href = 'note.html?id=' + encodeURIComponent(saved.id);
+    });
+  });
+  var syncAdd = function(){ add.hidden = !DDSMinutes.canWrite(); };
+  syncAdd();
+  DDSAuth.onChange(syncAdd);
+
+  // refresh when another tab or the cloud writes new minutes
+  window.addEventListener('storage', function(e){
+    if (e.key === 'dds-minutes-v1') render();
+  });
+
+  render();
+})();
+</script>
 <script>
 // Bottom-of-page list: next two weeks, up to five events
 DDSEvents.mount(document.getElementById('upe-index'), {
@@ -2728,7 +2827,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
      {t:'Hours log template',h:'docs.google.com',u:'https://docs.google.com/spreadsheets/',img:'slot-mq-11.webp'}],
     [{t:'Chapter points & hours sheet',h:'docs.google.com',u:'https://docs.google.com/spreadsheets/d/1yXCL-EK5xeVeIATHolpgLdSzQcEDcndSCJL4bbnPFE4/',img:'slot-mq-12.webp'},
      {t:'ASDA pre-dental membership',h:'asdanet.org',u:'https://www.asdanet.org/index/get-involved/predental',img:'slot-mq-1.webp'},
-     {t:'Meeting notes archive',h:'uncdds.org',u:'#meeting-notes'},
+     {t:'Meeting notes archive',h:'uncdds.org',u:'archive.html'},
      {t:'Event calendar',h:'uncdds.org',u:'#calendar',img:'slot-mq-2.webp'},
      {t:'Instagram @unc_dds',h:'instagram.com',u:'https://www.instagram.com/unc_dds/',img:'slot-mq-3.webp'}],
     [{t:'UNC Undergraduate Research',h:'our.unc.edu',u:'https://our.unc.edu/',img:'slot-mq-4.webp'},

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Archive — Meeting Notes | Delta Delta Sigma at UNC</title>
+<meta name="description" content="The Archive is the minute book of Delta Delta Sigma, UNC-Chapel Hill's pre-dental honor society — every chapter meeting documented, tagged, and open to member annotation.">
+<link rel="canonical" href="https://uncdds.org/archive.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Delta Delta Sigma">
+<meta property="og:title" content="The Archive — Meeting Notes | Delta Delta Sigma at UNC">
+<meta property="og:description" content="Every chapter meeting documented, tagged, and open to member annotation — the minute book of Delta Delta Sigma at UNC-Chapel Hill.">
+<meta property="og:url" content="https://uncdds.org/archive.html">
+<meta property="og:image" content="https://uncdds.org/og-image.png">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0A1A30">
+<link rel="icon" type="image/png" href="logo-dds.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;overflow-x:clip;}
+body{margin:0;background:#0A1A30;-webkit-font-smoothing:antialiased;font-family:'Montserrat',sans-serif;color:#fff;}
+::selection{background:#4B9CD3;color:#0A1A30;}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #4B9CD3;outline-offset:3px;}
+
+/* Sub-page nav (matches newsletter.html) */
+.subnav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px clamp(20px,4vw,48px);background:rgba(9,20,38,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(75,156,211,.18);}
+.subnav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;}
+.subnav-brand img{width:40px;height:40px;border-radius:50%;display:block;box-shadow:0 4px 16px -5px rgba(0,0,0,.6);}
+.subnav-brand span{font-weight:700;font-size:14px;letter-spacing:2px;color:#D7E2EA;white-space:nowrap;}
+.subnav-links{display:flex;align-items:center;gap:clamp(14px,2.4vw,30px);}
+.subnav-links a{color:#D7E2EA;font-weight:600;font-size:12.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;white-space:nowrap;}
+.subnav-links a:hover{opacity:.62;}
+.nav-auth-link{display:inline-flex;align-items:center;gap:7px;color:#D7E2EA;font-weight:600;font-size:12.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;white-space:nowrap;}
+.nav-auth-link:hover{opacity:.62;}
+.nav-auth-link.is-in{color:#B9975B;}
+.nav-auth-dot{width:7px;height:7px;border-radius:50%;background:#B9975B;box-shadow:0 0 10px rgba(185,151,91,.9);flex:none;}
+.nav-auth-photo{width:22px;height:22px;border-radius:50%;object-fit:cover;border:1.5px solid #B9975B;flex:none;display:block;}
+.subnav-cta{display:inline-flex;align-items:center;padding:10px 20px;border-radius:999px;background:#B9975B;color:#0A1A30 !important;font-weight:700;font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:transform .2s;box-shadow:0 6px 20px -8px rgba(185,151,91,.8);cursor:pointer;border:0;font-family:'Montserrat',sans-serif;}
+.subnav-cta:hover{transform:translateY(-2px);opacity:1 !important;}
+.subnav-cta[hidden]{display:none;}
+@media(max-width:640px){.subnav-hide{display:none;}}
+
+/* Masthead */
+.mast{position:relative;min-height:52vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;padding:clamp(120px,17vh,180px) clamp(20px,4vw,48px) clamp(64px,9vw,110px);background:radial-gradient(125% 95% at 50% -12%,#214a7e 0%,#16315a 34%,#0c2042 64%,#0A1A30 100%);overflow:clip;}
+.mast-eyebrow{display:inline-flex;align-items:center;gap:14px;margin-bottom:20px;}
+.mast-eyebrow .rule{width:34px;height:1.5px;background:#B9975B;display:block;}
+.mast-eyebrow span:nth-child(2){color:#B9975B;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;}
+.mast-word{position:relative;display:inline-block;}
+.mast h1{margin:0;font-weight:900;text-transform:uppercase;line-height:.84;letter-spacing:-0.02em;font-size:clamp(3rem,12vw,9.5rem);background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 78%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+/* the chapter seal, stamped over the corner of the word like a filing mark */
+.mast-seal{position:absolute;top:-40px;right:-58px;width:clamp(66px,8vw,96px);aspect-ratio:1;border-radius:50%;border:2px dashed rgba(185,151,91,.85);display:flex;align-items:center;justify-content:center;transform:rotate(10deg);background:rgba(10,26,48,.55);box-shadow:0 14px 30px -12px rgba(0,0,0,.7);}
+.mast-seal img{width:62%;height:62%;object-fit:contain;border-radius:50%;display:block;}
+@media(max-width:640px){.mast-seal{top:-22px;right:-14px;}}
+.mast-sub{margin:26px 0 0;font-family:'Lora',serif;font-style:italic;font-size:clamp(1rem,1.8vw,1.3rem);line-height:1.6;color:#C5D6E8;max-width:620px;}
+.mast-meta{display:flex;align-items:center;gap:16px;margin-top:26px;color:#7FB2E0;font-weight:600;letter-spacing:2.5px;font-size:11.5px;text-transform:uppercase;flex-wrap:wrap;justify-content:center;}
+.mast-meta .dot{width:5px;height:5px;border-radius:50%;background:#B9975B;}
+
+/* Minute book (paper) */
+.arch{position:relative;background:#F7F4EC;color:#13294B;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;z-index:5;min-height:100vh;padding:0 0 clamp(90px,12vw,150px);overflow:clip;}
+.arch-grain{position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.18;mix-blend-mode:multiply;z-index:1;}
+.arch-in{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px);}
+
+/* Tag filter rail */
+.rail{position:sticky;top:64px;z-index:30;background:rgba(247,244,236,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid rgba(19,41,75,.14);border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;padding:clamp(18px,2.6vw,26px) clamp(20px,4vw,48px);}
+.rail-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.rail-label{color:#B9975B;font-weight:700;letter-spacing:2px;font-size:11px;text-transform:uppercase;white-space:nowrap;}
+.chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:8px 16px;border-radius:999px;border:1px solid rgba(19,41,75,.3);background:transparent;color:#3E5F87;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.2px;font-size:10.5px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s;white-space:nowrap;}
+.chip:hover{border-color:#B9975B;transform:translateY(-1px);}
+.chip.active{background:#13294B;border-color:#13294B;color:#F5F7FA;}
+
+/* mono "typed record" bits */
+.stamp{font-family:'Courier Prime',monospace;letter-spacing:.5px;}
+
+/* Featured record: the open page of the minute book — ruled lines and a
+   gold margin rule, the way a real minute sheet is kept. */
+.feat{position:relative;display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:0;background:#FBF8F1;border-radius:8px;overflow:hidden;box-shadow:0 40px 80px -36px rgba(19,41,75,.45),0 8px 22px -10px rgba(19,41,75,.25);margin:clamp(40px,6vw,72px) 0 clamp(40px,6vw,64px);border:1px solid rgba(19,41,75,.08);}
+.feat-side{position:relative;background:#13294B;color:#EAF1F8;padding:clamp(26px,3.4vw,42px) clamp(22px,2.6vw,32px);display:flex;flex-direction:column;justify-content:space-between;gap:22px;}
+.feat-side .no{font-family:'Courier Prime',monospace;font-weight:700;font-size:clamp(2.2rem,4vw,3.1rem);line-height:1;color:#B9975B;white-space:nowrap;}
+.feat-side .no small{display:block;font-size:.28em;letter-spacing:3px;color:#7FB2E0;font-family:'Montserrat',sans-serif;font-weight:700;text-transform:uppercase;margin-bottom:10px;}
+.feat-side .dt{font-family:'Courier Prime',monospace;font-size:15px;color:#C5D6E8;}
+.feat-side .dt b{display:block;color:#B9975B;font-size:11px;font-family:'Montserrat',sans-serif;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-weight:700;}
+.feat-body{position:relative;padding:clamp(26px,3.6vw,48px);display:flex;flex-direction:column;gap:14px;background:repeating-linear-gradient(180deg,transparent 0 31px,rgba(19,41,75,.05) 31px 32px);}
+.feat-body::before{content:"";position:absolute;top:0;bottom:0;left:clamp(16px,2vw,26px);width:1.5px;background:rgba(185,151,91,.45);}
+.feat-body::after{content:"";position:absolute;inset:0;background:url('grain.png') repeat;opacity:.12;mix-blend-mode:multiply;pointer-events:none;}
+.feat-body>*{position:relative;z-index:2;margin-left:clamp(14px,1.6vw,22px);}
+.feat-latest{color:#B9975B;font-weight:700;letter-spacing:2px;font-size:11px;text-transform:uppercase;}
+.feat h2{margin:0;font-family:'Lora',serif;font-weight:600;font-size:clamp(1.5rem,2.8vw,2.2rem);line-height:1.25;color:#13294B;}
+.feat h2 .spk{font-family:'Montserrat',sans-serif;font-weight:600;font-size:.52em;color:#5A7798;letter-spacing:.4px;}
+.feat h2 .spk b{font-weight:400;color:#B9975B;}
+.feat-ex{margin:0;color:#5A7798;font-weight:400;font-size:clamp(.94rem,1.2vw,1.05rem);line-height:1.7;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.feat-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-top:1px solid rgba(19,41,75,.15);padding-top:16px;}
+.feat-byline{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;color:#13294B;}
+.feat-byline em{display:block;font-style:normal;color:#5A7798;margin-top:3px;font-weight:600;}
+.read-btn{display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;cursor:pointer;border:0;font-family:'Montserrat',sans-serif;transition:transform .2s;box-shadow:0 10px 24px -10px rgba(185,151,91,.8);}
+.read-btn:hover{transform:translateY(-2px);}
+@media(max-width:760px){.feat{grid-template-columns:1fr;}.feat-side{flex-direction:row;align-items:center;}}
+
+/* Record grid */
+.pg-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:0 0 clamp(20px,3vw,30px);flex-wrap:wrap;}
+.pg-head h3{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-0.01em;font-size:clamp(1.4rem,2.6vw,2rem);color:#13294B;}
+.pg-count{color:#5A7798;font-weight:600;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;}
+.pg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:clamp(18px,2.4vw,28px);}
+.pg-card{display:flex;flex-direction:column;gap:11px;background:#FBF8F1;color:#13294B;border-radius:8px;padding:clamp(16px,1.6vw,22px);border:1px solid rgba(19,41,75,.08);box-shadow:0 22px 46px -26px rgba(19,41,75,.4);cursor:pointer;text-align:left;text-decoration:none;font-family:'Montserrat',sans-serif;transition:transform .35s cubic-bezier(.25,.1,.25,1),box-shadow .35s cubic-bezier(.25,.1,.25,1);position:relative;}
+.pg-card:hover{transform:translateY(-8px);box-shadow:0 34px 64px -28px rgba(19,41,75,.5);}
+.pg-card::after{content:"";position:absolute;inset:0;border-radius:8px;background:url('grain.png') repeat;opacity:.12;mix-blend-mode:multiply;pointer-events:none;}
+.pg-card>*{position:relative;z-index:2;}
+.pg-mast{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1.5px solid #13294B;padding-bottom:8px;}
+.pg-mast .nm{font-weight:900;letter-spacing:2px;font-size:11px;}
+.pg-mast .is{font-family:'Courier Prime',monospace;font-weight:700;font-size:11px;color:#B9975B;white-space:nowrap;}
+.pg-date{font-family:'Courier Prime',monospace;font-size:12.5px;color:#5A7798;}
+.chips-s{display:flex;flex-wrap:wrap;gap:5px;}
+.chip-s{font-weight:700;letter-spacing:1px;font-size:9px;text-transform:uppercase;color:#4B9CD3;border:1px solid rgba(75,156,211,.5);border-radius:999px;padding:2px 8px;white-space:nowrap;}
+.pg-title{margin:0;font-family:'Lora',serif;font-weight:600;font-size:1.12rem;line-height:1.3;color:#13294B;}
+.pg-title .spk{font-family:'Montserrat',sans-serif;font-weight:600;font-size:.68em;color:#5A7798;}
+.pg-title .spk b{font-weight:400;color:#B9975B;}
+.pg-ex{margin:0;color:#5A7798;font-weight:400;font-size:.87rem;line-height:1.6;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.pg-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid rgba(19,41,75,.14);padding-top:9px;font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+.pg-foot .au{color:#13294B;}
+.pg-foot .cm{color:#5A7798;display:inline-flex;align-items:center;gap:5px;}
+
+/* Add-record tile (exec only) */
+.pg-add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:220px;border-radius:8px;border:2px dashed rgba(185,151,91,.65);background:rgba(185,151,91,.05);color:#8a6d38;cursor:pointer;font-family:'Montserrat',sans-serif;transition:transform .25s ease,background .25s ease,border-color .25s ease;}
+.pg-add:hover{transform:translateY(-4px);background:rgba(185,151,91,.11);border-color:#B9975B;}
+.pg-add .plus{font-size:2.6rem;font-weight:300;line-height:1;}
+.pg-add .lbl{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;line-height:1.6;text-align:center;}
+.pg-add[hidden]{display:none;}
+
+/* Empty state */
+.pg-empty{grid-column:1/-1;text-align:center;background:#FBF8F1;border-radius:8px;border:1px dashed rgba(19,41,75,.25);padding:clamp(40px,6vw,64px) 24px;}
+.pg-empty h4{margin:0 0 8px;font-family:'Lora',serif;font-weight:600;font-size:1.3rem;color:#13294B;}
+.pg-empty p{margin:0;color:#5A7798;font-size:.92rem;line-height:1.6;}
+
+/* Footer strip */
+.foot{background:#08172B;padding:clamp(30px,4vw,44px) clamp(20px,4vw,48px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;}
+.foot-brand{display:flex;align-items:center;gap:13px;}
+.foot-brand img{width:42px;height:42px;border-radius:50%;display:block;}
+.foot-brand .a{font-weight:700;letter-spacing:1.5px;font-size:13px;color:#D7E2EA;}
+.foot-brand .b{color:#54708E;font-size:12px;letter-spacing:.5px;}
+.foot-meta{display:flex;flex-wrap:wrap;gap:18px;align-items:center;color:#6E89A6;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
+.foot-meta .gold{color:#B9975B;}
+
+@media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
+</style>
+</head>
+<body>
+
+<nav class="subnav">
+  <a class="subnav-brand" href="index.html"><img src="logo-dds.png" alt="DDS" onerror="this.src='https://placehold.co/40x40/13294B/4B9CD3'"><span>UNC DDS</span></a>
+  <div class="subnav-links">
+    <a href="index.html#meeting-notes" class="subnav-hide">&larr; Back to the site</a>
+    <a href="newsletter.html" class="subnav-hide">The Bite</a>
+    <span data-auth-mount style="display:inline-flex;align-items:center;"></span>
+    <button type="button" class="subnav-cta" id="cta-add" hidden>Add meeting notes</button>
+  </div>
+</nav>
+
+<!-- MASTHEAD -->
+<header class="mast">
+  <div class="mast-eyebrow"><span class="rule"></span><span>Chapter Minutes · Recorded Every Monday</span><span class="rule"></span></div>
+  <div class="mast-word">
+    <h1>The Archive</h1>
+    <div class="mast-seal" aria-hidden="true"><img src="logo-dds.png" alt=""></div>
+  </div>
+  <p class="mast-sub">The chapter’s minute book — every meeting documented by the exec board, tagged by what it was, and open to every member’s comments and annotations.</p>
+  <div class="mast-meta">
+    <span class="stamp" id="mast-count">— records</span><span class="dot"></span><span>Filed by the exec board</span><span class="dot"></span><span>Est. 2026</span>
+  </div>
+</header>
+
+<!-- MINUTE BOOK -->
+<main class="arch" id="book">
+  <div class="arch-grain"></div>
+  <div class="rail">
+    <div class="rail-in">
+      <span class="rail-label">Filter by meeting type</span>
+      <div class="chips" id="chips" role="group" aria-label="Filter records by tag"></div>
+    </div>
+  </div>
+  <div class="arch-in">
+    <div id="feat-slot"></div>
+    <div class="pg-head">
+      <h3>From the Minute Book</h3>
+      <span class="pg-count" id="pg-count"></span>
+    </div>
+    <div class="pg-grid" id="pg-grid"></div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-brand">
+    <img src="logo-dds.png" alt="DDS" onerror="this.src='https://placehold.co/42x42/13294B/4B9CD3'">
+    <div><div class="a">DELTA DELTA SIGMA</div><div class="b">The Archive · Minutes since 2026</div></div>
+  </div>
+  <div class="foot-meta"><span>Learn. Serve. Lead.</span><span class="gold">#FutureDDS</span><span>© <span id="yr"></span> ΔΔΣ</span></div>
+</footer>
+
+<script src="dds-cloud-config.js"></script>
+<script src="dds-cloud.js"></script>
+<script src="dds-auth.js"></script>
+<script src="dds-minutes.js"></script>
+<script src="dds-minutes-ui.js"></script>
+<script>
+(function(){
+'use strict';
+
+var esc = DDSMinutes.esc;
+document.getElementById('yr').textContent = new Date().getFullYear();
+document.querySelectorAll('[data-auth-mount]').forEach(function(el){ DDSAuth.mountNav(el); });
+
+var chipsEl = document.getElementById('chips');
+var featSlot = document.getElementById('feat-slot');
+var gridEl = document.getElementById('pg-grid');
+var countEl = document.getElementById('pg-count');
+var activeTag = null; // null = all
+
+// ---- Filter chips ----
+function renderChips(){
+  var mk = function(label, tag){
+    var on = (tag === activeTag) || (tag === null && activeTag === null);
+    return '<button type="button" class="chip' + (on ? ' active' : '') + '" data-tag="' + (tag === null ? '' : esc(DDSMinutes.slug(tag))) + '">' + esc(label) + '</button>';
+  };
+  chipsEl.innerHTML = mk('All', null) + DDSMinutes.TAGS.map(function(t){ return mk(t, t); }).join('');
+}
+chipsEl.addEventListener('click', function(e){
+  var b = e.target.closest('.chip');
+  if (!b) return;
+  var slug = b.getAttribute('data-tag');
+  activeTag = slug ? DDSMinutes.fromSlug(slug) : null;
+  history.replaceState(null, '', location.pathname + (activeTag ? '?tag=' + DDSMinutes.slug(activeTag) : ''));
+  renderChips(); renderRecords();
+});
+
+// ---- Records ----
+function filtered(){
+  var all = DDSMinutes.all();
+  return activeTag ? all.filter(function(n){ return (n.tags || []).indexOf(activeTag) !== -1; }) : all;
+}
+function chipRow(n){
+  return (n.tags || []).map(function(t){ return '<span class="chip-s">' + esc(t) + '</span>'; }).join('');
+}
+function speakerHtml(n, cls){
+  return n.speaker ? '<span class="' + cls + '"> <b>|</b> ' + esc(n.speaker) + '</span>' : '';
+}
+function noteHref(n){ return 'note.html?id=' + encodeURIComponent(n.id); }
+function pad(no){ return no < 10 ? '0' + no : '' + no; }
+
+function renderRecords(){
+  var list = filtered();
+  var total = DDSMinutes.all().length;
+  document.getElementById('mast-count').textContent = total + ' record' + (total === 1 ? '' : 's');
+
+  // Featured = newest in the current filter, laid out as the open minute page
+  var f = list[0];
+  featSlot.innerHTML = !f ? '' :
+    '<article class="feat">' +
+      '<div class="feat-side">' +
+        '<div class="no"><small>Minute Record</small>Nº ' + pad(f.no) + '</div>' +
+        '<div class="dt"><b>Meeting date</b>' + DDSMinutes.fmtDate(f.date) + '</div>' +
+      '</div>' +
+      '<div class="feat-body">' +
+        '<span class="feat-latest">' + (activeTag ? 'Latest in ' + esc(activeTag) : 'The Latest Record') + '</span>' +
+        '<h2>' + esc(f.title) + speakerHtml(f, 'spk') + '</h2>' +
+        '<div class="chips-s">' + chipRow(f) + '</div>' +
+        '<p class="feat-ex">' + esc(DDSMinutes.excerpt(f)) + '</p>' +
+        '<div class="feat-foot">' +
+          '<div class="feat-byline">Recorded by ' + esc(f.author || 'Exec Board') + '<em>' + DDSMinutes.commentCount(f.id) + ' member annotation' + (DDSMinutes.commentCount(f.id) === 1 ? '' : 's') + '</em></div>' +
+          '<a class="read-btn" href="' + noteHref(f) + '">Read the notes&nbsp;→</a>' +
+        '</div>' +
+      '</div>' +
+    '</article>';
+
+  var rest = list.slice(1);
+  countEl.textContent = list.length + ' record' + (list.length === 1 ? '' : 's') + (activeTag ? ' tagged ' + activeTag : '');
+  var cards = rest.map(function(n){
+    var cm = DDSMinutes.commentCount(n.id);
+    return '<a class="pg-card" href="' + noteHref(n) + '">' +
+      '<div class="pg-mast"><span class="nm">MINUTES</span><span class="is">Nº ' + pad(n.no) + '</span></div>' +
+      '<span class="pg-date stamp">' + DDSMinutes.fmtDate(n.date) + '</span>' +
+      '<div class="chips-s">' + chipRow(n) + '</div>' +
+      '<h4 class="pg-title">' + esc(n.title) + speakerHtml(n, 'spk') + '</h4>' +
+      '<p class="pg-ex">' + esc(DDSMinutes.excerpt(n)) + '</p>' +
+      '<div class="pg-foot"><span class="au">' + esc(n.author || 'Exec Board') + '</span>' +
+        '<span class="cm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' + cm + '</span>' +
+      '</div>' +
+    '</a>';
+  });
+  if (!list.length) {
+    cards = ['<div class="pg-empty"><h4>No meetings tagged ' + esc(activeTag || '') + ' yet.</h4><p>When the exec board files one, it lands here.</p></div>'];
+  }
+  if (DDSMinutes.canWrite()) {
+    cards.push('<button type="button" class="pg-add" id="pg-add-tile"><span class="plus">＋</span><span class="lbl">File new<br>meeting notes</span></button>');
+  }
+  gridEl.innerHTML = cards.join('');
+}
+
+// ---- Exec: add-record entry points ----
+function openAdd(){
+  DDSMinutesUI.openComposer(null, function(saved){
+    location.href = 'note.html?id=' + encodeURIComponent(saved.id);
+  });
+}
+document.getElementById('cta-add').addEventListener('click', openAdd);
+gridEl.addEventListener('click', function(e){
+  if (e.target.closest('#pg-add-tile')) openAdd();
+});
+function syncExec(){
+  document.getElementById('cta-add').hidden = !DDSMinutes.canWrite();
+  renderRecords();
+}
+DDSAuth.onChange(syncExec);
+
+// refresh when another tab or the cloud writes
+window.addEventListener('storage', function(e){
+  if (e.key === 'dds-minutes-v1' || e.key === 'dds-minute-comments-v1') renderRecords();
+});
+
+// ---- Boot ----
+var tagMatch = /[?&]tag=([^&]+)/.exec(location.search);
+if (tagMatch) activeTag = DDSMinutes.fromSlug(decodeURIComponent(tagMatch[1]));
+renderChips();
+syncExec();
+})();
+</script>
+</body>
+</html>
