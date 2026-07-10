@@ -1714,17 +1714,34 @@ ddsWrapAbout();
     return null;
   }
   const has = v => typeof v === 'string' ? v.trim() !== '' : !!v;
+  // Inline-edit-mode fallback for officers with no account yet: edits save to
+  // the shared content store under op:<email>:<field> and overlay the defaults
+  // here. Once the officer signs up, their member row takes over.
+  function opOv(email, f){
+    try { return window.DDSEdit && DDSEdit.fieldOverride ? DDSEdit.fieldOverride('op:' + String(email || '').toLowerCase() + ':' + f) : null; }
+    catch (e) { return null; }
+  }
   function merged(base){
+    let b = base;
+    const ovBio = opOv(base.email, 'bio'), ovQ = opOv(base.email, 'quote'), ovQb = opOv(base.email, 'quoteBy');
+    const ovPh = opOv(base.email, 'photos');
+    if (has(ovBio) || has(ovQ) || has(ovQb) || ovPh) {
+      b = Object.assign({}, base);
+      if (has(ovBio)) b.bio = ovBio;
+      if (has(ovQ)) b.quote = ovQ;
+      if (has(ovQb)) b.quoteBy = ovQb;
+      if (ovPh) { try { const arr = JSON.parse(ovPh); if (Array.isArray(arr) && arr.length) b.photos = arr; } catch (e) {} }
+    }
     const m = memberFor(base.email);
-    if (!m) return base;
-    return Object.assign({}, base, {
-      bio:       has(m.bio)       ? m.bio       : base.bio,
-      quote:     has(m.quote)     ? m.quote     : base.quote,
-      quoteBy:   has(m.quoteBy)   ? m.quoteBy   : base.quoteBy,
-      phone:     has(m.phone)     ? m.phone     : base.phone,
-      instagram: has(m.instagram) ? m.instagram : base.instagram,
-      linkedin:  has(m.linkedin)  ? m.linkedin  : base.linkedin,
-      photos:    (Array.isArray(m.photos) && m.photos.length) ? m.photos : (base.photos || [])
+    if (!m) return b;
+    return Object.assign({}, b, {
+      bio:       has(m.bio)       ? m.bio       : b.bio,
+      quote:     has(m.quote)     ? m.quote     : b.quote,
+      quoteBy:   has(m.quoteBy)   ? m.quoteBy   : b.quoteBy,
+      phone:     has(m.phone)     ? m.phone     : b.phone,
+      instagram: has(m.instagram) ? m.instagram : b.instagram,
+      linkedin:  has(m.linkedin)  ? m.linkedin  : b.linkedin,
+      photos:    (Array.isArray(m.photos) && m.photos.length) ? m.photos : (b.photos || [])
     });
   }
 
@@ -1732,6 +1749,7 @@ ddsWrapAbout();
     const o = merged(base);
     const panel = document.createElement('div');
     panel.setAttribute('data-officer-panel','');
+    panel.setAttribute('data-op-email', String(base.email || '').toLowerCase());
     panel._base = base;
     panel.style.cssText = 'flex:none;width:100vw;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:clamp(80px,10vh,128px) clamp(20px,4vw,48px) clamp(46px,7vh,84px);perspective:1300px;';
     panel.innerHTML = `
@@ -1809,7 +1827,7 @@ ddsWrapAbout();
   }
   window.__opRefresh = refreshOfficers;
   try { if (window.DDSAuth && DDSAuth.onChange) DDSAuth.onChange(refreshOfficers); } catch (e) {}
-  window.addEventListener('storage', (e) => { if (!e.key || e.key === 'dds-members-v1') refreshOfficers(); });
+  window.addEventListener('storage', (e) => { if (!e.key || e.key === 'dds-members-v1' || e.key === 'dds-content-v1') refreshOfficers(); });
 })();
 
 // ---- Officer "Get to know me" box: pull the officer's dashboard profile (if present) ----

@@ -68,22 +68,36 @@
       toRows: function (v) { return Array.isArray(v) ? v : []; },
       fromRows: function (rows) { return rows; }
     },
-    content: {   // exec inline text edits (dds-edit.js): map id -> {t,by,at,up}
+    content: {   // exec inline edits (dds-edit.js): map id -> {t?,img?,href?,by,at,up}
       key: 'dds-content-v1', coll: 'content', every: 30,
       when: function () { return true; },
       toRows: function (v) {
         v = v || {}; var rows = [];
         Object.keys(v).forEach(function (id) {
-          var e = v[id] || {};
-          rows.push({ id: id, t: e.t || '', by: e.by || '', at: e.at || 0, up: e.up || 0 });
+          var e = v[id] || {}, r = { id: id };
+          for (var k in e) r[k] = e[k];
+          r.up = e.up || 0;
+          rows.push(r);
         });
         return rows;
       },
       fromRows: function (rows) {
         var out = {};
-        rows.forEach(function (r) { if (r.id) out[r.id] = { t: r.t || '', by: r.by || '', at: r.at || 0, up: r.up || 0 }; });
+        rows.forEach(function (r) {
+          if (!r.id) return;
+          var e = {};
+          for (var k in r) if (k !== 'id') e[k] = r[k];
+          out[r.id] = e;
+        });
         return out;
       }
+    },
+    news: {      // The Bite member posts (dds-news.js). maxRowBytes keeps posts
+      key: 'dds-newsletter-v1', coll: 'posts', every: 60,   // whose cover image
+      when: function () { return true; },                   // would blow Firestore's
+      maxRowBytes: 900000,                                  // ~1MB doc cap local-only.
+      toRows: function (v) { return Array.isArray(v) ? v : []; },
+      fromRows: function (rows) { return rows; }
     },
     classes: {
       key: 'dds-classes-v1', coll: 'classes', every: 60,
@@ -342,6 +356,9 @@
       var id = String(r.id);
       seen[id] = true;
       if (id.indexOf('seed-') === 0) return;
+      if (st.maxRowBytes) {   // oversized rows never queue — they stay local-only
+        try { if (JSON.stringify(r).length > st.maxRowBytes) return; } catch (e) { return; }
+      }
       var h = hashRow(r);
       var s = sh[id];
       if (!s || s.h !== h || s.del) {

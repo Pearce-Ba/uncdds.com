@@ -240,6 +240,24 @@
       return m.role === 'exec' || !!EXEC_BOARD[String(m.email || '').toLowerCase()];
     },
 
+    /* Exec-only: write officer-card fields onto ANY member's row by email —
+       used by the site's inline edit mode so the president can update another
+       officer's panel. Same allow-list as the officer card in member.html. */
+    execSetProfileByEmail: function (email, fields) {
+      if (!api.isExec()) return { ok: false, err: 'Exec only.' };
+      email = String(email || '').trim().toLowerCase();
+      var list = loadMembers();
+      var m = list.find(function (r) { return String(r.email || '').toLowerCase() === email; });
+      if (!m) return { ok: false, err: 'no-account' };
+      var ALLOW = ['bio', 'quote', 'quoteBy', 'phone', 'instagram', 'linkedin', 'photos'];
+      var changed = false;
+      ALLOW.forEach(function (k) {
+        if (k in fields && JSON.stringify(m[k]) !== JSON.stringify(fields[k])) { m[k] = fields[k]; changed = true; }
+      });
+      if (changed) { m.up = Date.now(); saveMembers(list); notify(); }
+      return { ok: true, changed: changed };
+    },
+
     /* The member's real board title ("President", "Treasurer", ...), or
        null for members / exec rows without a roster match. */
     execTitle: function (member) {

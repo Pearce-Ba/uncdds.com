@@ -58,7 +58,10 @@
     try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
     catch (e) { return []; }
   }
-  function save(list) { localStorage.setItem(STORE_KEY, JSON.stringify(list)); }
+  function save(list) {
+    localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    if (window.DDSCloud) { try { DDSCloud.touch('news'); } catch (e) {} }
+  }
   function uid() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -76,9 +79,16 @@
       return MONTHS[(+p[1] || 1) - 1] + ' ' + (+p[2] || 1) + ', ' + p[0];
     },
 
-    /* All posts, newest first. Member posts carry authorId. */
+    /* All posts, newest first. Member posts carry authorId. A saved post
+       with replaces:<seed-id> is an edited copy of that seed issue and
+       stands in for it (copy-on-write — the seed constant is never mutated,
+       and deleting the copy restores the original issue). */
     all: function () {
-      return SEED.concat(loadSaved()).sort(function (a, b) {
+      var saved = loadSaved();
+      var replaced = {};
+      saved.forEach(function (p) { if (p.replaces) replaced[p.replaces] = true; });
+      var seeds = SEED.filter(function (s) { return !replaced[s.id]; });
+      return seeds.concat(saved).sort(function (a, b) {
         return a.date < b.date ? 1 : a.date > b.date ? -1 : (b.issue || 0) - (a.issue || 0);
       });
     },
@@ -98,12 +108,46 @@
       return post;
     },
 
+    /* Edit a post after publication. Saved posts update in place; seed
+       issues get a copy-on-write row (new id, replaces:<seed-id>) so the
+       edit can sync to the cloud (seed- ids never sync). Returns the
+       post that should be shown, or null if the id is unknown. */
+    update: function (id, fields) {
+      var EDITABLE = ['title', 'body', 'tags', 'img'];
+      var list = loadSaved();
+      var mine = list.find(function (p) { return p.id === id; });
+      if (mine) {
+        EDITABLE.forEach(function (k) { if (k in fields) mine[k] = fields[k]; });
+        mine.editedAt = new Date().toISOString().slice(0, 10);
+        save(list);
+        return mine;
+      }
+      var seed = SEED.find(function (s) { return s.id === id; });
+      if (!seed) return null;
+      var copy = {};
+      for (var k in seed) copy[k] = seed[k];
+      EDITABLE.forEach(function (k2) { if (k2 in fields) copy[k2] = fields[k2]; });
+      copy.id = uid();
+      copy.replaces = seed.id;
+      copy.editedAt = new Date().toISOString().slice(0, 10);
+      list.push(copy);
+      save(list);
+      return copy;
+    },
+
     remove: function (id) {
       save(loadSaved().filter(function (p) { return p.id !== id; }));
     },
 
     isMine: function (post, member) {
       return !!(post && member && post.authorId === member.id);
+    },
+
+    /* Who may edit/delete a post through the UI: its author, or any exec. */
+    canEdit: function (post, member) {
+      if (!post || !member) return false;
+      if (api.isMine(post, member)) return true;
+      try { return !!(window.DDSAuth && DDSAuth.isExec && DDSAuth.isExec(member)); } catch (e) { return false; }
     }
   };
 
