@@ -54,7 +54,7 @@
       '#hero-login', '#exec-copy', '#nb-rail',                  // JS-swapped labels + Bite rail
       '[data-bl-rail]', '[data-bl-big]', '.bl-tier', '.blm-card', // big/little (family data)
       '[data-op-bio]', '[data-op-voice]', '[data-op-voiceby]',  // officer fields (custom DB bridge below)
-      '[data-op-desc]', '[data-op-reach]', '[data-op-photos]'
+      '[data-op-desc]', '[data-op-reach]', '[data-op-photos]', '[data-op-roles]'
     ],
     newsletter: [
       '#chips', '#feat-slot', '#pg-grid', '#reader', '#cp-sub', '#cp-tags'

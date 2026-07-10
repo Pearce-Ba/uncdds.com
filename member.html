@@ -73,6 +73,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .sh-exec-eyebrow span:last-child{color:#8a6d38;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;font-size:11px;}
 .sh-photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px;margin:-4px 0 18px;}
 .sh-photos-grid:empty{display:none;}
+.sh-role-row{display:flex;gap:8px;margin:0 0 8px;}
+.sheet .sh-role-row input{margin-top:0;}
+.sh-role-row .sh-role-y{flex:0 0 118px;}
+.sh-role-row .sh-role-t{flex:1;min-width:0;}
+.sh-role-rm{flex:none;align-self:center;width:36px;height:36px;border-radius:9px;border:1px solid rgba(190,70,70,.4);background:none;color:#A03030;font-size:14px;cursor:pointer;transition:background .2s;}
+.sh-role-rm:hover{background:rgba(190,60,60,.09);}
+.sh-role-add{display:inline-block;margin:2px 0 18px;background:none;border:1px dashed rgba(19,41,75,.4);border-radius:999px;padding:8px 16px;color:#33719F;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;font-size:10px;cursor:pointer;transition:border-color .2s,background .2s;}
+.sh-role-add:hover{border-color:#4B9CD3;background:rgba(75,156,211,.07);}
 .sh-pthumb{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid rgba(19,41,75,.2);background:#0c2042;}
 .sh-pthumb img{width:100%;height:100%;object-fit:cover;display:block;}
 .sh-pthumb button{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(160,48,48,.94);color:#fff;font-size:12px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.4);}
@@ -143,7 +151,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
         <label>Officer bio<textarea id="sh-bio" maxlength="600" placeholder="Junior studying Biology and Business. I currently serve as…"></textarea><span class="sh-hint">The intro paragraph shown under “Hi, I’m [you]!” on your officer card.</span></label>
         <label>Quote attribution<input type="text" id="sh-quoteby" maxlength="80" placeholder="e.g. Reba McEntire"><span class="sh-hint">Who said your quote above — shown on your Voice card as “— Name.”</span></label>
         <label>Phone<input type="text" id="sh-phone" maxlength="24" placeholder="469-512-5950"><span class="sh-hint">Shown on your Reach Me card; visitors copy it with one tap. Leave blank to hide it.</span></label>
-        <label>Officer photos<input type="file" id="sh-photos" accept="image/*" multiple><span class="sh-hint">Add several at once — they tile and cross-fade across your officer card. Up to 8.</span></label>
+        <label>“Get To Know Me” card<textarea id="sh-about" maxlength="500" placeholder="A few lines in your own voice — what you’re into, where people can find you, why you love DDS…"></textarea><span class="sh-hint">Shown word-for-word in the “Get To Know Me” box on your officer card. Leave blank and it auto-builds from your major, interests &amp; hobbies instead.</span></label>
+        <label style="margin-bottom:6px;">DDS history<span class="sh-hint">The role-by-year lines on your officer card’s “Background” box. Add, edit, or remove as many as you like — leave it empty to show the default lines.</span></label>
+        <div id="sh-roles"></div>
+        <button type="button" class="sh-role-add" id="sh-role-add">+ Add a role</button>
+        <label>Graduation year<input type="text" id="sh-gradyear" maxlength="4" inputmode="numeric" placeholder="2027"><span class="sh-hint">Shows on the “UNC · Chapel Hill” line of your Background box (and your Class-of chip).</span></label>
+        <label>Officer photos<input type="file" id="sh-photos" accept="image/*" multiple><span class="sh-hint">Add several at once — they tile and cross-fade across your officer card, and take turns filling its backdrop. Up to 8.</span></label>
         <div class="sh-photos-grid" id="sh-photos-grid"></div>
       </div>
       <button type="submit" class="sh-save" id="sh-save">Save My Profile</button>
@@ -225,11 +238,48 @@ function renderPhotosGrid(){
     return '<div class="sh-pthumb"><img src="' + u + '" alt="Officer photo ' + (i+1) + '"><button type="button" data-rm="' + i + '" aria-label="Remove photo ' + (i+1) + '">✕</button></div>';
   }).join('');
 }
+
+/* --- DDS history: the role-by-year lines on the officer card's Background box.
+   Edited as rows of [years | title]; empty list = card shows its defaults. --- */
+var rolesData = [];
+var ROLES_MAX = 8;
+function escAttr(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function setRolesFrom(list){
+  rolesData = (Array.isArray(list) ? list : []).map(function(r){ return { y: r.y || '', t: r.t || '' }; });
+}
+function renderRoles(){
+  var wrap = document.getElementById('sh-roles');
+  wrap.innerHTML = rolesData.map(function(r, i){
+    return '<div class="sh-role-row">' +
+      '<input type="text" class="sh-role-y" data-ri="' + i + '" data-rf="y" maxlength="16" placeholder="2024–Now" value="' + escAttr(r.y) + '" aria-label="Years held">' +
+      '<input type="text" class="sh-role-t" data-ri="' + i + '" data-rf="t" maxlength="48" placeholder="e.g. President" value="' + escAttr(r.t) + '" aria-label="Role title">' +
+      '<button type="button" class="sh-role-rm" data-rrm="' + i + '" aria-label="Remove this role">✕</button></div>';
+  }).join('') || '<p class="sh-hint" style="margin:0 0 10px;">Using the default lines (2024–Now · your title, 2023–24 · Member) — add your own to replace them.</p>';
+}
+document.getElementById('sh-roles').addEventListener('input', function(e){
+  var ri = e.target.getAttribute('data-ri'), rf = e.target.getAttribute('data-rf');
+  if (ri != null && rf && rolesData[+ri]) rolesData[+ri][rf] = e.target.value;
+});
+document.getElementById('sh-roles').addEventListener('click', function(e){
+  var b = e.target.closest('[data-rrm]'); if (!b) return;
+  rolesData.splice(+b.getAttribute('data-rrm'), 1); renderRoles();
+});
+document.getElementById('sh-role-add').addEventListener('click', function(){
+  if (rolesData.length >= ROLES_MAX) return;
+  rolesData.push({ y: '', t: '' }); renderRoles();
+  var ys = document.querySelectorAll('#sh-roles .sh-role-y');
+  if (ys.length) ys[ys.length - 1].focus();
+});
+
 if (isExec) {
   document.getElementById('sh-exec-fields').hidden = false;
   document.getElementById('sh-bio').value = me.bio || '';
   document.getElementById('sh-quoteby').value = me.quoteBy || '';
   document.getElementById('sh-phone').value = me.phone || '';
+  document.getElementById('sh-about').value = me.about || '';
+  document.getElementById('sh-gradyear').value = me.gradYear || '';
+  setRolesFrom(me.roles);
+  renderRoles();
   renderPhotosGrid();
 }
 document.getElementById('sh-photos-grid').addEventListener('click', function(e){
@@ -325,6 +375,12 @@ document.getElementById('sh-form').addEventListener('submit', function(e){
     payload.bio = document.getElementById('sh-bio').value.trim();
     payload.quoteBy = document.getElementById('sh-quoteby').value.trim();
     payload.phone = document.getElementById('sh-phone').value.trim();
+    payload.about = document.getElementById('sh-about').value.trim();
+    payload.roles = rolesData
+      .map(function(r){ return { y: String(r.y || '').trim(), t: String(r.t || '').trim() }; })
+      .filter(function(r){ return r.y || r.t; });
+    var gy = document.getElementById('sh-gradyear').value.trim();
+    if (gy) payload.gradYear = gy;
     payload.photos = photosData;
   }
   var res = DDSAuth.updateProfile(payload);
@@ -332,6 +388,8 @@ document.getElementById('sh-form').addEventListener('submit', function(e){
   me = res.member;
   document.getElementById('sh-instagram').value = me.instagram || '';
   document.getElementById('sh-linkedin').value = me.linkedin || '';
+  if (isExec) { setRolesFrom(me.roles); renderRoles(); }
+  renderHead();
   var btn = document.getElementById('sh-save');
   btn.textContent = 'Saved ✓';
   btn.classList.add('saved');

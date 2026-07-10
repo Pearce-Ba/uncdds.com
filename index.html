@@ -278,6 +278,14 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .op-desc-cta{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;background:linear-gradient(180deg,#C9A867,#B9975B);color:#1a1408;font-weight:700;font-size:12px;letter-spacing:.04em;text-decoration:none;box-shadow:0 12px 26px -12px rgba(185,151,91,.8);transition:transform .2s ease,box-shadow .2s ease;}
 .op-desc-cta:hover{transform:translateY(-2px);box-shadow:0 16px 32px -12px rgba(185,151,91,.95);}
 /* Officer profile: Photos box (was Involvement) — rows of little tiles that drift and cross-fade */
+/* Photos card backdrop: two stacked layers cross-dissolve between the same
+   photos the marquee rows carry, so one always fills the frame — a scrim
+   keeps the label + rows readable over whatever photo is up. */
+.op-ph-bg{position:absolute;inset:0;z-index:0;pointer-events:none;}
+.op-ph-bg i{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.25s ease;will-change:opacity;}
+.op-ph-bg i.on{opacity:1;}
+.op-ph-scrim{position:absolute;inset:0;opacity:0;transition:opacity 1.25s ease;background:linear-gradient(180deg,rgba(12,14,19,.78) 0%,rgba(12,14,19,.30) 44%,rgba(12,14,19,.66) 100%);}
+.op-ph-bg.live .op-ph-scrim{opacity:1;}
 .op-ph-rows{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding-bottom:2px;overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent);}
 .op-ph-row{display:flex;gap:8px;width:max-content;}
 .op-ph-tile{flex:none;width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 1px rgba(255,255,255,.12);background-size:cover;background-position:center;transition:opacity .5s ease;}
@@ -452,14 +460,17 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .nb-foot .nb-author{color:#13294B;}
 .nb-foot .nb-date{color:#5A7798;}
 @media(max-width:768px){.nb-arrow{display:none;}.nb-card{width:min(76vw,320px);}.nb-rail{padding:38px 6px 48px;}}
-/* Per-section cursors. The navy dot leads only in the Hero and Our Members;
-   the tooth stays in Opportunities + Officer Profiles; the President's
-   letter hides the cursor (its glow does the work); everywhere else keeps
-   the normal pointer. cursor:none for the dot zones is gated on html.dot-on
-   so it only applies when initDotCursor actually runs (fine pointer). */
+/* Per-section cursors. The navy dot leads in the Hero, Our Members, and the
+   Member Toolkit; the tooth stays in Opportunities + Officer Profiles; the
+   President's letter hides the cursor (its glow does the work); everywhere
+   else keeps the normal pointer. cursor:none for the dot zones is gated on
+   html.dot-on so it only applies when initDotCursor actually runs (fine
+   pointer). The toolkit is dense with links, so its links drop the native
+   pointer too — the dot's grow state is the hover affordance there. */
 @media (prefers-reduced-motion: no-preference){
   #officer-profiles,#offers,#president-letter{cursor:none;}
   html.dot-on #top,html.dot-on #members-preview{cursor:none;}
+  html.dot-on #toolkit,html.dot-on #toolkit a{cursor:none;}
 }
 #dotcur{position:fixed;top:0;left:0;width:13px;height:13px;border-radius:50%;
   background:#13294B;pointer-events:none;z-index:99999;opacity:0;
@@ -1705,6 +1716,17 @@ ddsWrapAbout();
                 </div>
                 <div class="op-reach-cubes">${cube(urlLI(o.linkedin), ICON_LI, 'LinkedIn')}${cube(urlIG(o.instagram), ICON_IG, 'Instagram')}${phCube}</div>`;
   }
+  const roleRow = (y, mid, right) => `<div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.88);"><span>${esc(y)}</span><span style="opacity:.65;">✦ ${esc(mid)}</span><span style="opacity:.65;">${esc(right)}</span></div>`;
+  // The Background card's role-by-year lines: the officer's own list (edited in
+  // the profile sheet's "Your Officer Card") when present, else a default pair
+  // built from their roster title; the UNC line carries their graduation year.
+  function rolesInner(o){
+    const list = (Array.isArray(o.roles) && o.roles.length)
+      ? o.roles
+      : [{ y: '2024–Now', t: o.role }, { y: '2023–24', t: 'Member' }];
+    return list.map(r => roleRow(r.y || '—', r.t || '—', 'DDS')).join('') +
+           roleRow('UNC', 'Chapel Hill', o.gradYear || '2027');
+  }
   // Find the member row for an officer by email; officer-card content the officer
   // fills in their dashboard profile overrides the hard-coded defaults below.
   function memberFor(email){
@@ -1741,7 +1763,9 @@ ddsWrapAbout();
       phone:     has(m.phone)     ? m.phone     : b.phone,
       instagram: has(m.instagram) ? m.instagram : b.instagram,
       linkedin:  has(m.linkedin)  ? m.linkedin  : b.linkedin,
-      photos:    (Array.isArray(m.photos) && m.photos.length) ? m.photos : (b.photos || [])
+      photos:    (Array.isArray(m.photos) && m.photos.length) ? m.photos : (b.photos || []),
+      roles:     (Array.isArray(m.roles) && m.roles.length) ? m.roles : (b.roles || null),
+      gradYear:  m.gradYear || b.gradYear
     });
   }
 
@@ -1767,11 +1791,7 @@ ddsWrapAbout();
             <img src="${o.bgPhoto}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;">
             <div style="position:relative;z-index:2;height:100%;min-height:clamp(380px,42vw,540px);display:flex;flex-direction:column;justify-content:space-between;padding:18px;pointer-events:none;">
               <div style="text-align:center;letter-spacing:.22em;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,.78);">✦&nbsp;&nbsp;Background&nbsp;&nbsp;✦</div>
-              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(to top,rgba(0,0,0,.78),transparent);margin:0 -18px -18px;padding:46px 18px 18px;">
-                <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.88);"><span>2024–Now</span><span style="opacity:.65;">✦ ${esc(o.role)}</span><span style="opacity:.65;">DDS</span></div>
-                <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.88);"><span>2023–24</span><span style="opacity:.65;">✦ Member</span><span style="opacity:.65;">DDS</span></div>
-                <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.88);"><span>UNC</span><span style="opacity:.65;">✦ Chapel Hill</span><span style="opacity:.65;">2027</span></div>
-              </div>
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(to top,rgba(0,0,0,.78),transparent);margin:0 -18px -18px;padding:46px 18px 18px;" data-op-roles>${rolesInner(o)}</div>
             </div>
           </div>
           <!-- Col 2: voice + get-to-know-me (fills down to the background's bottom) -->
@@ -1792,6 +1812,7 @@ ddsWrapAbout();
           <!-- Col 3: photos + reach (photos fills the top; reach sits on the bottom line) -->
           <div style="display:flex;flex-direction:column;gap:clamp(12px,1.2vw,18px);">
             <div class="op-ph-box" data-tilt data-depth="1.2" data-op-photos data-photos='${esc(JSON.stringify(o.photos || []))}' style="flex:1;position:relative;overflow:hidden;border-radius:20px;background:radial-gradient(120% 120% at 72% 8%,#20242d 0%,#141519 68%);min-height:clamp(210px,24vw,320px);box-shadow:0 30px 70px -28px rgba(0,0,0,.6),0 8px 22px -10px rgba(0,0,0,.45);will-change:transform;">
+              <div class="op-ph-bg" data-op-ph-bg aria-hidden="true"><i></i><i></i><span class="op-ph-scrim"></span></div>
               <div style="position:relative;z-index:2;padding:16px;display:flex;flex-direction:column;gap:14px;height:100%;">
                 <div style="text-align:center;letter-spacing:.22em;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,.78);">✦ Photos ✦</div>
                 <div class="op-ph-rows">
@@ -1819,6 +1840,7 @@ ddsWrapAbout();
     const vEl = panel.querySelector('[data-op-voice]'); if (vEl) vEl.textContent = '“' + o.quote + '”';
     const vbEl = panel.querySelector('[data-op-voiceby]'); if (vbEl) vbEl.innerHTML = '<span style="color:rgba(255,255,255,.6);">— </span><strong>' + esc(o.quoteBy) + '</strong>';
     const rEl = panel.querySelector('[data-op-reach]'); if (rEl) rEl.innerHTML = reachInner(o);
+    const rlEl = panel.querySelector('[data-op-roles]'); if (rlEl) rlEl.innerHTML = rolesInner(o);
     const phEl = panel.querySelector('[data-op-photos]'); if (phEl) phEl.setAttribute('data-photos', JSON.stringify(o.photos || []));
   }
   function refreshOfficers(){
@@ -1835,6 +1857,7 @@ ddsWrapAbout();
   const els = Array.from(document.querySelectorAll('[data-op-desc]'));
   if (!els.length) return;
   const cut = (s, n) => { const a = String(s || '').split(/\s*,\s*/).filter(Boolean); return a.slice(0, n); };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function memberFor(email){
     email = String(email || '').toLowerCase();
     if (!email) return null;
@@ -1854,13 +1877,19 @@ ddsWrapAbout();
     let lead = '', chips = [];
     if (m) {
       if (ctaEl) ctaEl.setAttribute('href', 'dashboard.html?member=' + encodeURIComponent(m.id) + '#members');
-      const mj = m.major || major;
-      const parts = ['<b>Beyond the title.</b>'];
-      if (mj) parts.push('I’m a ' + mj + ' major' + (m.gradYear ? ', Class of ' + m.gradYear : '') + '.');
-      if (m.interests) parts.push('Lately I’m into ' + cut(m.interests, 3).join(', ') + '.');
-      if (m.hobbies)   parts.push('Off the clock you’ll catch me ' + cut(m.hobbies, 2).join(' and ') + '.');
       chips = cut(m.interests, 4);
-      lead = (parts.length > 1) ? parts.join(' ') : '';
+      const typed = String(m.about || '').trim();
+      if (typed) {
+        // the officer wrote this box themselves — show it word for word
+        lead = esc(typed).replace(/\n+/g, '<br>');
+      } else {
+        const mj = m.major || major;
+        const parts = ['<b>Beyond the title.</b>'];
+        if (mj) parts.push('I’m a ' + mj + ' major' + (m.gradYear ? ', Class of ' + m.gradYear : '') + '.');
+        if (m.interests) parts.push('Lately I’m into ' + cut(m.interests, 3).join(', ') + '.');
+        if (m.hobbies)   parts.push('Off the clock you’ll catch me ' + cut(m.hobbies, 2).join(' and ') + '.');
+        lead = (parts.length > 1) ? parts.join(' ') : '';
+      }
     }
     if (!lead) {
       // Public visitors (and officers who haven’t filled a profile yet) get an
@@ -1893,6 +1922,19 @@ ddsWrapAbout();
         else { t.style.backgroundImage = 'url("' + url + '")'; t.style.opacity = '1'; }
       });
     });
+    // one of the same photos also fills the card's backdrop; alternating the
+    // two stacked layers cross-dissolves each swap (no hard jumps)
+    const bg = box.querySelector('[data-op-ph-bg]');
+    if (bg) {
+      const layers = bg.querySelectorAll('i');
+      if (layers.length === 2) {
+        const showEl = layers[off % 2], hideEl = layers[1 - off % 2];
+        bg.classList.add('live');
+        showEl.style.backgroundImage = 'url("' + photos[off % photos.length] + '")';
+        showEl.classList.add('on');
+        hideEl.classList.remove('on');
+      }
+    }
   }
   const io = new IntersectionObserver(entries => entries.forEach(e => {
     const box = e.target;
@@ -2598,7 +2640,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   dot.id = 'dotcur';
   document.body.appendChild(dot);
   document.documentElement.classList.add('dot-on');
-  const ZONES = '#top,#members-preview';
+  const ZONES = '#top,#members-preview,#toolkit';
   const HIT = 'a,button,summary,label,input,textarea,select,[role="button"],[data-cta-magnet],[onclick]';
   let x = innerWidth / 2, y = innerHeight / 2, raf = null;
   const draw = () => { raf = null; dot.style.left = x + 'px'; dot.style.top = y + 'px'; };
@@ -2788,6 +2830,38 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     return { pos: N - 1, local: 0 };
   };
 
+  // --- satellite timing runs off the RAW scroll, not the parked ring position,
+  //     so the five links are always in motion while the wheel sits parked:
+  //     they glide in during the transition into their topic (for the first
+  //     topic, from the very first scrolled pixel), keep drifting slowly
+  //     inward the whole time the topic is parked (never a full stop), then
+  //     accelerate out through the next transition — and the last set scrolls
+  //     out over the final stretch so the stage is clear right as the page
+  //     unpins and moves on. ---
+  const dwellPh = phases.filter(p => p.type === 'dwell');
+  const transPh = phases.filter(p => p.type === 'trans');
+  const SAT_WIN = dwellPh.map((d, i) => {
+    const dl = d.t1 - d.t0;
+    return {
+      e0: i === 0 ? 0 : transPh[i - 1].t0,                                  // entry begins
+      e1: i === 0 ? d.t0 + dl * 0.5 : d.t0 + dl * (i === N - 1 ? 0.2 : 0.3), // entry settles (a bit into the dwell)
+      x0: i === N - 1 ? d.t0 + dl * 0.45 : transPh[i].t0,                   // exit begins
+      x1: i === N - 1 ? 1 : transPh[i].t1                                   // exit completes
+    };
+  });
+  const D_FAR = 2.4, D_CREEP = 0.93;            // ×rest distance; 1 = the parked slot
+  const easeOutC = u => 1 - Math.pow(1 - u, 3);
+  const easeInC = u => u * u * u;
+  // distance multiplier for topic i at raw progress t: fly in (ease-out) →
+  // slow inward creep while parked → accelerate out (ease-in)
+  const satDist = (i, t) => {
+    const w = SAT_WIN[i];
+    if (t <= w.e0 || t >= w.x1) return D_FAR;
+    if (t < w.e1) return D_FAR + (1 - D_FAR) * easeOutC((t - w.e0) / (w.e1 - w.e0));
+    if (t < w.x0) return 1 + (D_CREEP - 1) * ((t - w.e1) / (w.x0 - w.e1));
+    return D_CREEP + (D_FAR - D_CREEP) * easeInC((t - w.x0) / (w.x1 - w.x0));
+  };
+
   // progress bar ticks at each of the five parking points
   const ticks = phases.filter(p => p.type === 'dwell').map(p => {
     const ct = (p.t0 + p.t1) / 2;
@@ -2803,7 +2877,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   };
   const mixC = (base, f) => 'rgb(' + Math.round(base[0]+(HILITE[0]-base[0])*f) + ',' + Math.round(base[1]+(HILITE[1]-base[1])*f) + ',' + Math.round(base[2]+(HILITE[2]-base[2])*f) + ')';
 
-  let curPos = 0, mx = 0, my = 0, tMx = 0, tMy = 0, cX = 0, cY = 0, inSec = false, wasIn = false, running = false, rafId = null;
+  let curPos = 0, curT = 0, mx = 0, my = 0, tMx = 0, tMy = 0, cX = 0, cY = 0, inSec = false, wasIn = false, running = false, rafId = null;
   let fc = 0, lastRy = null, lastFill = null;
   const frame = () => {
     fc++;
@@ -2812,6 +2886,8 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     const s = sample(t);
     curPos += (s.pos - curPos) * 0.09;                             // gentle, slower catch-up
     if (Math.abs(s.pos - curPos) < 0.0005) curPos = s.pos;
+    curT += (t - curT) * 0.09;                                     // smoothed raw scroll (drives the satellites)
+    if (Math.abs(t - curT) < 0.0004) curT = t;
     mx += (tMx - mx) * 0.07; my += (tMy - my) * 0.07;
 
     // only write style when a value actually changed (cheaper, smoother)
@@ -2820,12 +2896,13 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     scene.style.setProperty('--mx', mx.toFixed(3));
     scene.style.setProperty('--my', my.toFixed(3));
 
-    // aurora splooshes move through space as you scroll between the five topics
-    // (curPos drives a per-blob parallax) plus a gentle time drift for life
+    // aurora splooshes move through space with the RAW scroll (so the backdrop
+    // keeps drifting even while the ring is parked) plus a gentle time drift
     const nowS = performance.now() / 1000;
+    const flowPos = curT * (N - 1);
     for (let bi = 0; bi < auroraBlobs.length; bi++) {
-      const px = (curPos - (N - 1) / 2) * (36 + bi * 18) + Math.sin(nowS * 0.22 + bi * 2.1) * 26;
-      const py = (curPos - (N - 1) / 2) * (-16 - bi * 9) + Math.cos(nowS * 0.17 + bi * 1.3) * 22;
+      const px = (flowPos - (N - 1) / 2) * (36 + bi * 18) + Math.sin(nowS * 0.22 + bi * 2.1) * 26;
+      const py = (flowPos - (N - 1) / 2) * (-16 - bi * 9) + Math.cos(nowS * 0.17 + bi * 1.3) * 22;
       auroraBlobs[bi].style.transform = 'translate3d(' + px.toFixed(1) + 'px,' + py.toFixed(1) + 'px,0)';
     }
 
@@ -2838,9 +2915,11 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
       c.style.setProperty('--self', (Math.max(-1.3, Math.min(1.3, d)) * 70).toFixed(2) + 'deg');
       c.style.setProperty('--settle', settle.toFixed(3));
       c.classList.toggle('front', settle > 0.55);
-      // long, single-path ease-out: links accelerate off-screen then decelerate
-      // straight into place over a wide window (folders overlap in transit)
-      const sp = 1 - Math.pow(1 - clamp01((settle - 0.05) / 0.9), 2.3);
+      // raw-scroll timing (see satDist): the links keep moving for the whole
+      // pinned range — sp runs slightly past 1 during the parked creep so a
+      // settled set is still drifting, and it never sits at a constant value
+      // while there is scroll left in this topic's window
+      const sp = (D_FAR - satDist(i, curT)) / 1.4;
       // opacity ramps to solid well before the link parks (rise), then only dips
       // when the link sits near the edge of the frame (edge) — so settled links
       // fully cover the central cards; edge links stay lighter for depth

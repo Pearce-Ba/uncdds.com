@@ -137,6 +137,8 @@
         favClasses: m.favClasses || '', favProfs: m.favProfs || '',
         instagram: m.instagram || '', linkedin: m.linkedin || '',
         bio: m.bio || '', quoteBy: m.quoteBy || '', phone: m.phone || '',
+        about: m.about || '',
+        roles: Array.isArray(m.roles) ? m.roles : [],
         photos: Array.isArray(m.photos) ? m.photos : []
       } : null;
     },
@@ -153,6 +155,8 @@
         interests: m.interests || '', hobbies: m.hobbies || '',
         instagram: m.instagram || '', linkedin: m.linkedin || '',
         bio: m.bio || '', quoteBy: m.quoteBy || '',
+        about: m.about || '',
+        roles: Array.isArray(m.roles) ? m.roles : [],
         photos: Array.isArray(m.photos) ? m.photos : []
       } : null;
     },
@@ -166,7 +170,7 @@
       var m = list.find(function (r) { return r.id === sess.id; });
       if (!m) return { ok: false, err: 'Sign in first.' };
       ['photo', 'quote', 'interests', 'hobbies', 'major', 'favClasses', 'favProfs', 'instagram', 'linkedin',
-       'bio', 'quoteBy', 'phone', 'photos'].forEach(function (k) {
+       'bio', 'quoteBy', 'phone', 'photos', 'about', 'roles', 'gradYear'].forEach(function (k) {
         if (k in fields) m[k] = fields[k];
       });
       saveMembers(list);
@@ -249,7 +253,7 @@
       var list = loadMembers();
       var m = list.find(function (r) { return String(r.email || '').toLowerCase() === email; });
       if (!m) return { ok: false, err: 'no-account' };
-      var ALLOW = ['bio', 'quote', 'quoteBy', 'phone', 'instagram', 'linkedin', 'photos'];
+      var ALLOW = ['bio', 'quote', 'quoteBy', 'phone', 'instagram', 'linkedin', 'photos', 'about', 'roles'];
       var changed = false;
       ALLOW.forEach(function (k) {
         if (k in fields && JSON.stringify(m[k]) !== JSON.stringify(fields[k])) { m[k] = fields[k]; changed = true; }
