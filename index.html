@@ -270,6 +270,56 @@ a.calv-wev:hover{filter:brightness(1.3);}
   .nm-glass .upe-when{width:auto;}
   .nm-glass .upe-body{width:100%;min-width:0;overflow:hidden;}
 }
+/* Hero quick-link tiles — a sheet of paper a pen writes on (meeting notes) and a
+   newspaper that folds open to THE BITE (newsletter/blog). Same cursor magnet as
+   the pills beside them; the hover animation is the label, plus a tooltip pill. */
+.cta-mini{position:relative;display:inline-flex;align-items:center;justify-content:center;width:84px;height:60px;border-radius:20px;border:1.5px solid rgba(215,226,234,.55);background:rgba(10,26,48,.35);text-decoration:none;transition:background .25s ease,border-color .25s ease;}
+.cta-mini:hover{background:rgba(15,33,60,.6);border-color:rgba(227,194,124,.8);}
+.cm-tip{position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%) translateY(-4px);white-space:nowrap;color:#EAF1F8;background:rgba(9,20,38,.93);border:1px solid rgba(185,151,91,.5);border-radius:999px;padding:5px 13px;font-weight:700;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;z-index:4;}
+.cta-mini:hover .cm-tip{opacity:1;transform:translateX(-50%) translateY(0);}
+/* -- paper + pen -- */
+.cmn-svg{display:block;width:46px;height:46px;overflow:visible;}
+.cmn-sheet{fill:#F5F0E4;stroke:rgba(19,41,75,.3);stroke-width:1;}
+.cmn-fold{fill:#DDD3BC;}
+.cmn-ghost{fill:none;stroke:rgba(19,41,75,.16);stroke-width:2;stroke-linecap:round;}
+.cmn-line{fill:none;stroke:#13294B;stroke-width:2;stroke-linecap:round;stroke-dasharray:18;stroke-dashoffset:18;opacity:0;}
+.cmn-l3{stroke-dasharray:12;stroke-dashoffset:12;}
+.cmn-pen{opacity:0;transform:translate(46px,4px) rotate(16deg);}
+.cta-mini:hover .cmn-pen{animation:cmnPen 2.6s cubic-bezier(.45,.05,.55,.95) infinite;}
+.cta-mini:hover .cmn-l1{animation:cmnL1 2.6s linear infinite;}
+.cta-mini:hover .cmn-l2{animation:cmnL2 2.6s linear infinite;}
+.cta-mini:hover .cmn-l3{animation:cmnL3 2.6s linear infinite;}
+@keyframes cmnPen{
+  0%{opacity:0;transform:translate(46px,4px) rotate(16deg);}
+  8%{opacity:1;transform:translate(23px,24px) rotate(0deg);}
+  28%{transform:translate(41px,24px) rotate(0deg);}
+  36%{transform:translate(23px,30px) rotate(0deg);}
+  56%{transform:translate(41px,30px) rotate(0deg);}
+  64%{transform:translate(23px,36px) rotate(0deg);}
+  80%{opacity:1;transform:translate(35px,36px) rotate(0deg);}
+  92%,100%{opacity:0;transform:translate(46px,20px) rotate(16deg);}
+}
+@keyframes cmnL1{0%,8%{stroke-dashoffset:18;opacity:1;}28%,90%{stroke-dashoffset:0;opacity:1;}96%,100%{stroke-dashoffset:18;opacity:0;}}
+@keyframes cmnL2{0%,36%{stroke-dashoffset:18;opacity:1;}56%,90%{stroke-dashoffset:0;opacity:1;}96%,100%{stroke-dashoffset:18;opacity:0;}}
+@keyframes cmnL3{0%,64%{stroke-dashoffset:12;opacity:1;}80%,90%{stroke-dashoffset:0;opacity:1;}96%,100%{stroke-dashoffset:12;opacity:0;}}
+/* -- newspaper -- */
+.cmb-scene{position:relative;width:30px;height:40px;perspective:240px;transition:transform .6s cubic-bezier(.22,.61,.36,1);}
+.cta-mini:hover .cmb-scene{transform:translateX(9px);}
+.cmb-page{position:absolute;inset:0;border-radius:2px;background:#F5F0E4;border:1px solid rgba(19,41,75,.28);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 3px;box-shadow:0 4px 10px -4px rgba(0,0,0,.5);}
+.cmb-mast{font-family:'Playfair Display',Georgia,serif;font-weight:900;color:#13294B;font-size:9px;line-height:1;letter-spacing:.4px;text-transform:uppercase;text-align:center;margin:2px 0 3px;opacity:0;transform:scale(.7);transition:opacity .3s ease .18s,transform .45s cubic-bezier(.22,.61,.36,1) .18s;}
+.cta-mini:hover .cmb-mast{opacity:1;transform:scale(1);}
+.cmb-l{display:block;width:80%;height:2px;border-radius:1px;background:rgba(19,41,75,.26);margin:2.5px 0 0;}
+.cmb-l.cmb-short{width:55%;}
+.cmb-l.cmb-wide{width:88%;height:5px;background:rgba(19,41,75,.5);margin-top:1px;}
+.cmb-flap{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.3,.65,.3,1);}
+.cta-mini:hover .cmb-flap{transform:rotateY(-168deg);}
+.cmb-face{position:absolute;inset:0;border-radius:2px;background:#F5F0E4;border:1px solid rgba(19,41,75,.28);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 3px;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.cmb-backp{transform:rotateY(180deg);background:#EFE8D6;}
+@media(prefers-reduced-motion:reduce){
+  .cta-mini:hover .cmn-pen,.cta-mini:hover .cmn-line{animation:none;}
+  .cta-mini:hover .cmn-l1,.cta-mini:hover .cmn-l2,.cta-mini:hover .cmn-l3{animation:none;stroke-dashoffset:0;opacity:1;}
+  .cmb-flap,.cmb-scene,.cmb-mast{transition:none;}
+}
 /* Points system section — signature is the "good standing" meter that fills on scroll */
 #points{scroll-margin-top:64px;}
 .pts-glow{position:absolute;top:-140px;left:50%;transform:translateX(-50%);width:min(900px,120%);height:520px;pointer-events:none;background:radial-gradient(circle,rgba(75,156,211,.16) 0%,transparent 66%);z-index:0;}
@@ -307,7 +357,7 @@ a.calv-wev:hover{filter:brightness(1.3);}
 .pts-dot{color:#3A567A;font-weight:700;}
 @media(max-width:760px){.pts-cats{grid-template-columns:1fr;}}
 @media(prefers-reduced-motion:reduce){.pts-fill{transition:none;}}
-#about,#pillars,#offers,#officers,#join,#calendar,#gallery,#pillar-stories{scroll-margin-top:64px;}
+#about,#pillars,#offers,#officers,#join,#calendar,#gallery,#offer-stories{scroll-margin-top:64px;}
 a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px solid #4B9CD3;outline-offset:3px;}
 /* Pillar photo rows (full-width tiles) */
 .pillar-row{position:relative;border-radius:18px;overflow:hidden;margin-bottom:10px;background:#0c2042;cursor:pointer;}
@@ -575,7 +625,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
    pointer). The toolkit is dense with links, so its links drop the native
    pointer too — the dot's grow state is the hover affordance there. */
 @media (prefers-reduced-motion: no-preference){
-  #officer-profiles,#offers,#president-letter{cursor:none;}
+  #officer-profiles,#pillars,#president-letter{cursor:none;}
   html.dot-on #top,html.dot-on #members-preview{cursor:none;}
   html.dot-on #toolkit,html.dot-on #toolkit a{cursor:none;}
 }
@@ -588,6 +638,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 #dotcur.grow{transform:translate(-50%,-50%) scale(2.7);background:#4B9CD3;
   box-shadow:0 0 0 1.5px rgba(233,240,248,.85), 0 0 22px 6px rgba(75,156,211,.7);}
 #dotcur.press{transform:translate(-50%,-50%) scale(1.8);}
+#dotcur.slim{transform:translate(-50%,-50%) scale(.55);background:#4B9CD3;box-shadow:0 0 0 1px rgba(233,240,248,.6),0 0 8px 2px rgba(75,156,211,.5);}
 /* Offers: cursor-follow glow inside the stacked cards (lightens the navy) + radial gold text */
 .of-glow{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;background:radial-gradient(circle 360px at var(--gx,-999px) var(--gy,-999px),rgba(126,176,232,.42) 0%,rgba(75,156,211,.16) 46%,transparent 72%);mix-blend-mode:screen;opacity:0;transition:opacity .45s ease;}
 .of-glowtext{color:transparent;background-image:radial-gradient(circle 300px at var(--px,-999px) var(--py,-999px),#B9975B 0%,#B9975B 30%,var(--base,#EAF1F8) 70%);-webkit-background-clip:text;background-clip:text;}
@@ -634,7 +685,16 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   <button class="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" data-nav-burger><span></span><span></span><span></span></button>
   <div class="nav-links" style="display:flex;gap:clamp(14px,1.9vw,32px);align-items:center;">
     <a href="#top" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Home</a>
-    <a href="#about" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">About</a>
+    <a href="#calendar" class="nav-link" style="color:#D7E2EA;font-weight:600;font-size:13.5px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;">Calendar</a>
+    <!-- About: top-level links to the about section; submenu jumps to the pillars + offers -->
+    <div class="nav-dd" data-nav-dd>
+      <a class="nav-dd-btn" href="#about" aria-haspopup="true">About<svg class="nav-dd-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></a>
+      <div class="nav-dd-menu" role="menu">
+        <a href="#about" class="nav-dd-link" role="menuitem">About DDS<span>&rarr;</span></a>
+        <a href="#pillars" class="nav-dd-link" role="menuitem">The Pillars<span>&rarr;</span></a>
+        <a href="#offers" class="nav-dd-link" role="menuitem">Offers<span>&rarr;</span></a>
+      </div>
+    </div>
     <!-- Publishing: top-level links to The Bite -->
     <div class="nav-dd" data-nav-dd>
       <a class="nav-dd-btn" href="newsletter.html" aria-haspopup="true">Publishing<svg class="nav-dd-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></a>
@@ -652,6 +712,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div class="nav-dd-menu" role="menu">
         <a href="#members-preview" class="nav-dd-link" role="menuitem">Members<span>&rarr;</span></a>
         <a href="#officers" class="nav-dd-link" role="menuitem">Officers<span>&rarr;</span></a>
+        <a href="#president-letter" class="nav-dd-link" role="menuitem">Letter From The President<span>&rarr;</span></a>
         <a href="#big-little" class="nav-dd-link" role="menuitem">Big Little<span>&rarr;</span></a>
       </div>
     </div>
@@ -675,7 +736,11 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   <button class="nav-mobile-close" type="button" aria-label="Close menu" data-nav-close><span></span><span></span></button>
   <div class="nav-mobile-list">
     <a href="#top">Home</a>
+    <a href="#calendar">Calendar</a>
+    <span class="nav-mobile-group">About</span>
     <a href="#about">About</a>
+    <a href="#pillars">The Pillars</a>
+    <a href="#offers">Offers</a>
     <span class="nav-mobile-group">Publishing</span>
     <a href="#gallery">Gallery</a>
     <a href="newsletter.html?tag=blog-post">Blog</a>
@@ -686,6 +751,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <span class="nav-mobile-group">People</span>
     <a href="#members-preview">Members</a>
     <a href="#officers">Officers</a>
+    <a href="#president-letter">Letter From The President</a>
     <a href="#big-little">Big Little</a>
     <span class="nav-mobile-group">Contact</span>
     <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener">Instagram</a>
@@ -725,6 +791,29 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div data-reveal="0.42" style="display:flex;flex-wrap:wrap;gap:clamp(12px,1.6vw,18px);justify-content:center;align-items:center;">
         <a data-cta-magnet href="#officers" class="cta-gold" style="display:inline-flex;align-items:center;justify-content:center;padding:16px clamp(26px,3vw,38px);border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:clamp(12px,2vw,18px);text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -12px rgba(185,151,91,.85);transition:transform .2s;letter-spacing:2px;min-width:280px;height:60px;">Meet the Officers&nbsp;→</a>
         <a data-cta-magnet href="login.html" id="hero-login" class="cta-outline" style="display:inline-flex;align-items:center;justify-content:center;padding:16px clamp(26px,3vw,38px);border-radius:999px;border:1.5px solid rgba(215,226,234,.6);color:#EAF1F8;font-weight:700;font-size:clamp(11px,1.5vw,15px);letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;min-width:280px;height:60px;background:rgba(10,26,48,.35);">Member Login</a>
+        <!-- Quick-link tiles: paper+pen = meeting notes, newspaper = The Bite -->
+        <a data-cta-magnet href="archive.html" class="cta-mini" aria-label="Meeting notes — read the chapter minutes in The Archive">
+          <svg class="cmn-svg" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+            <path class="cmn-sheet" d="M18 12 H40 L46 18 V50 H18 Z"/>
+            <path class="cmn-fold" d="M40 12 L40 18 L46 18 Z"/>
+            <path class="cmn-ghost" d="M23 24 h18 M23 30 h18 M23 36 h12"/>
+            <path class="cmn-line cmn-l1" d="M23 24 h18"/>
+            <path class="cmn-line cmn-l2" d="M23 30 h18"/>
+            <path class="cmn-line cmn-l3" d="M23 36 h12"/>
+            <g class="cmn-pen"><path d="M0 0 L2.6 -7.2 L7.2 -2.6 Z" fill="#EAF1F8"/><path d="M2.6 -7.2 L13 -17.6 L17.6 -13 L7.2 -2.6 Z" fill="#B9975B"/></g>
+          </svg>
+          <span class="cm-tip">Meeting Notes</span>
+        </a>
+        <a data-cta-magnet href="newsletter.html" class="cta-mini" aria-label="The Bite — our newsletter and blog">
+          <span class="cmb-scene" aria-hidden="true">
+            <span class="cmb-page"><span class="cmb-mast">The<br>Bite</span><i class="cmb-l"></i><i class="cmb-l cmb-short"></i><i class="cmb-l"></i></span>
+            <span class="cmb-flap">
+              <span class="cmb-face"><i class="cmb-l cmb-wide"></i><i class="cmb-l"></i><i class="cmb-l"></i><i class="cmb-l cmb-short"></i><i class="cmb-l"></i></span>
+              <span class="cmb-face cmb-backp"><i class="cmb-l"></i><i class="cmb-l cmb-short"></i><i class="cmb-l"></i></span>
+            </span>
+          </span>
+          <span class="cm-tip">The Bite &middot; Newsletter</span>
+        </a>
       </div>
     </div>
   </div>
@@ -1093,24 +1182,24 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   </div>
 </section>
 
-<!-- PILLARS -->
-<section id="pillars" style="position:relative;z-index:5;background:#fff;color:#13294B;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;padding:clamp(52px,6vw,72px) clamp(20px,4vw,48px) clamp(36px,4.5vw,56px);overflow:clip;">
+<!-- OFFERS (five standing offers) -->
+<section id="offers" style="position:relative;z-index:5;background:#fff;color:#13294B;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;padding:clamp(52px,6vw,72px) clamp(20px,4vw,48px) clamp(36px,4.5vw,56px);overflow:clip;">
   <div style="position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.28;mix-blend-mode:multiply;z-index:1;"></div>
   <div style="max-width:1080px;margin:0 auto;position:relative;z-index:2;">
     <div data-reveal="0" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:clamp(20px,2.6vw,32px);">
-      <h2 style="margin:0;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2rem,4.4vw,3.4rem);">What We<br>Stand For</h2>
-      <p style="margin:0;max-width:340px;color:#5A7798;line-height:1.6;font-size:clamp(.9rem,1.2vw,1.05rem);">Five pillars guide everything Delta Delta Sigma does for its members and the Carolina community.</p>
+      <h2 style="margin:0;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2rem,4.4vw,3.4rem);">What We<br>Offer</h2>
+      <p style="margin:0;max-width:340px;color:#5A7798;line-height:1.6;font-size:clamp(.9rem,1.2vw,1.05rem);">Five standing offers every Delta Delta Sigma member can count on, semester after semester.</p>
     </div>
-    <div class="pillar-row" data-reveal="0" data-goto="#pd-1" role="link" tabindex="0" aria-label="Academic Excellence — jump to details"><img class="pillar-bg" src="slot-mq-3.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">01</span><div style="flex:1;"><h3 class="pillar-title">Academic Excellence</h3><p class="pillar-body">Supporting members with the resources, guidance, and a 3.0+ GPA community to excel in their coursework and beyond.</p></div></div></div>
-    <div class="pillar-row" data-reveal="0.05" data-goto="#pd-2" role="link" tabindex="0" aria-label="Professional Development — jump to details"><img class="pillar-bg" src="slot-off1-a.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">02</span><div style="flex:1;"><h3 class="pillar-title">Professional Development</h3><p class="pillar-body">Providing opportunities to grow, learn, and build our future through seminars and connections in the dental field.</p></div></div></div>
-    <div class="pillar-row" data-reveal="0.1" data-goto="#pd-3" role="link" tabindex="0" aria-label="Service — jump to details"><img class="pillar-bg" src="slot-off3-a.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">03</span><div style="flex:1;"><h3 class="pillar-title">Service</h3><p class="pillar-body">Making a positive impact in our community by volunteering within the dental field and the community at large.</p></div></div></div>
-    <div class="pillar-row" data-reveal="0.15" data-goto="#pd-4" role="link" tabindex="0" aria-label="Mentorship — jump to details"><img class="pillar-bg" src="slot-mq-9.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">04</span><div style="flex:1;"><h3 class="pillar-title">Mentorship</h3><p class="pillar-body">Guiding and uplifting each member on their journey to dental school, every step of the way.</p></div></div></div>
-    <div class="pillar-row" data-reveal="0.2" data-goto="#pd-5" role="link" tabindex="0" aria-label="Community — jump to details"><img class="pillar-bg" src="slot-mq-12.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">05</span><div style="flex:1;"><h3 class="pillar-title">Community</h3><p class="pillar-body">Building lifelong connections and a strong DDS family that lasts well beyond graduation.</p></div></div></div>
+    <div class="pillar-row" data-reveal="0" data-goto="#pd-1" role="link" tabindex="0" aria-label="Intro to Dentistry Seminars — jump to details"><img class="pillar-bg" src="slot-off1-a.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">01</span><div style="flex:1;"><h3 class="pillar-title">Intro to Dentistry Seminars</h3><p class="pillar-body">Guest lecturers from across the dental community, hosted with the UNC Adams School of Dentistry.</p></div></div></div>
+    <div class="pillar-row" data-reveal="0.05" data-goto="#pd-2" role="link" tabindex="0" aria-label="Dental School Prep — jump to details"><img class="pillar-bg" src="slot-mq-3.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">02</span><div style="flex:1;"><h3 class="pillar-title">Dental School Prep</h3><p class="pillar-body">Course roadmaps, DAT study cohorts, and application guidance from members who just made it through.</p></div></div></div>
+    <div class="pillar-row" data-reveal="0.1" data-goto="#pd-3" role="link" tabindex="0" aria-label="Shadowing &amp; Conferences — jump to details"><img class="pillar-bg" src="slot-off2-a.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">03</span><div style="flex:1;"><h3 class="pillar-title">Shadowing &amp; Conferences</h3><p class="pillar-body">Placements with local clinics and specialists, plus trips to ASDA conferences and beyond.</p></div></div></div>
+    <div class="pillar-row" data-reveal="0.15" data-goto="#pd-4" role="link" tabindex="0" aria-label="Service &amp; Recognition — jump to details"><img class="pillar-bg" src="slot-off3-a.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">04</span><div style="flex:1;"><h3 class="pillar-title">Service &amp; Recognition</h3><p class="pillar-body">Volunteer events every semester, tracked through the points system and honored with chapter awards.</p></div></div></div>
+    <div class="pillar-row" data-reveal="0.2" data-goto="#pd-5" role="link" tabindex="0" aria-label="Big–Little Mentorship — jump to details"><img class="pillar-bg" src="slot-mq-9.webp" alt=""><div class="pillar-scrim"></div><div class="pillar-inner"><span class="pillar-num">05</span><div style="flex:1;"><h3 class="pillar-title">Big&ndash;Little Mentorship</h3><p class="pillar-body">Every new member joins a DDS family — a big who has already walked the road to dental school.</p></div></div></div>
   </div>
 </section>
 
-<!-- PILLAR DEEP DIVES -->
-<section id="pillar-stories" style="position:relative;z-index:6;background:#101d33;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;color:#fff;overflow:clip;padding:clamp(90px,12vw,160px) clamp(20px,4vw,48px) clamp(80px,11vw,140px);">
+<!-- OFFER DEEP DIVES -->
+<section id="offer-stories" style="position:relative;z-index:6;background:#101d33;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;color:#fff;overflow:clip;padding:clamp(90px,12vw,160px) clamp(20px,4vw,48px) clamp(80px,11vw,140px);">
   <!-- Sticky viewport-height backdrop: same officer-bg + grain treatment as the profile/gallery sections, without the fixed-attachment glitches -->
   <div aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;">
     <div style="position:sticky;top:0;height:100vh;background:#15171c url('officer-bg.png') center/cover no-repeat;">
@@ -1120,9 +1209,9 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   </div>
   <div style="max-width:1200px;margin:0 auto;position:relative;z-index:2;">
     <div data-reveal="0" style="text-align:center;margin-bottom:clamp(56px,8vw,110px);">
-      <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">The Pillars, Up Close</div>
-      <h2 style="margin:0 0 20px;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2.4rem,7vw,5.5rem);background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">More Than A Motto</h2>
-      <p class="stories-intro" style="margin:0 auto;max-width:560px;font-weight:300;line-height:1.65;font-size:clamp(.95rem,1.3vw,1.12rem);">Each pillar is a program, not a promise. Here is what living them actually looks like inside DDS.</p>
+      <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">The Offers, Up Close</div>
+      <h2 style="margin:0 0 20px;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2.4rem,7vw,5.5rem);background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">What You Actually Get</h2>
+      <p class="stories-intro" style="margin:0 auto;max-width:560px;font-weight:300;line-height:1.65;font-size:clamp(.95rem,1.3vw,1.12rem);">Each offer is a standing program, not a brochure line. Here is what every one of them actually looks like inside DDS.</p>
     </div>
 
     <div style="position:relative;">
@@ -1133,12 +1222,12 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div class="pd-panel" id="pd-1" data-pd-panel style="position:relative;display:flex;justify-content:flex-start;align-items:center;min-height:clamp(420px,62vh,640px);padding:clamp(20px,3vw,40px) 0;scroll-margin-top:70px;">
         <div class="pd-num" data-pd-num style="position:absolute;right:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">01</div>
         <div class="pdc-wrap pdc-r">
-        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-1.webp" alt="Academic Excellence at DDS"><p>Course roadmaps, DAT cohorts &amp; a 3.0+ GPA community.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
+        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-1.webp" alt="Intro to Dentistry Seminars at DDS"><p>Guest lecturers &amp; specialty nights with the UNC Adams School of Dentistry.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
         <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(75,156,211,.28);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 01 · Academic Excellence</span></div>
-          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Sharpen the mind first</h3>
-          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Dentistry starts in the classroom. DDS pairs members with course roadmaps, exam archives, and study groups that turn Carolina's toughest prerequisites into a shared project instead of a solo grind.</p>
-          <div><div class="pd-row"><span class="pd-k">Members maintain</span><span class="pd-v">3.0+ GPA</span></div><div class="pd-row"><span class="pd-k">DAT preparation</span><span class="pd-v">Group study cohorts</span></div><div class="pd-row"><span class="pd-k">Course roadmaps</span><span class="pd-v">Bio · Chem · Physics</span></div></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Offer 01 · Intro to Dentistry Seminars</span></div>
+          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Meet dentistry, live</h3>
+          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">In conjunction with the UNC Adams School of Dentistry, we host a running seminar series — guest lecturers from across the dental community put general dentistry, the specialties, and real casework in front of you before you ever apply.</p>
+          <div><div class="pd-row"><span class="pd-k">Seminar series</span><span class="pd-v">UNC Adams School of Dentistry</span></div><div class="pd-row"><span class="pd-k">Guest lecturers</span><span class="pd-v">General dentistry &amp; specialties</span></div><div class="pd-row"><span class="pd-k">Cadence</span><span class="pd-v">Throughout the semester</span></div></div>
         </div>
         </div>
       </div>
@@ -1146,12 +1235,12 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div class="pd-panel pd-even" id="pd-2" data-pd-panel style="position:relative;display:flex;justify-content:flex-end;align-items:center;min-height:clamp(420px,62vh,640px);padding:clamp(20px,3vw,40px) 0;scroll-margin-top:70px;">
         <div class="pd-num" data-pd-num style="position:absolute;left:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">02</div>
         <div class="pdc-wrap pdc-l">
-        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-2.webp" alt="Professional Development at DDS"><p>Seminars, shadowing &amp; conferences across the dental field.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
+        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-2.webp" alt="Dental School Prep at DDS"><p>Course roadmaps, DAT cohorts &amp; application reviews.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
         <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(185,151,91,.3);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#4B9CD3;display:block;"></span><span style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 02 · Professional Development</span></div>
-          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Practice the profession early</h3>
-          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">From guest lecturers to shadowing placements, members meet dentistry where it happens. Seminars with the UNC Adams School of Dentistry put specialties, admissions, and real casework in front of you before you ever apply.</p>
-          <div><div class="pd-row"><span class="pd-k">Seminar series</span><span class="pd-v">UNC Adams School of Dentistry</span></div><div class="pd-row"><span class="pd-k">Shadowing</span><span class="pd-v">Local clinics &amp; specialists</span></div><div class="pd-row"><span class="pd-k">Conferences</span><span class="pd-v">ASDA &amp; beyond</span></div></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#4B9CD3;display:block;"></span><span style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Offer 02 · Dental School Prep</span></div>
+          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">A map to admission</h3>
+          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">We guide members through their undergraduate years and the dental school application — course roadmaps, exam archives, DAT study cohorts, essay reviews, and mock interviews that turn Carolina's toughest stretch into a shared project instead of a solo grind.</p>
+          <div><div class="pd-row"><span class="pd-k">DAT preparation</span><span class="pd-v">Group study cohorts</span></div><div class="pd-row"><span class="pd-k">Application reviews</span><span class="pd-v">Essays &amp; mock interviews</span></div><div class="pd-row"><span class="pd-k">Course roadmaps</span><span class="pd-v">Bio · Chem · Physics</span></div></div>
         </div>
         </div>
       </div>
@@ -1159,12 +1248,12 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div class="pd-panel" id="pd-3" data-pd-panel style="position:relative;display:flex;justify-content:flex-start;align-items:center;min-height:clamp(420px,62vh,640px);padding:clamp(20px,3vw,40px) 0;scroll-margin-top:70px;">
         <div class="pd-num" data-pd-num style="position:absolute;right:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">03</div>
         <div class="pdc-wrap pdc-r">
-        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-3.webp" alt="Service at DDS"><p>Tracked service points &amp; annual chapter honors.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
+        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-3.webp" alt="Shadowing and conferences at DDS"><p>Clinic placements &amp; ASDA conference trips, every year.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
         <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(75,156,211,.28);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 03 · Service</span></div>
-          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Serve before you're asked</h3>
-          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Service is tracked, celebrated, and constant. Members volunteer in dental clinics and across the Chapel Hill community, logging hours through the chapter points system and earning recognition at year's end.</p>
-          <div><div class="pd-row"><span class="pd-k">Service events</span><span class="pd-v">Every semester</span></div><div class="pd-row"><span class="pd-k">Points system</span><span class="pd-v">Tracked &amp; celebrated</span></div><div class="pd-row"><span class="pd-k">Awards</span><span class="pd-v">Annual chapter honors</span></div></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Offer 03 · Shadowing &amp; Conferences</span></div>
+          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">See the chair up close</h3>
+          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Members meet dentistry where it happens — shadowing placements with local clinics and specialists, plus conference trips that put the wider profession within reach long before the first application goes out.</p>
+          <div><div class="pd-row"><span class="pd-k">Shadowing</span><span class="pd-v">Local clinics &amp; specialists</span></div><div class="pd-row"><span class="pd-k">Conferences</span><span class="pd-v">ASDA &amp; beyond</span></div><div class="pd-row"><span class="pd-k">Exposure</span><span class="pd-v">Every specialty</span></div></div>
         </div>
         </div>
       </div>
@@ -1172,12 +1261,12 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div class="pd-panel pd-even" id="pd-4" data-pd-panel style="position:relative;display:flex;justify-content:flex-end;align-items:center;min-height:clamp(420px,62vh,640px);padding:clamp(20px,3vw,40px) 0;scroll-margin-top:70px;">
         <div class="pd-num" data-pd-num style="position:absolute;left:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">04</div>
         <div class="pdc-wrap pdc-l">
-        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-4.webp" alt="Mentorship at DDS"><p>Big–little families &amp; application reviews, every rush class.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
+        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-4.webp" alt="Service and recognition at DDS"><p>Tracked service points &amp; annual chapter honors.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
         <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(185,151,91,.3);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#4B9CD3;display:block;"></span><span style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 04 · Mentorship</span></div>
-          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Pass it down</h3>
-          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Every rushee joins a big–little family. Upperclassmen review applications, run mock interviews, and hand down what worked — so no member reinvents the road to dental school alone.</p>
-          <div><div class="pd-row"><span class="pd-k">Big–little families</span><span class="pd-v">Every rush class</span></div><div class="pd-row"><span class="pd-k">Application reviews</span><span class="pd-v">Essays &amp; interviews</span></div><div class="pd-row"><span class="pd-k">Alumni network</span><span class="pd-v">Dental schools nationwide</span></div></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#4B9CD3;display:block;"></span><span style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Offer 04 · Service &amp; Recognition</span></div>
+          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Give back, get recognized</h3>
+          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Service is constant, tracked, and celebrated. Members volunteer in dental clinics and across the Chapel Hill community, logging hours through the chapter points system and earning recognition at year's end.</p>
+          <div><div class="pd-row"><span class="pd-k">Service events</span><span class="pd-v">Every semester</span></div><div class="pd-row"><span class="pd-k">Points system</span><span class="pd-v">Tracked &amp; celebrated</span></div><div class="pd-row"><span class="pd-k">Awards</span><span class="pd-v">Annual chapter honors</span></div></div>
         </div>
         </div>
       </div>
@@ -1185,12 +1274,12 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div class="pd-panel" id="pd-5" data-pd-panel style="position:relative;display:flex;justify-content:flex-start;align-items:center;min-height:clamp(420px,62vh,640px);padding:clamp(20px,3vw,40px) 0;scroll-margin-top:70px;">
         <div class="pd-num" data-pd-num style="position:absolute;right:-2%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(9rem,24vw,22rem);line-height:1;">05</div>
         <div class="pdc-wrap pdc-r">
-        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-5.webp" alt="Community at DDS"><p>Formals, DDS families &amp; friendships beyond graduation.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
+        <div class="pdc-back"><div class="pdc-back-in"><img class="pdc-back-img" src="slot-pd-5.webp" alt="Big–Little mentorship at DDS"><p>Big–little families &amp; hand-me-down advice, every rush class.</p><a class="pb-btn" href="#join">Get Involved&nbsp;→</a></div></div>
         <div data-reveal="0.05" class="pdc-card" style="position:relative;z-index:2;background:rgba(10,21,39,.9);border:1px solid rgba(75,156,211,.28);border-radius:26px;padding:clamp(26px,3.4vw,46px);box-shadow:0 30px 70px -30px rgba(0,0,0,.65);">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Pillar 05 · Community</span></div>
-          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">Stay for the people</h3>
-          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Formals, socials, DDS families, intramurals — the professional network doubles as a friend group. The people you rush with are the people who show up at your white coat ceremony.</p>
-          <div><div class="pd-row"><span class="pd-k">Formals &amp; socials</span><span class="pd-v">Fall &amp; spring</span></div><div class="pd-row"><span class="pd-k">DDS families</span><span class="pd-v">Built to last</span></div><div class="pd-row"><span class="pd-k">Friendships</span><span class="pd-v">Beyond graduation</span></div></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span><span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:12px;text-transform:uppercase;">Offer 05 · Big&ndash;Little Mentorship</span></div>
+          <h3 class="pd-title" style="margin:0 0 16px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.02;font-size:clamp(1.7rem,3.4vw,2.9rem);color:#EAF1F8;">A family in the field</h3>
+          <p style="margin:0 0 22px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.2vw,1.08rem);">Every rushee joins a big&ndash;little family. Bigs hand down notes, introductions, and hard-won advice; formals, socials, and intramurals turn the professional network into a friend group that shows up at your white coat ceremony.</p>
+          <div><div class="pd-row"><span class="pd-k">Big&ndash;little families</span><span class="pd-v">Every rush class</span></div><div class="pd-row"><span class="pd-k">Handed down</span><span class="pd-v">Notes &amp; hard-won advice</span></div><div class="pd-row"><span class="pd-k">Community</span><span class="pd-v">Formals, socials &amp; beyond</span></div></div>
         </div>
         </div>
       </div>
@@ -1198,8 +1287,8 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   </div>
 </section>
 
-<!-- OFFERS -->
-<section id="offers" style="background:#0A1A30;color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;position:relative;z-index:6;padding:clamp(80px,11vw,150px) clamp(20px,4vw,48px) clamp(40px,6vw,80px);overflow:clip;">
+<!-- PILLARS: LEARN. SERVE. LEAD. -->
+<section id="pillars" style="background:#0A1A30;color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;position:relative;z-index:6;padding:clamp(80px,11vw,150px) clamp(20px,4vw,48px) clamp(40px,6vw,80px);overflow:clip;">
   <div aria-hidden="true" style="position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;">
     <div style="position:absolute;top:6%;left:-4%;width:min(48vw,640px);height:min(48vw,640px);border-radius:50%;background:radial-gradient(circle,rgba(75,156,211,.17),transparent 68%);filter:blur(10px);animation:of-float1 23s ease-in-out infinite;will-change:transform;"></div>
     <div style="position:absolute;bottom:2%;right:-6%;width:min(44vw,580px);height:min(44vw,580px);border-radius:50%;background:radial-gradient(circle,rgba(185,151,91,.14),transparent 68%);filter:blur(12px);animation:of-float2 29s ease-in-out infinite;will-change:transform;"></div>
@@ -1209,15 +1298,15 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   <div id="tooth-offers" style="position:absolute;top:0;left:0;width:38px;height:49px;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform;filter:drop-shadow(0 5px 12px rgba(0,0,0,.6));"><img src="slot-hero-portrait.webp" alt="" style="display:block;width:100%;height:100%;object-fit:contain;"></div>
   <div style="max-width:1120px;margin:0 auto;position:relative;z-index:1;">
     <div data-reveal="0" style="text-align:center;margin-bottom:clamp(40px,6vw,72px);">
-      <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">What DDS Offers</div>
-      <h2 style="margin:0;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2.6rem,8vw,6rem);background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Opportunity</h2>
+      <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">What We Stand For · Our Three Pillars</div>
+      <h2 style="margin:0;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2.2rem,6.4vw,4.8rem);background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Learn. Serve. Lead.</h2>
     </div>
     <div data-stack-wrap style="height:88vh;">
       <div data-stack-card style="position:sticky;top:110px;will-change:transform;">
         <div data-offer-inner style="position:relative;overflow:hidden;border:1.5px solid rgba(75,156,211,.45);background:#0c2042;border-radius:clamp(26px,3vw,44px);padding:clamp(20px,3vw,40px);">
           <div class="of-glow" aria-hidden="true"></div>
-          <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">01</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Seminars</div><h3 class="of-glowtext" style="--base:#FFFFFF;margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Intro to Dentistry</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
-          <div class="of-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p class="of-glowtext" style="--base:#A9C0D8;margin:0;align-self:center;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">In conjunction with the UNC School of Dentistry, we host a series of introduction-to-dentistry seminars — inviting guest lecturers from across the dental community to speak on general dentistry and the specialties.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off1-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off1-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
+          <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">01</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Pillar 01 · The Classroom</div><h3 class="of-glowtext" style="--base:#FFFFFF;margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Learn</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
+          <div class="of-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p class="of-glowtext" style="--base:#A9C0D8;margin:0;align-self:center;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">Dentistry starts in the classroom. Course roadmaps, exam archives, DAT cohorts, and seminars with the UNC Adams School of Dentistry keep every member sharp — a 3.0+ GPA community that treats Carolina's toughest prerequisites as a shared project.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off1-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off1-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
         </div>
       </div>
     </div>
@@ -1225,8 +1314,8 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div data-stack-card style="position:sticky;top:132px;will-change:transform;">
         <div data-offer-inner style="position:relative;overflow:hidden;border:1.5px solid rgba(75,156,211,.45);background:#0c2042;border-radius:clamp(26px,3vw,44px);padding:clamp(20px,3vw,40px);">
           <div class="of-glow" aria-hidden="true"></div>
-          <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">02</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Guidance</div><h3 class="of-glowtext" style="--base:#FFFFFF;margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Dental School Prep</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
-          <div class="of-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p class="of-glowtext" style="--base:#A9C0D8;margin:0;align-self:center;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">We guide members throughout their undergraduate education and the dental school application process — building a social and academic support network that gives our members a clear advantage as future dental students.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off2-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off2-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
+          <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">02</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Pillar 02 · The Community</div><h3 class="of-glowtext" style="--base:#FFFFFF;margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Serve</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
+          <div class="of-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p class="of-glowtext" style="--base:#A9C0D8;margin:0;align-self:center;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">Service is constant, tracked, and celebrated. Members volunteer in dental clinics and across the Chapel Hill community, making a positive impact within the dental field and far beyond it — and the chapter honors that work every year.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off3-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off3-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
         </div>
       </div>
     </div>
@@ -1234,8 +1323,8 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div data-stack-card style="position:sticky;top:154px;will-change:transform;">
         <div data-offer-inner style="position:relative;overflow:hidden;border:1.5px solid rgba(75,156,211,.45);background:#0c2042;border-radius:clamp(26px,3vw,44px);padding:clamp(20px,3vw,40px);">
           <div class="of-glow" aria-hidden="true"></div>
-          <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">03</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Service &amp; Awards</div><h3 class="of-glowtext" style="--base:#FFFFFF;margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Give Back, Get Recognized</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
-          <div class="of-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p class="of-glowtext" style="--base:#A9C0D8;margin:0;align-self:center;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">Members volunteer within the dental field and the broader community, tracking service through our points system. Outstanding contributions are celebrated each year with chapter service awards.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off3-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off3-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
+          <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,34px);"><div style="display:flex;align-items:baseline;gap:22px;"><span style="font-weight:900;font-size:clamp(2.2rem,5vw,4rem);line-height:.8;color:#B9975B;">03</span><div><div style="color:#7FB2E0;font-weight:600;letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-bottom:6px;">Pillar 03 · The Chapter</div><h3 class="of-glowtext" style="--base:#FFFFFF;margin:0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:clamp(1.3rem,2.4vw,2.1rem);">Lead</h3></div></div><a href="#join" class="offer-more" style="flex:none;display:inline-flex;align-items:center;padding:12px 26px;border-radius:999px;border:1.5px solid #D7E2EA;color:#D7E2EA;font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;">Learn More</a></div>
+          <div class="of-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,2vw,22px);align-items:stretch;"><p class="of-glowtext" style="--base:#A9C0D8;margin:0;align-self:center;font-weight:300;line-height:1.7;font-size:clamp(.95rem,1.4vw,1.15rem);">Leadership is handed down. Bigs guide littles, members run committees and service events, and the exec board is grown from within — so every member graduates having led something that mattered.</p><div style="display:flex;gap:clamp(12px,1.6vw,18px);"><img src="slot-off2-a.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"><img src="slot-off2-b.webp" alt="" style="flex:1;min-width:0;height:clamp(180px,26vw,320px);object-fit:cover;border-radius:22px;display:block;"></div></div>
         </div>
       </div>
     </div>
@@ -2926,7 +3015,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 
 // ---- Pillar deep-dive: word reveals, ghost-number parallax, spine draw ----
 (function initPillarStories(){
-  const sec = document.getElementById('pillar-stories');
+  const sec = document.getElementById('offer-stories');
   if (!sec) return;
   const panels = Array.from(sec.querySelectorAll('[data-pd-panel]'));
   panels.forEach(p => {
@@ -3164,7 +3253,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   };
   // Tooth stays only where it reads well: Opportunities + Officer Profiles.
   make(document.querySelector('#officer-profiles [data-hpin-stage]'), document.getElementById('tooth-officers'));
-  make(document.getElementById('offers'), document.getElementById('tooth-offers'));
+  make(document.getElementById('pillars'), document.getElementById('tooth-offers'));
 })();
 
 // ---- Navy dot cursor: leads only in the Hero and Our Members sections ----
@@ -3187,7 +3276,11 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     x = e.clientX; y = e.clientY;
     dot.classList.add('show');
     const hot = e.target.closest(HIT);
-    dot.classList.toggle('grow', !!hot);
+    // Over the little paper/newspaper tiles the grown dot would hide the
+    // hover animation that IS the label — shrink out of the way instead
+    const mini = e.target.closest('.cta-mini');
+    dot.classList.toggle('grow', !!hot && !mini);
+    dot.classList.toggle('slim', !!mini);
     if (!raf) raf = requestAnimationFrame(draw);
   }, { passive: true });
   document.addEventListener('mousedown', () => dot.classList.add('press'));
@@ -3646,7 +3739,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 // ---- Offers: gold background glow + in-card navy-lightening glow + radial gold text ----
 (function initOffersGlow(){
   if (REDUCED_MOTION) return;
-  const sec = document.getElementById('offers');
+  const sec = document.getElementById('pillars');
   const glow = document.getElementById('offers-glow');
   if (!sec || !glow) return;
   const cards = Array.from(sec.querySelectorAll('[data-offer-inner]'));
