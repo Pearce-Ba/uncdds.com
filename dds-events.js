@@ -88,6 +88,42 @@
     });
   }
 
+  /* Every event between two dates — feeds the week/month grid on the
+     homepage. Same normalization as fetchUpcoming, no item cap. Carries the
+     raw HTML description, the Google color id, and any Drive attachments so
+     the hover cards can show everything the event holds. */
+  function fetchRange(timeMin, timeMax) {
+    var url = 'https://clients6.google.com/calendar/v3/calendars/' + encodeURIComponent(CAL_ID) +
+      '/events?singleEvents=true&orderBy=startTime&maxResults=250' +
+      '&timeZone=America%2FNew_York' +
+      '&timeMin=' + encodeURIComponent(timeMin.toISOString()) +
+      '&timeMax=' + encodeURIComponent(timeMax.toISOString()) +
+      '&key=' + API_KEY;
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('calendar ' + r.status);
+      return r.json();
+    }).then(function (data) {
+      return (data.items || []).filter(function (it) {
+        return it.status !== 'cancelled';
+      }).map(function (it) {
+        return {
+          id: it.id,
+          title: it.summary || 'Untitled event',
+          start: parseWhen(it.start),
+          end: parseWhen(it.end),
+          allDay: !!(it.start && it.start.date),
+          location: it.location || '',
+          desc: it.description || '',
+          colorId: it.colorId || '',
+          attachments: (it.attachments || []).map(function (a) {
+            return { fileUrl: a.fileUrl || '', title: a.title || '', mimeType: a.mimeType || '', fileId: a.fileId || '' };
+          }),
+          link: it.htmlLink || ''
+        };
+      }).filter(function (ev) { return ev.start; });
+    });
+  }
+
   function readCache(cacheKey) {
     try {
       var c = JSON.parse(localStorage.getItem(cacheKey || CACHE_KEY));
@@ -167,5 +203,5 @@
     });
   }
 
-  window.DDSEvents = { fetchUpcoming: fetchUpcoming, render: render, mount: mount };
+  window.DDSEvents = { fetchUpcoming: fetchUpcoming, fetchRange: fetchRange, render: render, mount: mount };
 })();

@@ -709,6 +709,10 @@
   var MSG_KEY = 'dds-chat-v2';    // { id, ch, by, byId, text, img?, at }
   var CHAN_KEY = 'dds-chat-meta-v1'; // groups + DMs (General is implicit)
   var GENERAL = { id: 'seed-general', kind: 'channel', name: 'General', members: null };
+  /* Built-in chapter-wide channel. Everyone reads it; only exec can post.
+     Posts younger than 3 days also surface as the bottom-right overlay on
+     every page (dds-announce.js reads the same message store). */
+  var ANNOUNCE = { id: 'seed-announce', kind: 'channel', name: 'Announcements', members: null };
   var curChan = 'seed-general';
 
   function messagesAll() {
@@ -741,10 +745,11 @@
       if (c.kind === 'dm') return (c.members || []).indexOf(ME.id) > -1;
       return c.members == null || c.members.indexOf(ME.id) > -1;
     });
-    return [GENERAL].concat(mine);
+    return [GENERAL, ANNOUNCE].concat(mine);
   }
   function channelById(id) {
     if (id === 'seed-general') return GENERAL;
+    if (id === 'seed-announce') return ANNOUNCE;
     return channelsStored().find(function (c) { return c.id === id; }) || GENERAL;
   }
   function channelLabel(c) {
@@ -781,9 +786,16 @@
     var c = channelById(id);
     $('chat-title').textContent = channelLabel(c);
     var subEl = $('chat-sub');
-    if (c.kind === 'dm') subEl.textContent = 'Direct message';
+    if (c.id === ANNOUNCE.id) subEl.textContent = 'Exec posts — pinned on every page for 3 days';
+    else if (c.kind === 'dm') subEl.textContent = 'Direct message';
     else if (c.members) subEl.textContent = c.members.length + ' members';
     else subEl.textContent = 'Everyone in the chapter';
+    // announcements are read-only for everyone off the exec board
+    var lock = c.id === ANNOUNCE.id && !(DDSAuth.isExec && DDSAuth.isExec(ME));
+    $('chat-input').disabled = lock;
+    $('chat-input').placeholder = lock ? 'Only exec can post announcements.' : 'Message… use @ to mention';
+    $('chat-send').disabled = lock;
+    $('chat-attach').disabled = lock;
     renderRail();
     renderChat(true);
     $('chat-rail').classList.remove('open');
@@ -798,7 +810,9 @@
       var p = channelAvatar(c);
       var av = c.kind === 'dm'
         ? (p && p.photo ? '<span class="chat-chan-av"><img src="' + esc(p.photo) + '" alt=""></span>' : '<span class="chat-chan-av">' + esc(initial(p && p.name)) + '</span>')
-        : '<span class="chat-chan-av">#</span>';
+        : c.id === ANNOUNCE.id
+          ? '<span class="chat-chan-av"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>'
+          : '<span class="chat-chan-av">#</span>';
       return '<button class="chat-chan' + (c.kind === 'dm' ? ' dm' : '') + (c.id === curChan ? ' on' : '') + '" type="button" data-chan="' + esc(c.id) + '">' +
         av + '<span class="chat-chan-name">' + esc(channelLabel(c)) + '</span></button>';
     };
@@ -841,7 +855,9 @@
     var lastDay = '';
     var msgs = messagesAll().filter(function (m) { return m.ch === curChan; });
     if (!msgs.length) {
-      log.innerHTML = '<div class="res-fempty" style="text-align:center;margin:auto;">No messages yet — say hi.</div>';
+      log.innerHTML = '<div class="res-fempty" style="text-align:center;margin:auto;">' +
+        (curChan === ANNOUNCE.id ? 'No announcements right now — exec posts here reach every page for 3 days.' : 'No messages yet — say hi.') +
+        '</div>';
       return;
     }
     log.innerHTML = msgs.map(function (m) {
@@ -909,6 +925,7 @@
   function sendChat() {
     var ta = $('chat-input'), text = ta.value.trim();
     if (!text && !chatImg) return;
+    if (curChan === ANNOUNCE.id && !(DDSAuth.isExec && DDSAuth.isExec(ME))) return;
     var list = messagesAll();
     var msg = { id: uid(), ch: curChan, by: ME.name, byId: ME.id, text: text.slice(0, 1000), at: Date.now() };
     if (chatImg) msg.img = chatImg;
