@@ -661,18 +661,26 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .nb-foot .nb-author{color:#13294B;}
 .nb-foot .nb-date{color:#5A7798;}
 @media(max-width:768px){.nb-arrow{display:none;}.nb-card{width:min(76vw,320px);}.nb-rail{padding:38px 6px 48px;}}
-/* Cursors: the native pointer never shows anywhere on the home page. The navy
-   dot leads everywhere (its grow state is the hover affordance, like the
-   toolkit already did); the tooth takes over in the Pillars + Officer Profiles
-   sections, where the dot hides. html.dot-on is only set when initDotCursor
-   actually runs (fine pointer, no reduced motion), so touch/reduced-motion
-   users keep normal cursors. */
+/* Per-section cursors — the settled map:
+   · DOT (grow = hover affordance, native pointer hidden): Hero, What We
+     Offer, What You Actually Get, Our Members, Member Toolkit.
+   · TOOTH (spring physics, native cursor hidden): Learn/Serve/Lead pillars
+     + Officer Profiles.
+   · GLOW ONLY (no dot, no native cursor): the President's letter.
+   · Everywhere else (About, Gallery, The Bite, Big Little, Join, …): the
+     normal native cursor.
+   html.dot-on is only set when initDotCursor actually runs (fine pointer,
+   no reduced motion), so touch/reduced-motion users keep normal cursors. */
 @media (prefers-reduced-motion: no-preference){
-  #officer-profiles,#pillars,#president-letter{cursor:none;}
-  html.dot-on,html.dot-on *{cursor:none !important;}
+  #officer-profiles,#officer-profiles *,#pillars,#pillars *,#president-letter,#president-letter *{cursor:none !important;}
+  html.dot-on #top,html.dot-on #top *,
+  html.dot-on #offers,html.dot-on #offers *,
+  html.dot-on #offer-stories,html.dot-on #offer-stories *,
+  html.dot-on #members-preview,html.dot-on #members-preview *,
+  html.dot-on #toolkit,html.dot-on #toolkit *{cursor:none !important;}
 }
 #dotcur{position:fixed;top:0;left:0;width:13px;height:13px;border-radius:50%;
-  background:#13294B;pointer-events:none;z-index:99999;opacity:0;
+  background:#13294B;pointer-events:none;z-index:2147483600;opacity:0;
   transform:translate(-50%,-50%) scale(1);
   box-shadow:0 0 0 1.5px rgba(233,240,248,.7), 0 0 12px 3px rgba(75,156,211,.5);
   transition:opacity .25s ease, transform .16s cubic-bezier(.2,.7,.3,1), background .2s ease, box-shadow .2s ease;}
@@ -3340,6 +3348,13 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   if (REDUCED_MOTION) return;
   const make = (stage, tooth) => {
     if (!stage || !tooth) return;
+    // The tooth must ride above EVERY overlay (announce cards, edit FAB, all
+    // z-index:99999) — reparent it to <body> as a fixed element with a
+    // near-max z, and track the pointer in viewport coordinates. The spring
+    // physics below are untouched.
+    tooth.style.position = 'fixed';
+    tooth.style.zIndex = '2147483500';
+    document.body.appendChild(tooth);
     let tx = 0, ty = 0, vx = 0, vy = 0, ang = 0, av = 0, mx = 0, my = 0, seen = false, raf = null;
     const tick = () => {
       raf = null;
@@ -3351,8 +3366,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
       if (Math.abs(vx) > 0.04 || Math.abs(vy) > 0.04 || Math.abs(av) > 0.04) raf = requestAnimationFrame(tick);
     };
     stage.addEventListener('mousemove', (e) => {
-      const r = stage.getBoundingClientRect();
-      mx = e.clientX - r.left; my = e.clientY - r.top;
+      mx = e.clientX; my = e.clientY;
       if (!seen) { tx = mx; ty = my; seen = true; }
       tooth.style.opacity = '1';
       // over anything clickable the tooth grows and does a few full spins
@@ -3368,9 +3382,10 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   make(document.getElementById('pillars'), document.getElementById('tooth-offers'));
 })();
 
-// ---- Navy dot cursor: leads everywhere on the page except the two tooth
-//      sections (Pillars + Officer Profiles), where the tooth takes over.
-//      The grow state is the only click affordance — no native pointer. ----
+// ---- Navy dot cursor: leads in the Hero, What We Offer, What You Actually
+//      Get, Our Members, and the Member Toolkit. The tooth owns the pillars
+//      + officer profiles; the President's letter keeps only its glow; every
+//      other section keeps the normal native cursor. ----
 (function initDotCursor(){
   if (REDUCED_MOTION) return;
   if (!window.matchMedia || !window.matchMedia('(hover:hover) and (pointer:fine)').matches) return;
@@ -3378,13 +3393,13 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   dot.id = 'dotcur';
   document.body.appendChild(dot);
   document.documentElement.classList.add('dot-on');
-  const TOOTH_ZONES = '#pillars,#officer-profiles';
+  const ZONES = '#top,#offers,#offer-stories,#members-preview,#toolkit';
   const HIT = 'a,button,summary,label,input,textarea,select,[role="button"],[data-cta-magnet],[onclick]';
   let x = innerWidth / 2, y = innerHeight / 2, raf = null;
   const draw = () => { raf = null; dot.style.left = x + 'px'; dot.style.top = y + 'px'; };
   document.addEventListener('mousemove', (e) => {
-    const inTooth = e.target.closest && e.target.closest(TOOTH_ZONES);
-    if (inTooth) { dot.classList.remove('show'); return; }
+    const inZone = e.target.closest && e.target.closest(ZONES);
+    if (!inZone) { dot.classList.remove('show'); return; }
     x = e.clientX; y = e.clientY;
     dot.classList.add('show');
     const hot = e.target.closest(HIT);
