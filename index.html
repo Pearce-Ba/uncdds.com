@@ -170,9 +170,14 @@ a.calv-ev:hover{filter:brightness(1.3);}
 .calv-ev .ce-n{display:block;font-weight:600;color:#EAF1F8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .calv-ev .ce-l{display:block;color:#8FA9C4;font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .calv-more{color:#7FB2E0;font-size:10px;letter-spacing:.5px;}
-/* hover card — expands over the grid with the event's full details */
-.calv-pop{position:absolute;z-index:40;display:flex;flex-direction:column;background:rgba(7,17,32,.97);border:1px solid var(--evc,#4B9CD3);border-radius:16px;box-shadow:0 30px 70px -24px rgba(0,0,0,.85);padding:14px 16px 12px;overflow:hidden;}
-.calv-pop[hidden]{display:none;}
+/* hover card — expands over the grid with the event's full details.
+   Fades + scales in from the anchor cell; position morphs when the hover
+   moves between events while the card is up. */
+.calv-pop{position:absolute;z-index:40;display:flex;flex-direction:column;background:rgba(7,17,32,.97);border:1px solid var(--evc,#4B9CD3);border-radius:16px;box-shadow:0 30px 70px -24px rgba(0,0,0,.85);padding:14px 16px 12px;overflow:hidden;
+  opacity:0;visibility:hidden;pointer-events:none;transform:scale(.92);
+  transition:opacity .26s ease,transform .34s cubic-bezier(.21,1.02,.55,1),top .3s ease,left .3s ease,width .3s ease,height .3s ease,visibility 0s linear .34s;}
+.calv-pop.show{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);
+  transition:opacity .22s ease,transform .34s cubic-bezier(.21,1.02,.55,1),top .3s ease,left .3s ease,width .3s ease,height .3s ease,visibility 0s;}
 .calv-pop-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex:none;}
 .calv-pop-dot{width:9px;height:9px;border-radius:50%;background:var(--evc,#4B9CD3);flex:none;}
 .calv-pop-head time{color:#9FBEDC;font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;}
@@ -1515,7 +1520,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <!-- Week / month views rendered live from the same Google Calendar as the list above -->
     <div id="cal-wrap" style="position:relative;margin-top:clamp(48px,6vw,80px);">
       <canvas id="cal-rays" style="position:absolute;left:-110px;top:-110px;pointer-events:none;z-index:0;"></canvas>
-      <div data-reveal="0.08" class="calv" style="position:relative;z-index:1;">
+      <div data-reveal="0.08" class="calv" data-ce-skip style="position:relative;z-index:1;">
         <div class="calv-bar">
           <div class="calv-nav">
             <button type="button" class="calv-btn" id="calv-prev" aria-label="Previous"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
@@ -1877,19 +1882,36 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
     return imgs + (chips ? '<div class="calv-pop-files">' + chips + '</div>' : '');
   }
 
-  var pop = null, popChip = null, hideT = null;
+  var pop = null, popChip = null, hideT = null, showT = null;
   function ensurePop(){
     if (pop){ if (!pop.isConnected) body.appendChild(pop); return pop; }   // re-attach after a re-render wiped the body
     pop = document.createElement('div');
     pop.className = 'calv-pop';
-    pop.hidden = true;
     body.appendChild(pop);
     pop.addEventListener('mouseenter', function(){ clearTimeout(hideT); });
     pop.addEventListener('mouseleave', schedHide);
     return pop;
   }
-  function hidePop(){ if (pop){ pop.hidden = true; } popChip = null; }
-  function schedHide(){ clearTimeout(hideT); hideT = setTimeout(hidePop, 140); }
+  function hidePop(){ clearTimeout(showT); if (pop) pop.classList.remove('show'); popChip = null; }
+  // 300ms grace both ways: no accidental expands brushing over an event,
+  // no accidental dismissals mousing off for a beat
+  function schedHide(){ clearTimeout(hideT); hideT = setTimeout(hidePop, 300); }
+  function showFor(chip){
+    var ev = curEvs[+chip.getAttribute('data-ei')];
+    if (!ev) return;
+    popChip = chip;
+    ensurePop();
+    fillPop(ev);
+    if (pop.classList.contains('show')){
+      placePop(chip, ev);                       // already up — morph over to the new event
+      return;
+    }
+    pop.style.transition = 'none';              // land in place silently, then animate in
+    placePop(chip, ev);
+    void pop.offsetHeight;
+    pop.style.transition = '';
+    requestAnimationFrame(function(){ pop.classList.add('show'); });
+  }
   function fillPop(ev){
     var PIN = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
     pop.innerHTML =
@@ -1905,26 +1927,31 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
     var anchorEl = isMonth ? chip.closest('.calv-day') : chip;
     var aR = anchorEl.getBoundingClientRect();
     var aTop = aR.top - bR.top, aBottom = aR.bottom - bR.top, aLeft = aR.left - bR.left;
-    var w, h, left, top;
+    var w, h, left, top, col = 3;
     if (isMonth){
       var cellW = aR.width, cellH = aR.height;
       h = Math.min(cellH * 3, bR.height);           // the cell plus two more rows
       w = cellW * 2;
-      var col = Math.max(0, Math.min(6, Math.round(aLeft / cellW)));
+      col = Math.max(0, Math.min(6, Math.round(aLeft / cellW)));
       if (col === 0) left = aLeft;                  // Sunday grows toward Monday
       else if (col === 6) left = aLeft - cellW;     // Saturday grows toward Friday
       else left = aLeft - cellW / 2;                // otherwise half a cell each side
       left = Math.max(0, Math.min(left, bR.width - w));
     } else {
-      w = aR.width; h = Math.min(aR.height + 240, bR.height); left = aLeft;
+      w = Math.min(440, aR.width);                  // narrower card so photos keep a sane ratio
+      h = Math.min(320, bR.height);
+      left = aLeft;
     }
     var below = bR.height - aTop, above = aBottom;
-    top = (below >= h || below >= above) ? aTop : aBottom - h;   // grow toward the roomier side
+    var growDown = below >= h || below >= above;    // grow toward the roomier side
+    top = growDown ? aTop : aBottom - h;
     top = Math.max(0, Math.min(top, bR.height - h));
     pop.style.top = top + 'px';
     pop.style.left = left + 'px';
     pop.style.width = w + 'px';
     pop.style.height = h + 'px';
+    // scale out of the anchor: origin follows the grow direction
+    pop.style.transformOrigin = (isMonth ? (col === 0 ? '12%' : col === 6 ? '88%' : '50%') : '10%') + ' ' + (growDown ? '10%' : '90%');
     pop.style.setProperty('--evc', colorOf(ev));
   }
   if (window.matchMedia('(hover:hover) and (pointer:fine)').matches){
@@ -1932,20 +1959,16 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
       var chip = e.target.closest('[data-ei]');
       if (!chip || !body.contains(chip)) return;
       clearTimeout(hideT);
-      if (chip === popChip) return;
-      var ev = curEvs[+chip.getAttribute('data-ei')];
-      if (!ev) return;
-      popChip = chip;
-      ensurePop();
-      fillPop(ev);
-      placePop(chip, ev);
-      pop.hidden = false;
+      if (chip === popChip && pop && pop.classList.contains('show')) return;
+      clearTimeout(showT);
+      showT = setTimeout(function(){ showFor(chip); }, 300);
     });
     body.addEventListener('mouseout', function(e){
       var chip = e.target.closest('[data-ei]');
       if (!chip) return;
       var to = e.relatedTarget;
       if (to && (chip.contains(to) || (pop && pop.contains(to)))) return;
+      clearTimeout(showT);
       schedHide();
     });
   }

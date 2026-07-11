@@ -49,7 +49,7 @@
   ];
   var EXCLUDE_PAGE = {
     home: [
-      '#upe-index', '#upe-hero', '#galc',                       // live calendar + gallery carousel
+      '#upe-index', '#upe-hero', '#galc', '.calv',              // live calendar list + week/month views + gallery carousel
       '#om-name', '#om-role', '#om-focus-t', '#om-quote', '#om-detail', '#om-pindex', // members spotlight rotator
       '#hero-login', '#exec-copy', '#nb-rail',                  // JS-swapped labels + Bite rail
       '[data-bl-rail]', '[data-bl-big]', '.bl-tier', '.blm-card', // big/little (family data)
