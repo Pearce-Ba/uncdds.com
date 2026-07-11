@@ -1788,27 +1788,37 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   window.addEventListener('resize', size, { passive: true });
   setTimeout(size, 500);
 
-  // Scrolling inside the pane stays fully native (free flow + snap, exactly
-  // like scrolling the page). The ONE intervention: once the pane is showing
-  // its final three rows, a wheel-down moves the PAGE. The bottom test is the
-  // nearest-snap-row INDEX, never a pixel threshold — with uneven row heights
-  // and Chrome's animated wheel scrolling, scrollTop comparisons are exactly
-  // what made wheel-downs get swallowed at the bottom. Upward chaining at the
-  // top already works natively (0 is a snap position).
+  // FREEZE AT THE BOTTOM. The top hands off perfectly because the browser
+  // itself sees "this pane cannot scroll up" and routes the whole gesture
+  // (momentum included) to the page. Manufacture the identical situation at
+  // the bottom: the moment the pane rests at its end, it becomes
+  // overflow-y:hidden — a stagnant box that genuinely cannot scroll — so the
+  // next down-gesture goes to the page NATIVELY. No JS event forwarding at
+  // all. Wheeling UP over the frozen pane (or an upward touch drag, or the
+  // up arrow) thaws it back to a normal scroller.
+  var frozen = false;
+  function paneMax(){ return view.scrollHeight - view.clientHeight; }
+  function setFrozen(f){
+    if (frozen === f) return;
+    frozen = f;
+    view.style.overflowY = f ? 'hidden' : 'auto';
+  }
+  view.addEventListener('scroll', function(){
+    setFrozen(view.scrollTop >= paneMax() - 2);
+  }, { passive: true });
   view.addEventListener('wheel', function(e){
-    if (e.deltaY <= 0 || !e.cancelable) return;   // up + momentum tails: native
-    var r = view.children;
-    if (r.length < 4) return;
-    var st = view.scrollTop, best = 0, bd = 1e9;
-    for (var i = 0; i < r.length; i++){
-      var d = Math.abs((r[i].offsetTop - r[0].offsetTop) - st);
-      if (d < bd){ bd = d; best = i; }
-    }
-    if (best >= r.length - 3) {                   // resting in the final view
+    if (!frozen || e.deltaY >= 0) return;
+    setFrozen(false);
+    if (e.cancelable) {
       e.preventDefault();
-      window.scrollBy(0, e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY);
+      view.scrollTop += (e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY);
     }
   }, { passive: false });
+  var touchY = 0;
+  view.addEventListener('touchstart', function(e){ touchY = e.touches[0].clientY; }, { passive: true });
+  view.addEventListener('touchmove', function(e){
+    if (frozen && e.touches[0].clientY > touchY + 6) setFrozen(false);
+  }, { passive: true });
 
   // exec-only: the + files a new record, then opens it
   add.addEventListener('click', function(){
