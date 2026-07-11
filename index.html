@@ -276,6 +276,9 @@ a.calv-wev:hover{filter:brightness(1.3);}
    pills they flank), tilt up-and-outward, and float on drop shadows. Same
    cursor magnet as the pills; hovering runs the animation + a tooltip pill. */
 .cta-mini{position:relative;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:2px;}
+/* pushed out from the pills so the pair reads as bookends, not row items */
+.cta-mini-l{margin-right:clamp(10px,2.6vw,40px);}
+.cta-mini-r{margin-left:clamp(10px,2.6vw,40px);}
 .cta-tilt{display:block;transition:transform .45s cubic-bezier(.22,.61,.36,1);}
 .cta-mini-l .cta-tilt{transform:rotate(-8deg);}
 .cta-mini-r .cta-tilt{transform:rotate(8deg);}
@@ -283,8 +286,10 @@ a.calv-wev:hover{filter:brightness(1.3);}
 .cta-mini-r:hover .cta-tilt{transform:rotate(4deg) translateY(-3px);}
 .cm-tip{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%) translateY(-4px);white-space:nowrap;color:#EAF1F8;background:rgba(9,20,38,.93);border:1px solid rgba(185,151,91,.5);border-radius:999px;padding:5px 13px;font-weight:700;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;z-index:4;}
 .cta-mini:hover .cm-tip{opacity:1;transform:translateX(-50%) translateY(0);}
-/* -- paper + pen (the sheet carries its note title at rest; ink lines loop on hover) -- */
-.cmn-svg{display:block;width:58px;height:74px;overflow:visible;filter:drop-shadow(0 16px 26px rgba(3,9,22,.55)) drop-shadow(0 4px 10px rgba(3,9,22,.4));}
+/* -- paper + pen (the sheet carries its note title at rest; ink lines loop on hover).
+      Sized so the SHEET itself (28×38 of the 38×44 viewBox) renders 81×110px —
+      the same footprint as the newspaper; the pen swing doesn't count. -- */
+.cmn-svg{display:block;width:111px;height:128px;overflow:visible;filter:drop-shadow(0 16px 26px rgba(3,9,22,.55)) drop-shadow(0 4px 10px rgba(3,9,22,.4));}
 .cmn-sheet{fill:#F5F0E4;stroke:rgba(19,41,75,.3);stroke-width:1;}
 .cmn-fold{fill:#DDD3BC;}
 .cmn-htitle{fill:#13294B;font-family:'Montserrat',sans-serif;font-weight:800;font-size:4.5px;letter-spacing:.25px;text-anchor:middle;}
@@ -314,19 +319,19 @@ a.calv-wev:hover{filter:brightness(1.3);}
       underneath for depth, and on hover four page turns in rapid succession
       (each faster than the last), a beat on the spread, then it closes and
       the loop starts over. Paint order = DOM order (cover span is last). -- */
-.cmb-scene{display:block;position:relative;width:54px;height:74px;perspective:340px;}
-.cmb-under{position:absolute;inset:0;border-radius:2.5px;background:#E7DFC9;border:1px solid rgba(19,41,75,.25);box-shadow:0 12px 24px -8px rgba(3,9,22,.55);}
-.cmb-under.u1{transform:translate(2.5px,2.5px);}
-.cmb-under.u2{transform:translate(5px,5px);background:#DDD3BC;}
-.cmb-page{position:absolute;inset:0;border-radius:2.5px;background:#F5F0E4;border:1px solid rgba(19,41,75,.28);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6px 5px;box-shadow:0 14px 30px -10px rgba(3,9,22,.6);}
-.cmb-mast{font-family:'Playfair Display',Georgia,serif;font-weight:900;color:#13294B;font-size:11px;line-height:1.05;letter-spacing:.2px;text-align:center;margin:2px 0 2px;white-space:nowrap;}
-.cmb-rule{display:block;width:82%;height:1.5px;border-radius:1px;background:#B9975B;margin:1px 0 2px;}
-.cmb-photo{display:block;width:82%;height:16px;border-radius:2px;background:linear-gradient(135deg,#7FA3C9,#41638F);opacity:.85;margin:3px 0 0;}
-.cmb-l{display:block;width:82%;height:2.5px;border-radius:1.5px;background:rgba(19,41,75,.26);margin:3px 0 0;}
+.cmb-scene{display:block;position:relative;width:81px;height:111px;perspective:520px;}
+.cmb-under{position:absolute;inset:0;border-radius:4px;background:#E7DFC9;border:1px solid rgba(19,41,75,.25);box-shadow:0 12px 24px -8px rgba(3,9,22,.55);}
+.cmb-under.u1{transform:translate(3.5px,3.5px);}
+.cmb-under.u2{transform:translate(7px,7px);background:#DDD3BC;}
+.cmb-page{position:absolute;inset:0;border-radius:4px;background:#F5F0E4;border:1px solid rgba(19,41,75,.28);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:9px 7px;box-shadow:0 14px 30px -10px rgba(3,9,22,.6);}
+.cmb-mast{font-family:'Playfair Display',Georgia,serif;font-weight:900;color:#13294B;font-size:16px;line-height:1.05;letter-spacing:.2px;text-align:center;margin:3px 0 3px;white-space:nowrap;}
+.cmb-rule{display:block;width:82%;height:2px;border-radius:1px;background:#B9975B;margin:2px 0 3px;}
+.cmb-photo{display:block;width:82%;height:25px;border-radius:3px;background:linear-gradient(135deg,#7FA3C9,#41638F);opacity:.85;margin:4.5px 0 0;}
+.cmb-l{display:block;width:82%;height:4px;border-radius:2px;background:rgba(19,41,75,.26);margin:4.5px 0 0;}
 .cmb-l.cmb-short{width:56%;}
-.cmb-l.cmb-wide{width:88%;height:6px;background:rgba(19,41,75,.5);margin-top:2px;}
+.cmb-l.cmb-wide{width:88%;height:9px;background:rgba(19,41,75,.5);margin-top:3px;}
 .cmb-flap{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;}
-.cmb-face{position:absolute;inset:0;border-radius:2.5px;background:#F5F0E4;border:1px solid rgba(19,41,75,.28);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6px 5px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 12px 26px -12px rgba(3,9,22,.5);}
+.cmb-face{position:absolute;inset:0;border-radius:4px;background:#F5F0E4;border:1px solid rgba(19,41,75,.28);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:9px 7px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 12px 26px -12px rgba(3,9,22,.5);}
 .cmb-backp{transform:rotateY(180deg);background:#EFE8D6;}
 .cta-mini:hover .cmb-flap.f1{animation:cmbF1 4.4s cubic-bezier(.45,.05,.35,1) infinite;}
 .cta-mini:hover .cmb-flap.f2{animation:cmbF2 4.4s cubic-bezier(.45,.05,.35,1) infinite;}
@@ -338,6 +343,18 @@ a.calv-wev:hover{filter:brightness(1.3);}
 @keyframes cmbF2{0%,14%{transform:rotateY(0);}22.5%{transform:rotateY(-159deg);}56%{transform:rotateY(-159deg);}64.5%,100%{transform:rotateY(0);}}
 @keyframes cmbF3{0%,21%{transform:rotateY(0);}28%{transform:rotateY(-150deg);}52.5%{transform:rotateY(-150deg);}60%,100%{transform:rotateY(0);}}
 @keyframes cmbF4{0%,26.5%{transform:rotateY(0);}32.5%{transform:rotateY(-141deg);}49.5%{transform:rotateY(-141deg);}55.5%,100%{transform:rotateY(0);}}
+/* Small screens keep the compact icons (the mobile layout works as-is) */
+@media(max-width:560px){
+  .cmn-svg{width:70px;height:81px;}
+  .cmb-scene{width:51px;height:70px;}
+  .cmb-mast{font-size:10px;margin:2px 0 2px;}
+  .cmb-rule{height:1.5px;margin:1px 0 2px;}
+  .cmb-photo{height:15px;margin:3px 0 0;}
+  .cmb-l{height:2.5px;margin:3px 0 0;}
+  .cmb-l.cmb-wide{height:6px;margin-top:2px;}
+  .cmb-page,.cmb-face{padding:6px 5px;}
+  .cta-mini-l,.cta-mini-r{margin:0;}
+}
 @media(prefers-reduced-motion:reduce){
   .cta-mini:hover .cmn-pen{animation:none;}
   .cta-mini:hover .cmn-l1,.cta-mini:hover .cmn-l2,.cta-mini:hover .cmn-l3{animation:none;stroke-dashoffset:0;opacity:1;}
@@ -849,7 +866,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <!-- Meeting notes: the sheet of paper itself is the button (flanks the pills on the right) -->
         <a data-cta-magnet href="archive.html" class="cta-mini cta-mini-r" aria-label="Meeting notes — read the chapter minutes in The Archive">
           <span class="cta-tilt">
-            <svg class="cmn-svg" viewBox="13 6 38 48" aria-hidden="true" focusable="false">
+            <svg class="cmn-svg" viewBox="13 9 38 44" aria-hidden="true" focusable="false">
               <path class="cmn-sheet" d="M18 12 H40 L46 18 V50 H18 Z"/>
               <path class="cmn-fold" d="M40 12 L40 18 L46 18 Z"/>
               <text class="cmn-htitle" x="31.5" y="20">MEETING</text>
@@ -2812,7 +2829,9 @@ ddsWrapAbout();
 })();
 
 // ---- CTA magnet + hero 3D tilt ----
+// Fine-pointer only: on touch the buttons must never chase taps.
 (function initMagnet(){
+  if (!window.matchMedia || !window.matchMedia('(hover:hover) and (pointer:fine)').matches) return;
   const heroWrap = document.getElementById('hero-img-wrap');
   const ctas = Array.from(document.querySelectorAll('[data-cta-magnet]'));
   ctas.forEach(c => { c.style.willChange = 'transform'; });
@@ -2840,7 +2859,7 @@ ddsWrapAbout();
       const dx = e.clientX - cx, dy = e.clientY - cy;
       const within = Math.abs(dx) < r.width/2 + 95 && Math.abs(dy) < r.height/2 + 95;
       c.style.transition = within ? 'transform .2s ease-out' : 'transform .5s ease-in-out';
-      c.style.transform = within ? 'translate('+(dx*.28)+'px,'+(dy*.34)+'px)' : 'translate(0,0)';
+      c.style.transform = within ? 'translate('+(dx*.09)+'px,'+(dy*.11)+'px)' : 'translate(0,0)';
     }
   };
   window.addEventListener('mousemove', onMove, {passive:true});
