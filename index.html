@@ -1788,46 +1788,26 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   window.addEventListener('resize', size, { passive: true });
   setTimeout(size, 500);
 
-  // Wheel handling is taken over completely. The old approach (let the browser
-  // scroll the pane, chain to the page once scrollTop reads "at bottom") fails
-  // on real trackpads: Chrome animates wheel scrolls and snap keeps adjusting,
-  // so events keep arriving while scrollTop still lags below the bottom and
-  // every one of them gets swallowed. Instead we track the ROW INDEX — a
-  // wheel notch steps one row (same as the arrows), and as soon as the last
-  // three rows are on screen a wheel-down scrolls the page itself. No
-  // dependence on scrollTop ever reaching an exact value.
-  var wAcc = 0, wLockUntil = 0;
-  function idxNearest(){
-    var r = view.children, st = view.scrollTop, best = 0, bd = 1e9;
+  // Scrolling inside the pane stays fully native (free flow + snap, exactly
+  // like scrolling the page). The ONE intervention: once the pane is showing
+  // its final three rows, a wheel-down moves the PAGE. The bottom test is the
+  // nearest-snap-row INDEX, never a pixel threshold — with uneven row heights
+  // and Chrome's animated wheel scrolling, scrollTop comparisons are exactly
+  // what made wheel-downs get swallowed at the bottom. Upward chaining at the
+  // top already works natively (0 is a snap position).
+  view.addEventListener('wheel', function(e){
+    if (e.deltaY <= 0 || !e.cancelable) return;   // up + momentum tails: native
+    var r = view.children;
+    if (r.length < 4) return;
+    var st = view.scrollTop, best = 0, bd = 1e9;
     for (var i = 0; i < r.length; i++){
       var d = Math.abs((r[i].offsetTop - r[0].offsetTop) - st);
       if (d < bd){ bd = d; best = i; }
     }
-    return best;
-  }
-  function goTo(i){
-    var r = view.children;
-    i = Math.max(0, Math.min(r.length - 1, i));
-    view.scrollTo({ top: r[i].offsetTop - r[0].offsetTop, behavior: reduce.matches ? 'auto' : 'smooth' });
-  }
-  view.addEventListener('wheel', function(e){
-    if (!e.cancelable) return;               // momentum tail — let it die naturally
-    var r = view.children;
-    if (r.length < 4) return;
-    var dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
-    var last = r.length - 3;                 // first row of the final view
-    var i = idxNearest();
-    if ((dy > 0 && i >= last) || (dy < 0 && i <= 0)) {
-      e.preventDefault();                    // at the end: this notch moves the page
-      window.scrollBy(0, dy);
-      return;
+    if (best >= r.length - 3) {                   // resting in the final view
+      e.preventDefault();
+      window.scrollBy(0, e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY);
     }
-    e.preventDefault();
-    var now = performance.now();
-    if (now < wLockUntil) { wAcc = 0; return; }   // a step is still animating
-    wAcc += dy;
-    if (wAcc > 60)      { goTo(i + 1); wAcc = 0; wLockUntil = now + 330; }
-    else if (wAcc < -60){ goTo(i - 1); wAcc = 0; wLockUntil = now + 330; }
   }, { passive: false });
 
   // exec-only: the + files a new record, then opens it
