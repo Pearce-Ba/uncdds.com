@@ -103,7 +103,6 @@ body.nav-open{overflow:hidden;}
 .hero-rule{display:block;height:2px;width:clamp(34px,6.5vw,110px);border-radius:2px;background:linear-gradient(90deg,transparent 0%,#B9975B 28%,#DCC08A 50%,#B9975B 72%,transparent 100%);transform-origin:center;}
 #hero-title .ht-char{display:inline-block;transform-style:preserve-3d;}
 #hero-title .ht-ink{display:inline-block;color:transparent;-webkit-text-fill-color:transparent;-webkit-background-clip:text;background-clip:text;background-image:url('grain.png'),radial-gradient(46% 150% at 14% 18%,rgba(75,156,211,.62) 0%,rgba(75,156,211,0) 72%),radial-gradient(34% 130% at 40% 92%,rgba(75,156,211,.34) 0%,rgba(75,156,211,0) 70%),radial-gradient(38% 130% at 60% 82%,rgba(185,151,91,.5) 0%,rgba(185,151,91,0) 68%),radial-gradient(44% 150% at 88% 14%,rgba(127,178,224,.55) 0%,rgba(127,178,224,0) 72%),linear-gradient(180deg,#FDFEFF 0%,#ECF2F9 55%,#C2D7EA 100%);background-blend-mode:multiply,screen,screen,screen,screen,normal;}
-.hero-accent{position:absolute;pointer-events:none;border-radius:2px;}
 #hero-backlight{position:absolute;left:50%;top:62%;width:min(64vw,940px);height:min(22vw,320px);transform:translate(-50%,-50%);background:radial-gradient(50% 50% at 50% 50%,rgba(75,156,211,.32) 0%,rgba(75,156,211,.10) 46%,transparent 72%);mix-blend-mode:screen;pointer-events:none;opacity:.6;z-index:0;}
 .join-btn:hover{transform:translateY(-2px);}
 .cta-gold:hover{transform:translateY(-3px);}
@@ -4395,26 +4394,14 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   // Hide before first paint; revealed the same tick the entrance is built.
   gsap.set([h1, sub], { autoAlpha: 0 });
 
-  // Accent hairlines anchored to glyph features of "DELTA DELTA SIGMA"
-  // (char index → feature height fraction, direction, color, opacity).
-  // 'l'/'r' run horizontally off the page; 'up' runs vertically off the top.
-  const LINE_SPECS = [
-    [1,  .30, 'l',  '#EAF1F8', .38],  // E: upper bar
-    [3,  .05, 'l',  '#B9975B', .55],  // T: cap line
-    [4,  .66, 'r',  '#7FB2E0', .45],  // A: crossbar
-    [7,  .95, 'l',  '#B9975B', .50],  // L: baseline
-    [8,  .05, 'r',  '#EAF1F8', .34],  // T: cap line
-    [11, 0,   'up', '#EAF1F8', .50],  // I: stem, straight up and off
-    [12, .52, 'r',  '#B9975B', .50],  // G: bar
-    [14, .95, 'r',  '#7FB2E0', .45],  // A: baseline
-  ];
-
-  let ctx = null, split = null, lineLayer = null;
+  let ctx = null, split = null, alive = null;
 
   function build(skipIntro){
     if (ctx) ctx.revert();
     if (split) { split.revert(); split = null; }
-    if (lineLayer) { lineLayer.remove(); lineLayer = null; }
+    if (alive) alive.ok = false;          // stops orphaned shake schedulers
+    alive = { ok: true };
+    const live = alive;
 
     ctx = gsap.context(() => {
       split = new SplitText(title, { type: 'words,chars', charsClass: 'ht-char', wordsClass: 'ht-word' });
@@ -4441,38 +4428,6 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
         inks[i].style.backgroundPosition = Math.round(tb.left - r.left) + 'px ' + Math.round(tb.top - r.top) + 'px';
       });
 
-      // Build the accent lines from live glyph geometry.
-      lineLayer = document.createElement('div');
-      lineLayer.setAttribute('aria-hidden', 'true');
-      lineLayer.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:2;';
-      hero.appendChild(lineLayer);
-      const hr = hero.getBoundingClientRect();
-      const lines = LINE_SPECS.map(([idx, frac, dir, colr, alpha]) => {
-        const c = chars[idx];
-        if (!c) return null;
-        const r = c.getBoundingClientRect();
-        const el = document.createElement('i');
-        el.className = 'hero-accent';
-        el.dataset.dir = dir;
-        if (dir === 'up') {
-          const x = r.left + r.width / 2 - hr.left;
-          const yEnd = r.top - hr.top + r.height * 0.12;
-          el.style.cssText += 'left:' + (x - 1) + 'px;top:0;width:2px;height:' + yEnd + 'px;transform-origin:50% 100%;background:linear-gradient(0deg,' + colr + ' 0%,' + colr + ' 55%,transparent 100%);';
-        } else if (dir === 'l') {
-          const x = r.left - hr.left + r.width * 0.16;
-          const y = r.top - hr.top + r.height * frac;
-          el.style.cssText += 'left:0;top:' + y + 'px;width:' + x + 'px;height:2px;transform-origin:100% 50%;background:linear-gradient(270deg,' + colr + ' 0%,' + colr + ' 70%,transparent 100%);';
-        } else {
-          const x = r.left - hr.left + r.width * 0.84;
-          const y = r.top - hr.top + r.height * frac;
-          el.style.cssText += 'left:' + x + 'px;top:' + y + 'px;width:' + (hr.width - x) + 'px;height:2px;transform-origin:0% 50%;background:linear-gradient(90deg,' + colr + ' 0%,' + colr + ' 70%,transparent 100%);';
-        }
-        el.style.opacity = alpha;
-        lineLayer.appendChild(el);
-        return el;
-      }).filter(Boolean);
-      const lineScale = (el) => el.dataset.dir === 'up' ? { scaleY: 0 } : { scaleX: 0 };
-
       // ---------- Entrance: every letter arrives its own way ----------
       const inTl = gsap.timeline();
       inTl.set(h1, { autoAlpha: 1 }, 0)
@@ -4485,71 +4440,79 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
         { y: '-1.5em', opacity: 0, ease: 'bounce.out', duration: 1.05 },
         { y: '1.2em', opacity: 0, ease: 'back.out(2.4)', duration: 0.9 },
         { rotationX: -95, opacity: 0, transformOrigin: '50% 100%', ease: 'power4.out', duration: 1 },
-        { x: '-1.4em', skewX: 24, opacity: 0, ease: 'expo.out', duration: 0.95 },
+        { x: '-1.2em', scaleX: 2.6, opacity: 0, transformOrigin: '100% 50%', ease: 'expo.out', duration: 0.95 }, // horizontal smear snapping to shape
         { scale: 0.1, opacity: 0, transformOrigin: '50% 80%', ease: 'elastic.out(1,0.5)', duration: 1.25 },
         { rotation: 130, scale: 0.5, opacity: 0, ease: 'power3.out', duration: 0.95 },
         { scaleY: 0.04, opacity: 0, ease: 'expo.out', duration: 0.85 },           // unfurls from a flat line
-        { scaleX: 0.05, y: '-0.4em', opacity: 0, transformOrigin: '50% 100%', ease: 'back.out(1.8)', duration: 0.9 },
+        { scaleY: 3.2, y: '-0.9em', opacity: 0, transformOrigin: '50% 0%', ease: 'power4.out', duration: 0.95 }, // taffy streak settling down
       ];
       const order = gsap.utils.shuffle(chars.map((_, i) => i));
       chars.forEach((c, i) => inTl.from(c, { ...enterMoves[i % enterMoves.length] }, 0.2 + order[i] * 0.055));
-      lines.forEach((el, i) => inTl.from(el, { ...lineScale(el), opacity: 0, duration: 0.9, ease: 'expo.inOut' }, 1.05 + i * 0.08));
       if (skipIntro) inTl.progress(1);
 
-      // ---------- Idle: the title never sits still ----------
-      const idleDelay = skipIntro ? 0 : 2;
-      inks.forEach((s, i) => {
-        gsap.to(s, {
-          y: (i % 2 ? 1 : -1) * gsap.utils.random(2.5, 4.5),
-          rotation: (i % 3 === 0 ? -1 : 1) * gsap.utils.random(0.5, 1.4),
-          duration: gsap.utils.random(2.2, 3.6), ease: 'sine.inOut',
-          repeat: -1, yoyo: true, delay: idleDelay + gsap.utils.random(0, 1.2)
-        });
+      // ---------- Idle: letters rest in place, with a quick shake now and
+      // then (no slow drift — baseline stays perfectly aligned) ----------
+      const idleDelay = skipIntro ? 0 : 2.2;
+      inks.forEach((s) => {
+        const shake = () => {
+          if (!live.ok) return;
+          const axis = Math.random() < 0.5 ? 'x' : 'y';
+          const a = gsap.utils.random(1.6, 2.8);
+          gsap.to(s, {
+            keyframes: [
+              { [axis]: -a, rotation: gsap.utils.random(-0.9, 0.9), duration: 0.045 },
+              { [axis]: a * 0.8, rotation: gsap.utils.random(-0.9, 0.9), duration: 0.045 },
+              { [axis]: -a * 0.5, duration: 0.045 },
+              { [axis]: a * 0.3, duration: 0.045 },
+              { [axis]: 0, rotation: 0, duration: 0.06 }
+            ],
+            ease: 'none',
+            onComplete: () => { if (live.ok) gsap.delayedCall(gsap.utils.random(2.5, 8), shake); }
+          });
+        };
+        gsap.delayedCall(idleDelay + gsap.utils.random(0.5, 6), shake);
       });
       gsap.to(backlight, { scale: 1.06, duration: 3.6, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: idleDelay });
 
-      // ---------- Exit: ~a third of a viewport of scroll and it's gone.
-      // Letters collapse into lines and fire off the page; eyebrow leads,
-      // subtitle trails. Scrubbed, so scrolling back reassembles everything.
+      // ---------- Exit: ~a quarter of a viewport of scroll and it's gone.
+      // Letters stretch taffy-like into threads, streaks and smears that fire
+      // off the page; eyebrow leads, subtitle trails. Scrubbed, so scrolling
+      // back reassembles everything.
       const vh = window.innerHeight, vw = window.innerWidth;
       const outTl = gsap.timeline({
         scrollTrigger: {
           trigger: hero, start: 'top top',
-          end: () => '+=' + Math.round(window.innerHeight * 0.32),
+          end: () => '+=' + Math.round(window.innerHeight * 0.24),
           scrub: 0.35,
           onUpdate(self) { if (self.progress > 0.02 && inTl.isActive()) inTl.progress(1).kill(); }
         },
         defaults: { ease: 'power1.in', immediateRender: false }
       });
       const exitMoves = [
-        { from: { scaleX: 1, y: 0, opacity: 1 },               to: { scaleX: 0.04, y: -vh * 0.6, opacity: 0 } },          // → vertical line, up
-        { from: { scaleY: 1, y: 0, opacity: 1 },               to: { scaleY: 3.4, y: -vh * 0.55, opacity: 0, transformOrigin: '50% 0%' } }, // streak
-        { from: { scaleY: 1, x: 0, opacity: 1 },               to: { scaleY: 0.05, x: vw * 0.55, opacity: 0 } },           // → flat line, right
-        { from: { rotation: 0, x: 0, y: 0, opacity: 1 },       to: { rotation: 110, x: vw * 0.2, y: -vh * 0.45, opacity: 0 } },
-        { from: { scaleY: 1, x: 0, opacity: 1 },               to: { scaleY: 0.05, x: -vw * 0.55, opacity: 0 } },          // → flat line, left
-        { from: { rotation: 0, y: 0, opacity: 1 },             to: { rotation: -70, y: -vh * 0.7, opacity: 0 } },
+        { from: { scaleX: 1, scaleY: 1, y: 0, opacity: 1 },    to: { scaleX: 0.05, scaleY: 2.8, y: -vh * 0.55, opacity: 0, transformOrigin: '50% 0%' } }, // pulled into a thread
+        { from: { scaleX: 1, scaleY: 1, y: 0, opacity: 1 },    to: { scaleY: 5, scaleX: 0.65, y: -vh * 0.5, opacity: 0, transformOrigin: '50% 0%' } },    // taffy streak
+        { from: { scaleX: 1, scaleY: 1, x: 0, opacity: 1 },    to: { scaleX: 3.4, scaleY: 0.06, x: vw * 0.5, opacity: 0, transformOrigin: '0% 50%' } },   // smeared off right
+        { from: { rotation: 0, scaleY: 1, x: 0, y: 0, opacity: 1 }, to: { rotation: 100, scaleY: 1.7, x: vw * 0.16, y: -vh * 0.42, opacity: 0 } },
+        { from: { scaleX: 1, scaleY: 1, x: 0, opacity: 1 },    to: { scaleX: 3.4, scaleY: 0.06, x: -vw * 0.5, opacity: 0, transformOrigin: '100% 50%' } }, // smeared off left
+        { from: { skewX: 0, scaleY: 1, y: 0, opacity: 1 },     to: { skewX: 38, scaleY: 2.4, y: -vh * 0.6, opacity: 0, transformOrigin: '50% 100%' } },   // sheared streak
       ];
-      outTl.fromTo(eyeText, { opacity: 1 }, { opacity: 0, letterSpacing: '0.55em', duration: 0.2 }, 0)
-           .fromTo(eyebrow.querySelectorAll('.hero-rule'), { scaleX: 1 }, { scaleX: 0, duration: 0.2, ease: 'power2.inOut' }, 0.02)
-           .fromTo(eyebrow, { y: 0 }, { y: -40, duration: 0.26 }, 0)
-           .fromTo(backlight, { opacity: 0.6 }, { opacity: 0, duration: 0.35 }, 0.2);
+      outTl.fromTo(eyeText, { opacity: 1 }, { opacity: 0, letterSpacing: '0.55em', duration: 0.18 }, 0)
+           .fromTo(eyebrow.querySelectorAll('.hero-rule'), { scaleX: 1 }, { scaleX: 0, duration: 0.18, ease: 'power2.inOut' }, 0.02)
+           .fromTo(eyebrow, { y: 0 }, { y: -40, duration: 0.24 }, 0)
+           .fromTo(backlight, { opacity: 0.6 }, { opacity: 0, duration: 0.3 }, 0.12);
       const order2 = gsap.utils.shuffle(chars.map((_, i) => i));
       chars.forEach((c, i) => {
         const m = exitMoves[i % exitMoves.length];
-        outTl.fromTo(c, { ...m.from }, { ...m.to, duration: 0.55 }, 0.12 + order2[i] * 0.024);
+        outTl.fromTo(c, { ...m.from }, { ...m.to, duration: 0.5 }, 0.05 + order2[i] * 0.02);
       });
-      lines.forEach((el, i) => {
-        const grow = el.dataset.dir === 'up' ? { scaleY: 1.25 } : { scaleX: 1.25 };
-        outTl.fromTo(el, { opacity: +el.style.opacity }, { ...grow, opacity: 0, duration: 0.3 }, 0.06 + i * 0.02);
-      });
-      outTl.fromTo(sub, { opacity: 1, y: 0 }, { opacity: 0, y: -26, letterSpacing: '11px', duration: 0.26 }, 0.6);
+      outTl.fromTo(sub, { opacity: 1, y: 0 }, { opacity: 0, y: -26, letterSpacing: '11px', duration: 0.24 }, 0.44);
     });
     ScrollTrigger.refresh();
   }
 
   document.fonts.ready.then(() => {
     build(false);
-    // Rebuild geometry (texture field, accent lines, exit vectors) when the
+    // Rebuild geometry (texture field, exit vectors) when the
     // viewport truly changes size — not on mobile URL-bar jitter.
     let lastW = window.innerWidth, t = 0;
     window.addEventListener('resize', () => {
