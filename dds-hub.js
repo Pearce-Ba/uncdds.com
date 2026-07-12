@@ -167,7 +167,11 @@
 
   /* ------------------------------- css ------------------------------- */
   var css =
-    '#dds-hub{position:fixed;right:18px;bottom:76px;z-index:100000;display:flex;flex-direction:column;align-items:flex-end;gap:14px;font-family:"Montserrat",system-ui,sans-serif;}' +
+    /* host must NOT catch the pointer: the invisible closed panel sizes it to ~360x550
+       bottom-right, which silently ate hovers/clicks on page content underneath (e.g.
+       the dashboard cluster's right side). Events re-enable on the FAB + open panel. */
+    '#dds-hub{position:fixed;right:18px;bottom:76px;z-index:100000;display:flex;flex-direction:column;align-items:flex-end;gap:14px;font-family:"Montserrat",system-ui,sans-serif;pointer-events:none;}' +
+    '#dds-hub .hub-fab{pointer-events:auto;}' +
     '@media (max-width:899px),(hover:none){#dds-hub{display:none !important;}}' +
     '#dds-announce{transition:opacity .35s ease,transform .35s ease;}' +
     'html.dds-hub-open #dds-announce{opacity:0;transform:translateX(20px);pointer-events:none;}' +
@@ -206,7 +210,10 @@
     /* --- stacked tab views --- */
     '.hub-views{position:relative;flex:1;min-height:0;}' +
     '.hub-view{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .28s ease,transform .34s ease;}' +
-    '.hub-view.on{opacity:1;transform:none;pointer-events:auto;}' +
+    /* pe:auto only while the panel is open — an explicit auto on a child beats the
+       closed panel's pointer-events:none and would eat events through it */
+    '.hub-view.on{opacity:1;transform:none;}' +
+    'html.dds-hub-open .hub-view.on{pointer-events:auto;}' +
     '.hub-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 14px;scrollbar-width:thin;scrollbar-color:rgba(75,156,211,.4) transparent;}' +
     '.hub-scroll::-webkit-scrollbar{width:8px;}' +
     '.hub-scroll::-webkit-scrollbar-thumb{background:rgba(75,156,211,.35);border-radius:99px;border:2px solid transparent;background-clip:content-box;}' +
@@ -244,7 +251,7 @@
        invisibly over the other three tabs and eat their clicks and wheels */
     '.hubm{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transform:translateX(16px);pointer-events:none;transition:opacity .26s ease,transform .3s ease;}' +
     '.hubm.on{opacity:1;transform:none;}' +
-    '.hub-view.on .hubm.on{pointer-events:auto;}' +
+    'html.dds-hub-open .hub-view.on .hubm.on{pointer-events:auto;}' +
     '.hub-av{flex:none;width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#1d3a68,#13294B);border:1px solid rgba(75,156,211,.4);color:#9FC6EC;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;}' +
     '.hub-av img{width:100%;height:100%;object-fit:cover;}' +
     '.hub-cright{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}' +

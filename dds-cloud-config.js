@@ -36,9 +36,10 @@ window.DDS_CLOUD = {
   /* OPTIONAL — auto-push logged hours into the chapter Google Sheet.
      Leave empty and the "Log your hours" tool still works: entries live in the
      synced site store and count toward each member's gauges, and the sheet is
-     one click away as the official record. To also write entries straight into
-     the sheet, deploy a Google Apps Script Web App on it (Extensions → Apps
-     Script → a doPost(e) that appends JSON.parse(e.postData.contents) as a row
-     → Deploy → Web app → "Anyone" access) and paste its /exec URL here. */
+     one click away as the official record. To ALSO write each new entry straight
+     into the sheet (known categories land in their own column; custom service
+     types land in "Other Volunteering"/"Other Dental" with the specific type
+     stamped on the cell as a note), follow the 5-step setup at the top of
+     sheet-hour-bridge.gs in this repo, then paste the deployed /exec URL here. */
   hourLogEndpoint: ''
 };

@@ -72,6 +72,13 @@ body{margin:0;background:#0A1A30;-webkit-font-smoothing:antialiased;font-family:
 .nav-dd-link span{color:#4B9CD3;opacity:0;transform:translateX(-4px);transition:opacity .2s ease,transform .2s ease;}
 .nav-dd-link:hover{background:rgba(75,156,211,.14);color:#fff;}
 .nav-dd-link:hover span{opacity:1;transform:translateX(0);}
+/* Nested flyout (Points → Service / Dental / Social): opens to the RIGHT of the menu */
+.nav-dd-subwrap{position:relative;}
+.nav-dd-subwrap>.nav-dd-link{width:100%;}
+.nav-dd-subwrap>.nav-dd-link .nav-dd-subchev{opacity:.7;transform:none;color:#7FB2E0;}
+.nav-dd-sub{position:absolute;left:calc(100% + 10px);top:-8px;min-width:170px;background:rgba(9,20,38,.97);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(75,156,211,.25);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:2px;box-shadow:0 24px 50px -20px rgba(0,0,0,.75);opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-6px);transition:opacity .22s ease,transform .22s ease;z-index:131;}
+.nav-dd-sub::before{content:"";position:absolute;left:-12px;top:0;bottom:0;width:12px;}
+.nav-dd-subwrap:hover .nav-dd-sub,.nav-dd-subwrap:focus-within .nav-dd-sub{opacity:1;visibility:visible;pointer-events:auto;transform:none;}
 /* Mobile hamburger nav */
 .nav-burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:44px;height:44px;padding:11px;background:transparent;border:0;cursor:pointer;}
 .nav-burger span{display:block;height:2px;width:100%;background:#D7E2EA;border-radius:2px;transition:transform .3s ease,opacity .3s ease;}
@@ -375,27 +382,89 @@ a.calv-wev:hover{filter:brightness(1.3);}
 /* Points system section — signature is the "good standing" meter that fills on scroll */
 #points{scroll-margin-top:64px;}
 .pts-glow{position:absolute;top:-140px;left:50%;transform:translateX(-50%);width:min(900px,120%);height:520px;pointer-events:none;background:radial-gradient(circle,rgba(75,156,211,.16) 0%,transparent 66%);z-index:0;}
-.pts-meter{position:relative;max-width:840px;margin:clamp(30px,4.5vw,54px) auto 0;}
-.pts-goalrow{display:flex;justify-content:flex-end;margin-bottom:10px;}
-.pts-goal{display:inline-flex;align-items:center;gap:6px;color:#E3C27C;font-weight:700;letter-spacing:1.6px;font-size:11px;text-transform:uppercase;background:rgba(185,151,91,.14);border:1px solid rgba(185,151,91,.42);padding:5px 12px;border-radius:999px;}
-.pts-track{position:relative;display:flex;height:clamp(50px,7vw,70px);border-radius:15px;background:rgba(4,11,24,.66);border:1px solid rgba(127,178,224,.22);box-shadow:inset 0 2px 12px rgba(0,0,0,.55);overflow:hidden;}
-.pts-track::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(255,255,255,.05) calc(10% - 1px),rgba(255,255,255,.05) 10%);}
-.pts-fill{width:0;height:100%;flex:none;position:relative;transition:width 1.15s cubic-bezier(.22,.61,.36,1);}
-.pts-fill::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 58%);}
-.pts-meter.is-filled .pts-fill{width:var(--w);}
-.pts-fill-1{background:linear-gradient(180deg,#63b0e0,#3f8dc4);}
-.pts-fill-2{background:linear-gradient(180deg,#ccab6a,#ab8b45);transition-delay:.16s;}
-.pts-fill-3{background:linear-gradient(180deg,#d17aa9,#b85e91);transition-delay:.32s;}
-.pts-scale{display:flex;margin-top:12px;}
-.pts-scale span{flex:none;text-align:center;font-weight:700;letter-spacing:1px;font-size:clamp(9px,2.4vw,11.5px);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;}
-.pts-cap{margin:clamp(16px,2.2vw,22px) auto 0;max-width:600px;text-align:center;color:#8FA8C4;font-weight:300;font-size:clamp(.86rem,1.15vw,.98rem);line-height:1.6;}
-.pts-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2vw,22px);margin-top:clamp(34px,4.5vw,58px);}
-.pts-cat{position:relative;background:rgba(255,255,255,.032);border:1px solid rgba(127,178,224,.16);border-radius:18px;padding:clamp(22px,2.6vw,30px);overflow:hidden;transition:transform .32s ease,border-color .32s ease,background .32s ease;}
+/* ---- Dynamic requirement sheet: a liquid-glass board where each box's area = the hours it carries ---- */
+.pts-wrap{max-width:940px;margin:clamp(30px,4.5vw,54px) auto 0;}
+.pts-sheet{position:relative;border-radius:26px;border:1px solid rgba(127,178,224,.24);isolation:isolate;overflow:hidden;
+  background:linear-gradient(155deg,rgba(151,186,227,.12) 0%,rgba(151,186,227,.04) 38%,rgba(6,14,30,.35) 100%),rgba(9,20,40,.5);
+  backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);
+  box-shadow:0 40px 80px -38px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.3);
+  padding:clamp(18px,2.8vw,30px);}
+.pts-sheet::before{content:'';position:absolute;top:0;left:8%;width:46%;height:1.5px;pointer-events:none;z-index:2;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5) 34%,transparent);}
+/* three-point radial glow behind the board, grain masked to the glows only
+   (id-qualified so the `.pts-sheet>*` flow rule below can never pull these layers into the layout) */
+#pts-sheet .pts-sheet-bg{position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(50% 62% at 12% 14%,rgba(75,156,211,.17) 0%,transparent 70%),
+             radial-gradient(52% 66% at 88% 20%,rgba(185,151,91,.15) 0%,transparent 72%),
+             radial-gradient(60% 72% at 50% 102%,rgba(201,94,151,.12) 0%,transparent 72%);}
+.pts-sheet-bg::after{content:'';position:absolute;inset:0;background:url('grain.png') repeat;opacity:.2;mix-blend-mode:overlay;
+  -webkit-mask-image:radial-gradient(50% 62% at 12% 14%,#000 0%,transparent 70%),radial-gradient(52% 66% at 88% 20%,#000 0%,transparent 72%),radial-gradient(60% 72% at 50% 102%,#000 0%,transparent 72%);
+  mask-image:radial-gradient(50% 62% at 12% 14%,#000 0%,transparent 70%),radial-gradient(52% 66% at 88% 20%,#000 0%,transparent 72%),radial-gradient(60% 72% at 50% 102%,#000 0%,transparent 72%);}
+#pts-sheet .pts-sheet-cursor{position:absolute;left:0;top:0;width:520px;height:520px;border-radius:50%;pointer-events:none;opacity:0;z-index:0;
+  transition:opacity .5s ease;mix-blend-mode:screen;will-change:transform;
+  background:radial-gradient(circle,rgba(127,178,224,.22) 0%,rgba(127,178,224,.08) 44%,transparent 68%);}
+.pts-sheet:hover .pts-sheet-cursor{opacity:1;}
+@media (hover:none),(prefers-reduced-motion:reduce){.pts-sheet-cursor{display:none;}}
+.pts-sheet>*{position:relative;z-index:1;}
+.pts-toprow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:clamp(14px,2vw,20px);}
+.pts-mode{display:inline-flex;gap:4px;padding:4px;border-radius:999px;border:1px solid rgba(127,178,224,.25);background:rgba(4,11,24,.55);}
+.pts-mode-btn{border:0;background:none;color:#8FA8C4;font-weight:700;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;padding:8px 16px;border-radius:999px;cursor:pointer;transition:color .25s ease,background .25s ease,box-shadow .25s ease;}
+.pts-mode-btn.on{color:#0A1A30;background:linear-gradient(165deg,#E3C27C,#B9975B);box-shadow:0 8px 18px -8px rgba(185,151,91,.7);}
+.pts-standing{display:inline-flex;align-items:center;gap:8px;color:#E3C27C;font-weight:700;letter-spacing:1.6px;font-size:11px;text-transform:uppercase;background:rgba(185,151,91,.14);border:1px solid rgba(185,151,91,.42);padding:7px 14px;border-radius:999px;transition:color .3s ease,border-color .3s ease,background .3s ease;}
+.pts-standing .pts-st-ic{font-weight:900;}
+.pts-standing.bad{color:#FF9B9B;background:rgba(201,68,68,.16);border-color:rgba(201,68,68,.5);}
+.pts-boardrow{display:flex;gap:clamp(14px,2vw,22px);align-items:stretch;}
+.pts-track{flex:1;display:flex;gap:6px;min-width:0;height:clamp(108px,15vw,148px);}
+.pts-box{position:relative;flex-grow:20;flex-basis:0;min-width:0;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;text-align:center;padding:8px 4px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 36%,rgba(8,16,32,.3)),color-mix(in srgb,var(--acc) 14%,rgba(6,13,27,.55)));
+  border:1px solid color-mix(in srgb,var(--acc) 45%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 14px 30px -18px rgba(0,0,0,.8);
+  transition:border-color .3s ease,box-shadow .3s ease;}
+.pts-box::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 55%);pointer-events:none;}
+.pts-box.low{border-color:rgba(255,120,120,.7);box-shadow:0 0 28px -6px rgba(201,68,68,.6),inset 0 1px 0 rgba(255,255,255,.12);}
+.pts-box.low .pts-num{color:#FFC9C9;}
+.pts-num{font-weight:900;font-size:clamp(1.5rem,3.8vw,2.8rem);line-height:1;color:#FFF;letter-spacing:-0.02em;text-shadow:0 2px 18px rgba(0,0,0,.45);transition:color .3s ease;}
+.pts-boxlabel{font-weight:800;font-size:clamp(8.5px,1.1vw,11.5px);letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.88);white-space:nowrap;overflow:hidden;max-width:100%;text-overflow:ellipsis;}
+.pts-paren{font-weight:600;font-size:clamp(8.5px,1vw,11px);color:rgba(255,255,255,.65);white-space:nowrap;}
+.pts-mintag{margin-top:4px;font-weight:700;font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;color:#E3C27C;background:rgba(4,11,24,.5);border:1px solid rgba(227,194,124,.35);border-radius:999px;padding:2px 8px;white-space:nowrap;}
+.pts-mins{flex:none;width:clamp(150px,17vw,190px);display:flex;flex-direction:column;justify-content:center;gap:7px;padding:14px 16px;border-radius:16px;border:1px dashed rgba(227,194,124,.4);background:rgba(185,151,91,.07);}
+.pts-mins-title{font-weight:800;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#E3C27C;line-height:1.5;}
+.pts-min-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11.5px;color:#C7D6E6;font-weight:600;}
+.pts-min-row b{color:#fff;font-weight:800;white-space:nowrap;}
+.pts-mins-total{margin-top:4px;padding-top:8px;border-top:1px solid rgba(227,194,124,.25);font-weight:800;font-size:11px;color:#E3C27C;letter-spacing:.6px;}
+.pts-cap{margin:clamp(14px,2vw,20px) auto 0;max-width:640px;text-align:center;color:#8FA8C4;font-weight:300;font-size:clamp(.86rem,1.15vw,.98rem);line-height:1.6;}
+@media(max-width:700px){
+  .pts-boardrow{flex-direction:column;}
+  .pts-mins{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 16px;}
+  .pts-mins-title{width:100%;}
+  .pts-mins-total{margin:0;padding:0;border:0;}
+  .pts-track{height:104px;}
+  .pts-mintag{display:none;}
+  .pts-boxlabel{font-size:7.5px;letter-spacing:.8px;}
+  .pts-paren{font-size:8px;}
+}
+/* ---- Yellow box: the obvious road to the dashboard ---- */
+.pts-dashbox{display:flex;align-items:center;gap:clamp(14px,2.4vw,24px);max-width:940px;margin:clamp(16px,2.4vw,24px) auto 0;padding:clamp(16px,2.4vw,24px) clamp(18px,3vw,30px);border-radius:20px;text-decoration:none;
+  background:linear-gradient(160deg,#E3C27C 0%,#B9975B 58%,#A5854B 100%);color:#0A1A30;
+  box-shadow:0 24px 54px -22px rgba(185,151,91,.75),inset 0 1px 0 rgba(255,255,255,.5);
+  transition:transform .25s ease,box-shadow .25s ease;}
+.pts-dashbox:hover{transform:translateY(-3px);box-shadow:0 32px 62px -22px rgba(185,151,91,.9),inset 0 1px 0 rgba(255,255,255,.55);}
+.pts-dashbox-ic{flex:none;width:48px;height:48px;border-radius:14px;background:rgba(10,26,48,.14);display:flex;align-items:center;justify-content:center;color:#0A1A30;}
+.pts-dashbox b{display:block;font-weight:900;font-size:clamp(1.02rem,1.8vw,1.35rem);letter-spacing:.2px;line-height:1.2;}
+.pts-dashbox small{display:block;font-weight:600;font-size:clamp(.78rem,1.1vw,.9rem);opacity:.82;margin-top:3px;line-height:1.45;}
+.pts-dashbox-arr{margin-left:auto;flex:none;font-weight:900;font-size:1.5rem;line-height:1;}
+/* ---- Ways to earn: the four categories ---- */
+.pts-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.6vw,18px);margin-top:clamp(30px,4vw,48px);}
+.pts-cat{position:relative;display:block;text-decoration:none;color:inherit;background:rgba(255,255,255,.032);border:1px solid rgba(127,178,224,.16);border-radius:18px;padding:clamp(18px,2.2vw,26px);overflow:hidden;transition:transform .32s ease,border-color .32s ease,background .32s ease;}
 .pts-cat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc);opacity:.85;}
 .pts-cat:hover{transform:translateY(-5px);background:rgba(255,255,255,.055);border-color:rgba(127,178,224,.4);}
-.pts-cat-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent);margin-bottom:16px;}
-.pts-cat h3{margin:0 0 8px;font-weight:800;font-size:clamp(1.1rem,1.6vw,1.3rem);letter-spacing:.3px;color:#EAF1F8;}
-.pts-cat p{margin:0;color:#9FB6CE;font-weight:300;line-height:1.6;font-size:clamp(.9rem,1.2vw,1rem);}
+.pts-cat-ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent);margin-bottom:14px;}
+.pts-cat h3{margin:0 0 6px;font-weight:800;font-size:clamp(1.05rem,1.5vw,1.25rem);letter-spacing:.3px;color:#EAF1F8;}
+.pts-cat-req{display:flex;align-items:baseline;gap:7px;margin:0 0 10px;}
+.pts-cat-req b{font-weight:900;font-size:clamp(1.7rem,2.6vw,2.3rem);line-height:1;color:#fff;letter-spacing:-0.02em;}
+.pts-cat-req span{font-weight:600;font-size:clamp(9.5px,1vw,11px);letter-spacing:.8px;text-transform:uppercase;color:#9FB6CE;line-height:1.35;}
+.pts-cat p{margin:0;color:#9FB6CE;font-weight:300;line-height:1.6;font-size:clamp(.86rem,1.1vw,.95rem);}
+.pts-cat-go{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-weight:700;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc);transition:color .25s ease;}
+.pts-cat:hover .pts-cat-go{color:#EAF1F8;}
 .pts-cta{display:flex;flex-wrap:wrap;gap:clamp(12px,1.6vw,16px);justify-content:center;align-items:center;margin-top:clamp(36px,4.6vw,58px);}
 .pts-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:15px clamp(24px,3vw,34px);border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -14px rgba(185,151,91,.8);transition:transform .2s ease;}
 .pts-btn:hover{transform:translateY(-3px);}
@@ -407,8 +476,8 @@ a.calv-wev:hover{filter:brightness(1.3);}
 .pts-link-blue{color:#7FB2E0;}
 .pts-link-blue:hover{color:#BFE0FF;}
 .pts-dot{color:#3A567A;font-weight:700;}
-@media(max-width:760px){.pts-cats{grid-template-columns:1fr;}}
-@media(prefers-reduced-motion:reduce){.pts-fill{transition:none;}}
+@media(max-width:980px){.pts-cats{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.pts-cats{grid-template-columns:1fr;}.pts-dashbox{flex-wrap:wrap;}.pts-dashbox-arr{margin-left:0;}}
 #about,#pillars,#offers,#officers,#join,#calendar,#gallery,#offer-stories{scroll-margin-top:64px;}
 a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px solid #4B9CD3;outline-offset:3px;}
 /* Pillar photo rows (full-width tiles) */
@@ -772,6 +841,14 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <a href="#about" class="nav-dd-link" role="menuitem">About DDS<span>&rarr;</span></a>
         <a href="#pillars" class="nav-dd-link" role="menuitem">The Pillars<span>&rarr;</span></a>
         <a href="#offers" class="nav-dd-link" role="menuitem">Offers<span>&rarr;</span></a>
+        <div class="nav-dd-subwrap">
+          <a href="#points" class="nav-dd-link" role="menuitem" aria-haspopup="true">Points<span class="nav-dd-subchev">&rsaquo;</span></a>
+          <div class="nav-dd-sub" role="menu" aria-label="Point categories">
+            <a href="service.html" class="nav-dd-link" role="menuitem">Service<span>&rarr;</span></a>
+            <a href="dental.html" class="nav-dd-link" role="menuitem">Dental<span>&rarr;</span></a>
+            <a href="social.html" class="nav-dd-link" role="menuitem">Social<span>&rarr;</span></a>
+          </div>
+        </div>
       </div>
     </div>
     <!-- Publishing: top-level links to The Bite -->
@@ -781,8 +858,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <a href="#gallery" class="nav-dd-link" role="menuitem">Gallery<span>&rarr;</span></a>
         <a href="newsletter.html?tag=blog-post" class="nav-dd-link" role="menuitem">Blog<span>&rarr;</span></a>
         <a href="#toolkit" class="nav-dd-link" role="menuitem">Toolkit<span>&rarr;</span></a>
-        <a href="#meeting-notes" class="nav-dd-link" role="menuitem">Meeting Notes<span>&rarr;</span></a>
-        <a href="archive.html" class="nav-dd-link" role="menuitem">The Archive<span>&rarr;</span></a>
+        <a href="archive.html" class="nav-dd-link" role="menuitem">Meeting Notes<span>&rarr;</span></a>
       </div>
     </div>
     <!-- People: top-level links to the members page -->
@@ -802,7 +878,6 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener" class="nav-dd-link" role="menuitem">Instagram<span>&rarr;</span></a>
         <a href="https://www.linkedin.com/company/unc-delta-delta-sigma-dds" target="_blank" rel="noopener" class="nav-dd-link" role="menuitem">LinkedIn<span>&rarr;</span></a>
         <a href="#join" class="nav-dd-link" role="menuitem">Listserv<span>&rarr;</span></a>
-        <a href="#points" class="nav-dd-link" role="menuitem">Points<span>&rarr;</span></a>
         <a href="mailto:ddsexec@unc.edu" class="nav-dd-link" role="menuitem">Email The Exec<span>&rarr;</span></a>
       </div>
     </div>
@@ -820,12 +895,15 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <a href="#about">About</a>
     <a href="#pillars">The Pillars</a>
     <a href="#offers">Offers</a>
+    <a href="#points">Points</a>
+    <a href="service.html">Points &middot; Service</a>
+    <a href="dental.html">Points &middot; Dental</a>
+    <a href="social.html">Points &middot; Social</a>
     <span class="nav-mobile-group">Publishing</span>
     <a href="#gallery">Gallery</a>
     <a href="newsletter.html?tag=blog-post">Blog</a>
     <a href="#toolkit">Toolkit</a>
-    <a href="#meeting-notes">Meeting Notes</a>
-    <a href="archive.html">The Archive</a>
+    <a href="archive.html">Meeting Notes</a>
     <a href="newsletter.html">The Bite</a>
     <span class="nav-mobile-group">People</span>
     <a href="#members-preview">Members</a>
@@ -836,7 +914,6 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener">Instagram</a>
     <a href="https://www.linkedin.com/company/unc-delta-delta-sigma-dds" target="_blank" rel="noopener">LinkedIn</a>
     <a href="#join">Listserv</a>
-    <a href="#points">Points</a>
     <a href="mailto:ddsexec@unc.edu">Email The Exec</a>
     <a href="login.html">Member Login</a>
     <a href="dashboard.html" class="nav-mobile-cta">Dashboard</a>
@@ -1627,42 +1704,98 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <div data-reveal="0" style="text-align:center;margin-bottom:clamp(18px,2.6vw,26px);">
       <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">Earn · Track · Recognized</div>
       <h2 style="margin:0 0 22px;font-weight:900;text-transform:uppercase;line-height:.86;letter-spacing:-0.02em;font-size:clamp(2.6rem,9vw,7rem);background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Earn Your Points</h2>
-      <p style="margin:0 auto;max-width:600px;color:#A9C0D8;font-weight:300;line-height:1.65;font-size:clamp(.98rem,1.4vw,1.18rem);">Service, professional development, and chapter life each earn points toward good standing. Log what you show up for, watch your total climb, and get recognized at year's end.</p>
+      <p style="margin:0 auto;max-width:620px;color:#A9C0D8;font-weight:300;line-height:1.65;font-size:clamp(.98rem,1.4vw,1.18rem);">Service, dental, meetings, and socials all bank hours toward the fifty you need. Log what you show up for, watch your total climb, and get recognized at year's end.</p>
     </div>
 
-    <!-- Signature: the "good standing" meter fills across all three categories on scroll -->
-    <div class="pts-meter" data-pts-meter data-reveal="0.05">
-      <div class="pts-goalrow"><span class="pts-goal">Good Standing ✓</span></div>
-      <div class="pts-track" role="img" aria-label="Points from service, professional, and social categories combine toward good standing.">
-        <div class="pts-fill pts-fill-1" style="--w:40%"></div>
-        <div class="pts-fill pts-fill-2" style="--w:33%"></div>
-        <div class="pts-fill pts-fill-3" style="--w:27%"></div>
+    <!-- Signature: the dynamic requirement sheet — each box's area is the hours a typical year carries (20 service · 20 dental · 10 meetings · 2 socials) -->
+    <div class="pts-wrap" data-reveal="0.05">
+      <div class="pts-sheet" id="pts-sheet" data-ce-skip>
+        <div class="pts-sheet-bg" aria-hidden="true"></div>
+        <div class="pts-sheet-cursor" id="pts-cursor" aria-hidden="true"></div>
+        <div class="pts-toprow">
+          <div class="pts-mode" role="group" aria-label="Switch between member and rushee requirements">
+            <button type="button" class="pts-mode-btn on" data-pts-mode="member" aria-pressed="true">Member</button>
+            <button type="button" class="pts-mode-btn" data-pts-mode="rushee" aria-pressed="false">Rushee</button>
+          </div>
+          <span class="pts-standing" id="pts-standing"><span class="pts-st-ic">✓</span><span class="pts-st-tx">Good Standing</span></span>
+        </div>
+        <div class="pts-boardrow">
+          <div class="pts-track" id="pts-track" role="img" aria-label="A typical year: 20 service hours, 20 dental hours, 10 meetings and 2 socials — each box sized by the hours it carries.">
+            <div class="pts-box" data-cat="service" style="--acc:#4B9CD3;">
+              <b class="pts-num" data-num>20</b>
+              <span class="pts-boxlabel">Service</span>
+              <span class="pts-paren" data-paren>hrs</span>
+              <span class="pts-mintag" data-mintag>min 10 hrs</span>
+            </div>
+            <div class="pts-box" data-cat="dental" style="--acc:#B9975B;">
+              <b class="pts-num" data-num>20</b>
+              <span class="pts-boxlabel">Dental</span>
+              <span class="pts-paren" data-paren>hrs</span>
+              <span class="pts-mintag" data-mintag>min 10 hrs</span>
+            </div>
+            <div class="pts-box" data-cat="meetings" style="--acc:#2196C6;">
+              <b class="pts-num" data-num>10</b>
+              <span class="pts-boxlabel">Meetings</span>
+              <span class="pts-paren" data-paren>(10 hrs)</span>
+              <span class="pts-mintag" data-mintag>min 5</span>
+            </div>
+            <div class="pts-box" data-cat="social" style="--acc:#C95E97;">
+              <b class="pts-num" data-num>2</b>
+              <span class="pts-boxlabel">Socials</span>
+              <span class="pts-paren" data-paren>(10 hrs)</span>
+              <span class="pts-mintag" data-mintag>min 1</span>
+            </div>
+          </div>
+          <aside class="pts-mins" id="pts-mins" aria-label="Minimums to stay in good standing">
+            <span class="pts-mins-title">Minimum to stay in good standing</span>
+            <span class="pts-min-row"><span>Service</span><b data-min="service">10 hrs</b></span>
+            <span class="pts-min-row"><span>Dental</span><b data-min="dental">10 hrs</b></span>
+            <span class="pts-min-row"><span>Meetings</span><b data-min="meetings">5</b></span>
+            <span class="pts-min-row"><span>Socials</span><b data-min="social">1 (5 hrs)</b></span>
+            <span class="pts-mins-total">50 hrs total</span>
+          </aside>
+        </div>
+        <div class="pts-cap">Meetings count an hour apiece and socials five. Let any tracker slip under its minimum and your standing flips — watch the sheet play it out.</div>
       </div>
-      <div class="pts-scale">
-        <span style="flex-basis:40%;color:#8FC0EA;">Service</span>
-        <span style="flex-basis:33%;color:#D8B877;">Professional</span>
-        <span style="flex-basis:27%;color:#DE93B7;">Social</span>
-      </div>
-      <div class="pts-cap">Every event you show up for adds to your total — reach the semester minimum to stay in good standing and earn year-end honors.</div>
     </div>
 
-    <!-- Ways to earn -->
+    <!-- The obvious road to the dashboard -->
+    <a class="pts-dashbox" data-reveal="0.06" href="dashboard.html#instruments">
+      <span class="pts-dashbox-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 12l4-4"/><path d="M4 12h2"/><path d="M12 4v2"/></svg></span>
+      <span><b>Track it live in your Member Dashboard</b><small>Five dials — service, dental, meetings, socials and your 50-hour total — updated the moment you log.</small></span>
+      <span class="pts-dashbox-arr" aria-hidden="true">&rarr;</span>
+    </a>
+
+    <!-- Ways to earn: the four categories -->
     <div class="pts-cats" data-reveal="0.06">
-      <article class="pts-cat" style="--acc:#4B9CD3">
+      <a class="pts-cat" style="--acc:#4B9CD3" href="service.html">
         <div class="pts-cat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
         <h3>Service</h3>
-        <p>Volunteer in dental clinics and across the Chapel Hill community.</p>
-      </article>
-      <article class="pts-cat" style="--acc:#B9975B">
-        <div class="pts-cat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
-        <h3>Professional</h3>
-        <p>Panels, DAT prep, conferences, and guest speaker events.</p>
-      </article>
-      <article class="pts-cat" style="--acc:#C95E97">
+        <div class="pts-cat-req"><b>20</b><span>hrs expected<br>min 10</span></div>
+        <p>Volunteer across the Chapel Hill community — every hour counts toward your total.</p>
+        <span class="pts-cat-go">Service stories &rarr;</span>
+      </a>
+      <a class="pts-cat" style="--acc:#B9975B" href="dental.html">
+        <div class="pts-cat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5c-1.6 0-2.2-.9-3.9-.9-2.8 0-4.3 2.3-4.3 4.9 0 2.3 1 3.7 1.6 5.8.6 2.1.7 6.2 2.5 6.2 1.6 0 1.3-4.2 2.9-4.2s1.3 4.2 2.9 4.2c1.8 0 1.9-4.1 2.5-6.2.6-2.1 1.6-3.5 1.6-5.8 0-2.6-1.5-4.9-4.3-4.9-1.7 0-2.3.9-3.9.9Z"/></svg></div>
+        <h3>Dental</h3>
+        <div class="pts-cat-req"><b>20</b><span>hrs expected<br>min 10</span></div>
+        <p>Shadowing, clinic work, UNC DFP — anything clinical banks dental hours.</p>
+        <span class="pts-cat-go">Dental hours &rarr;</span>
+      </a>
+      <a class="pts-cat" style="--acc:#2196C6" href="archive.html">
+        <div class="pts-cat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <h3>Meetings</h3>
+        <div class="pts-cat-req"><b>10</b><span>meetings<br>1 hr each</span></div>
+        <p>General body meetings and guest speakers — attendance is an hour apiece.</p>
+        <span class="pts-cat-go">The Archive &rarr;</span>
+      </a>
+      <a class="pts-cat" style="--acc:#C95E97" href="social.html">
         <div class="pts-cat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <h3>Social</h3>
+        <div class="pts-cat-req"><b>2</b><span>socials<br>5 hrs each</span></div>
         <p>Socials, family nights, and the chapter traditions in between.</p>
-      </article>
+        <span class="pts-cat-go">Social life &rarr;</span>
+      </a>
     </div>
 
     <!-- Log & track -->
@@ -2811,19 +2944,6 @@ ddsWrapAbout();
   els.forEach(el => io.observe(el));
 })();
 
-// ---- Points "good standing" meter: fill the segments once it scrolls into view ----
-(function initPointsMeter(){
-  const meter = document.querySelector('[data-pts-meter]');
-  if (!meter) return;
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(ent => {
-      if (!ent.isIntersecting) return;
-      meter.classList.add('is-filled');
-      io.unobserve(ent.target);
-    });
-  }, {threshold:0.35});
-  io.observe(meter);
-})();
 
 // ---- Scroll effects: marquee parallax + char reveal + sticky scale ----
 (function initScroll(){
@@ -4376,6 +4496,130 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/SplitText.min.js"></script>
+<script>
+/* ---- Earn Your Points: the dynamic requirement sheet (GSAP) ----
+   Each box's flex-grow = the hours it carries, so area stays proportional as a
+   tracker ticks down. The loop dips one category below its minimum, the Good
+   Standing pill flips to name it, then everything springs back to the expected
+   20 / 20 / 10 meetings / 2 socials. The Member/Rushee toggle only changes the
+   meetings minimum (5 vs 10) — and the loop respects whichever is active. */
+(function initPointsBoard(){
+  const sheet = document.getElementById('pts-sheet');
+  if (!sheet || !window.gsap) return;
+  const boxes = {};
+  sheet.querySelectorAll('.pts-box').forEach(b => { boxes[b.getAttribute('data-cat')] = b; });
+  const stand = document.getElementById('pts-standing');
+  const standIc = stand.querySelector('.pts-st-ic'), standTx = stand.querySelector('.pts-st-tx');
+  const CATS = ['service','dental','meetings','social'];
+  const DEF  = { service:20, dental:20, meetings:10, social:2 };   // a typical year
+  const HRS  = { service:1,  dental:1,  meetings:1,  social:5 };   // hours per unit
+  const NAME = { service:'Service', dental:'Dental', meetings:'Meetings', social:'Socials' };
+  const state = { service:20, dental:20, meetings:10, social:2 };
+  let mode = 'member';
+  const minsOf = () => ({ service:10, dental:10, meetings: mode === 'rushee' ? 10 : 5, social:1 });
+
+  function paint(cat){
+    const box = boxes[cat], mins = minsOf();
+    const n = Math.max(0, Math.round(state[cat]));
+    box.querySelector('[data-num]').textContent = n;
+    const paren = box.querySelector('[data-paren]');
+    if (cat === 'meetings') paren.textContent = '(' + n + ' hrs)';
+    else if (cat === 'social') paren.textContent = '(' + (n * 5) + ' hrs)';
+    box.style.flexGrow = Math.max(state[cat] * HRS[cat], 1.4); // area ∝ hours, floored so it never vanishes
+    box.classList.toggle('low', n < mins[cat]);
+  }
+  let wasBad = false;
+  function updateStanding(){
+    const mins = minsOf();
+    const bad = CATS.filter(c => Math.round(state[c]) < mins[c]);
+    const isBad = bad.length > 0;
+    if (isBad){
+      stand.classList.add('bad'); standIc.textContent = '✗';
+      standTx.textContent = NAME[bad[0]] + ' below minimum';
+    } else {
+      stand.classList.remove('bad'); standIc.textContent = '✓';
+      standTx.textContent = 'Good Standing';
+    }
+    if (isBad !== wasBad){
+      wasBad = isBad;
+      gsap.fromTo(stand, { scale:.82 }, { scale:1, duration:.5, ease:'back.out(2.4)', overwrite:'auto' });
+    }
+  }
+  function paintMins(){
+    const mins = minsOf();
+    const meet = sheet.querySelector('[data-min="meetings"]');
+    if (meet) meet.textContent = String(mins.meetings);
+    const tag = boxes.meetings.querySelector('[data-mintag]');
+    if (tag) tag.textContent = 'min ' + mins.meetings;
+  }
+
+  let tl = null, inView = false;
+  function build(){
+    if (tl) tl.kill();
+    CATS.forEach(c => { state[c] = DEF[c]; paint(c); });
+    updateStanding();
+    tl = gsap.timeline({ repeat:-1, repeatDelay:.9, paused:!inView });
+    CATS.forEach(cat => {
+      const mins = minsOf();
+      // dip visibly below the minimum, hold the flipped standing, spring back
+      const dip = cat === 'social' ? 0 : Math.max(0, mins[cat] - (cat === 'meetings' ? 3 : 6));
+      const step = () => { paint(cat); updateStanding(); };
+      tl.to(state, { [cat]: dip, duration:2.2, ease:'power1.inOut', onUpdate:step }, '+=0.7')
+        .to(state, { [cat]: DEF[cat], duration:1.5, ease:'power3.out', onUpdate:step }, '+=1.2');
+    });
+  }
+
+  // Member ⇄ Rushee: only the meetings minimum moves (5 vs 10)
+  sheet.querySelectorAll('[data-pts-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const m = btn.getAttribute('data-pts-mode');
+      if (m === mode) return;
+      mode = m;
+      sheet.querySelectorAll('[data-pts-mode]').forEach(b => {
+        const on = b === btn;
+        b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      paintMins();
+      if (tl) build(); else updateStanding();
+      gsap.fromTo('#pts-mins', { scale:.97 }, { scale:1, duration:.45, ease:'back.out(2)', overwrite:'auto' });
+    });
+  });
+
+  // cursor lens glow drifts after the pointer across the glass
+  const cur = document.getElementById('pts-cursor');
+  if (cur && window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    sheet.addEventListener('mousemove', e => {
+      const r = sheet.getBoundingClientRect();
+      gsap.to(cur, { x: e.clientX - r.left - 260, y: e.clientY - r.top - 260, duration:.55, ease:'power2.out', overwrite:'auto' });
+    });
+  }
+
+  const mm = gsap.matchMedia();
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    let entered = false;
+    const io = new IntersectionObserver(ents => {
+      ents.forEach(ent => {
+        inView = ent.isIntersecting;
+        if (!tl) return;
+        if (inView && !entered){
+          entered = true;
+          gsap.from(sheet.querySelectorAll('.pts-box'), { yPercent:24, autoAlpha:0, stagger:.09, duration:.75, ease:'power3.out' });
+          gsap.delayedCall(.6, () => { if (inView && tl) tl.play(); });
+        } else if (inView) tl.play();
+        else tl.pause();
+      });
+    }, { threshold:.35 });
+    build();
+    io.observe(sheet);
+    return () => { // reduced motion / cleanup: freeze at the defaults
+      io.disconnect();
+      if (tl){ tl.kill(); tl = null; }
+      CATS.forEach(c => { state[c] = DEF[c]; paint(c); });
+      updateStanding();
+    };
+  });
+})();
+</script>
 <script>
 (function initHeroTitle(){
   if (!window.gsap || !window.ScrollTrigger || !window.SplitText) return; // static title stays

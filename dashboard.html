@@ -143,8 +143,44 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 @media(max-width:700px){.chip.sync{margin-left:0;}}
 
 /* ---------- Instrument cluster ---------- */
-#instruments .cluster{padding:clamp(20px,3.4vw,42px) clamp(16px,3vw,40px) clamp(18px,2.6vw,30px);cursor:default;}
-.dials{position:relative;display:grid;grid-template-columns:1fr 1.42fr 1fr;gap:clamp(8px,2.4vw,34px);align-items:end;}
+#instruments .cluster{padding:clamp(28px,4.4vw,58px) clamp(18px,3.4vw,48px) clamp(30px,4vw,50px);cursor:default;overflow:hidden;}
+/* status row: Member/Rushee read off the chapter sheet + the live requirement line */
+.cl-top{display:flex;align-items:center;justify-content:space-between;gap:12px 18px;flex-wrap:wrap;margin-bottom:clamp(18px,2.8vw,34px);}
+.cl-status{display:inline-flex;flex-direction:column;gap:3px;padding:11px 20px;border-radius:15px;border:1px solid rgba(227,194,124,.42);background:rgba(185,151,91,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 12px 26px -16px rgba(0,0,0,.7);transition:border-color .35s ease,background .35s ease;}
+.cl-status b{font-family:var(--grotesk);font-weight:600;font-size:16px;letter-spacing:1.4px;color:var(--gold-hi);text-transform:uppercase;transition:color .35s ease;}
+.cl-status small{color:var(--ink3);font-size:10.5px;letter-spacing:.5px;}
+.cl-status.is-rushee{border-color:rgba(98,225,255,.4);background:rgba(33,150,198,.1);}
+.cl-status.is-rushee b{color:var(--cyan-hi);}
+.cl-reqline{color:var(--ink3);font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:600;text-align:right;line-height:1.9;max-width:420px;}
+.cl-reqline b{color:var(--gold-hi);font-family:var(--grotesk);font-weight:600;}
+@media(max-width:700px){.cl-reqline{text-align:left;}}
+/* three-point radial glow baked into the back of the cluster, with a whisper of
+   grain masked to the glows themselves so the noise lives only in the light */
+#cluster .cl-bg{position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
+  background:
+    radial-gradient(52% 64% at 15% 18%,rgba(33,150,198,.20) 0%,transparent 70%),
+    radial-gradient(56% 68% at 85% 22%,rgba(175,133,52,.17) 0%,transparent 72%),
+    radial-gradient(64% 74% at 50% 96%,rgba(75,156,211,.15) 0%,transparent 72%);}
+#cluster .cl-bg::after{content:'';position:absolute;inset:0;background:url('grain.png') repeat;opacity:.22;mix-blend-mode:overlay;
+  -webkit-mask-image:radial-gradient(52% 64% at 15% 18%,#000 0%,transparent 70%),radial-gradient(56% 68% at 85% 22%,#000 0%,transparent 72%),radial-gradient(64% 74% at 50% 96%,#000 0%,transparent 72%);
+  mask-image:radial-gradient(52% 64% at 15% 18%,#000 0%,transparent 70%),radial-gradient(56% 68% at 85% 22%,#000 0%,transparent 72%),radial-gradient(64% 74% at 50% 96%,#000 0%,transparent 72%);}
+/* cursor-follow lens glow — lights the dials it passes over */
+#cluster .cl-glow{position:absolute;left:0;top:0;width:640px;height:640px;border-radius:50%;z-index:0;pointer-events:none;opacity:0;
+  transition:opacity .5s ease;mix-blend-mode:screen;will-change:transform;
+  background:radial-gradient(circle,rgba(98,225,255,.22) 0%,rgba(127,178,224,.09) 42%,transparent 68%);}
+#cluster:hover .cl-glow{opacity:1;}
+@media (hover:none),(prefers-reduced-motion:reduce){#cluster .cl-glow{display:none;}}
+.dials{position:relative;display:grid;grid-template-columns:1fr 1.46fr 1fr;gap:clamp(10px,3vw,42px);align-items:end;}
+.dial-col{display:flex;flex-direction:column;justify-content:flex-end;gap:clamp(16px,2.6vw,32px);min-width:0;}
+/* the two attendance dials sit above their hour dials, smaller and nudged toward the middle */
+.dial-col .gauge-sm{width:78%;}
+.dial-col-l{align-items:flex-end;}
+.dial-col-l .gauge-sm{margin-right:-4%;}
+.dial-col-r{align-items:flex-start;}
+.dial-col-r .gauge-sm{margin-left:-4%;}
+.dial-col>.gauge:not(.gauge-sm){width:100%;}
+.gauge-sm .g-label{gap:4px;}
+.gauge-sm .g-name{font-size:9.5px;letter-spacing:2.2px;}
 .gauge{position:relative;text-align:center;}
 .gauge svg{width:100%;height:auto;display:block;filter:drop-shadow(0 18px 26px rgba(0,0,0,.55));}
 .gauge .g-label{margin-top:2px;display:flex;flex-direction:column;align-items:center;gap:6px;}
@@ -155,27 +191,10 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .gauge.met .g-met{display:inline-flex;}
 .gauge.met .g-req{display:none;}
 
-/* cluster bottom strip: meetings fuel bar + odometer */
-.strip{display:flex;align-items:center;gap:clamp(14px,3vw,34px);flex-wrap:wrap;margin-top:clamp(14px,2.4vw,24px);padding-top:clamp(14px,2vw,22px);border-top:1px solid rgba(163,196,233,.11);}
-.fuel{flex:1 1 320px;min-width:260px;}
-.fuel-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px;}
-.fuel-top .g-name{font-weight:700;font-size:10.5px;letter-spacing:2.6px;text-transform:uppercase;color:var(--ink2);}
-.fuel-top .fuel-val{font-family:var(--grotesk);font-weight:600;font-size:15px;color:var(--gold-hi);}
-.fuel-top .fuel-val small{color:var(--ink3);font-weight:500;}
-.fuel-cells{position:relative;display:flex;gap:4px;height:22px;}
-.fuel-cells .cell{flex:1;border-radius:5px;background:rgba(151,186,227,.09);border:1px solid rgba(163,196,233,.12);box-shadow:inset 0 1px 2px rgba(0,0,0,.4);}
-.fuel-cells .cell.lit{background:linear-gradient(180deg,var(--gold-hi),var(--gold));border-color:rgba(227,194,124,.55);box-shadow:0 0 14px -2px rgba(227,194,124,.55),inset 0 1px 0 rgba(255,255,255,.45);}
-.fuel-cells .goal-pin{position:absolute;top:-7px;bottom:-7px;width:2px;border-radius:2px;background:var(--gold-hi);box-shadow:0 0 10px rgba(227,194,124,.9);}
-.fuel-cells .goal-pin::after{content:'REQ';position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-family:var(--grotesk);font-size:8.5px;font-weight:600;letter-spacing:1.5px;color:var(--gold-hi);}
-.odo{flex:none;display:flex;align-items:center;gap:14px;}
-.odo .odo-label{font-weight:700;font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:var(--ink3);max-width:90px;line-height:1.5;text-align:right;}
-.odo .odo-glass{display:flex;gap:3px;padding:7px 10px;border-radius:11px;background:rgba(4,10,22,.85);border:1px solid rgba(163,196,233,.16);box-shadow:inset 0 2px 10px rgba(0,0,0,.65),0 1px 0 rgba(255,255,255,.07);}
-.odo .digit{font-family:var(--grotesk);font-weight:700;font-size:19px;color:var(--cyan-hi);background:rgba(98,225,255,.06);border-radius:5px;padding:3px 6px;min-width:24px;text-align:center;text-shadow:0 0 14px rgba(98,225,255,.55);}
-.odo .digit.dim{color:rgba(98,225,255,.35);text-shadow:none;}
-.odo .unit{align-self:center;color:var(--ink3);font-family:var(--grotesk);font-size:11px;letter-spacing:1.6px;padding-left:3px;}
 @media(max-width:860px){
   .dials{grid-template-columns:1fr 1fr;align-items:start;}
-  .dials .gauge:nth-child(2){grid-column:1 / -1;grid-row:1;max-width:420px;margin:0 auto;}
+  .dials .gauge-big{grid-column:1 / -1;grid-row:1;max-width:420px;margin:0 auto;width:100%;}
+  .dial-col{grid-row:2;}
 }
 
 /* ---------- Meetings + service duo ---------- */
@@ -322,6 +341,7 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .log-kind{flex:none;font-weight:700;font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;border-radius:999px;padding:3px 9px;}
 .log-kind-dental{color:var(--cyan-hi);background:rgba(98,225,255,.13);border:1px solid rgba(98,225,255,.3);}
 .log-kind-non{color:var(--orange-hi);background:rgba(255,158,87,.13);border:1px solid rgba(255,158,87,.3);}
+.log-kind-social{color:#E39BC0;background:rgba(201,94,151,.15);border:1px solid rgba(201,94,151,.35);}
 .log-row-cat{font-weight:600;font-size:13.5px;color:var(--ink);}
 .log-row-note{font-family:'Lora',serif;font-style:italic;font-size:12.5px;color:var(--ink3);}
 .log-row-side{display:flex;align-items:center;gap:12px;flex:none;}
@@ -714,7 +734,7 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
     <div class="standing" id="standing">
       <span class="chip" id="chip-gpa"><span class="st"></span>GPA — awaiting review</span>
       <span class="chip" id="chip-dues"><span class="st"></span>Dues — pending</span>
-      <span class="chip" id="chip-req"><span class="st"></span>40-hour requirement</span>
+      <span class="chip" id="chip-req"><span class="st"></span>50-hour requirement</span>
       <button class="chip sync" id="chip-sync" type="button" title="Fetch the latest sheet now"><span class="st"></span><span id="sync-text">Connecting&hellip;</span></button>
     </div>
   </section>
@@ -725,26 +745,25 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
       <div>
         <div class="eyebrow"><span class="tick"></span><span>Instruments</span></div>
         <h2>Requirement cluster</h2>
-        <p class="sub">Forty hours, five meetings, five dental, five non-dental. The gold tick is the requirement — drive the needle past it.</p>
+        <p class="sub">Fifty total hours: ten dental, ten service, five meetings (ten as a rushee), one social. Meetings count an hour apiece and socials five toward the total. The gold tick is the requirement — drive the needle past it.</p>
       </div>
     </div>
     <div class="glass cluster" id="cluster">
-      <div class="dials" id="dials">
-        <div class="gauge" id="g-dental"></div>
-        <div class="gauge" id="g-total"></div>
-        <div class="gauge" id="g-nondental"></div>
+      <div class="cl-bg" aria-hidden="true"></div>
+      <div class="cl-glow" id="cl-glow" aria-hidden="true"></div>
+      <div class="cl-top">
+        <span class="cl-status" id="cl-status"><b id="cl-status-name">Checking&hellip;</b><small id="cl-status-sub">Looking for you on the chapter sheet</small></span>
+        <span class="cl-reqline" id="cl-reqline"><b>50</b> hrs total &middot; <b>10</b> dental &middot; <b>10</b> service &middot; <b id="cl-req-meet">5</b> meetings &middot; <b>1</b> social</span>
       </div>
-      <div class="strip">
-        <div class="fuel" id="fuel">
-          <div class="fuel-top">
-            <span class="g-name">Meetings attended</span>
-            <span class="fuel-val"><span id="fuel-n">0</span><small> / <span id="fuel-max">12</span> &middot; need 5</small></span>
-          </div>
-          <div class="fuel-cells" id="fuel-cells"></div>
+      <div class="dials" id="dials">
+        <div class="dial-col dial-col-l">
+          <div class="gauge gauge-sm" id="g-socials"></div>
+          <div class="gauge" id="g-nondental"></div>
         </div>
-        <div class="odo">
-          <span class="odo-label">Total hours logged</span>
-          <div class="odo-glass" id="odo"></div>
+        <div class="gauge gauge-big" id="g-total"></div>
+        <div class="dial-col dial-col-r">
+          <div class="gauge gauge-sm" id="g-meetings"></div>
+          <div class="gauge" id="g-dental"></div>
         </div>
       </div>
     </div>
@@ -775,11 +794,12 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
               <label>Type</label>
               <div class="log-seg" role="group" aria-label="Service type">
                 <button type="button" class="log-seg-btn on" data-kind="dental" aria-pressed="true">Dental</button>
-                <button type="button" class="log-seg-btn" data-kind="nondental" aria-pressed="false">Non-dental</button>
+                <button type="button" class="log-seg-btn" data-kind="nondental" aria-pressed="false">Service</button>
+                <button type="button" class="log-seg-btn" data-kind="social" aria-pressed="false">Social</button>
               </div>
             </div>
             <div class="fld">
-              <label for="log-hours">Hours</label>
+              <label for="log-hours" id="log-hours-label">Hours</label>
               <input id="log-hours" type="number" min="0" step="0.5" inputmode="decimal" placeholder="2.5">
             </div>
           </div>
@@ -1246,7 +1266,10 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 <script src="dds-family.js"></script>
 <script src="dds-resources.js"></script>
 <script src="dds-events.js"></script>
-<script src="dds-dash.js"></script>
+<!-- ?v= cache-buster: dashboard.html and dds-dash.js ship as a matched pair; a stale
+     cached copy of one against the other kills the whole dashboard at boot. Bump the
+     version whenever the two change together. -->
+<script src="dds-dash.js?v=20260712"></script>
 <script src="dds-edit.js"></script>
 <script src="dds-news.js"></script>
 <script src="dds-minutes.js"></script>

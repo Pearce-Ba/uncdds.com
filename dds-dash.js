@@ -163,22 +163,62 @@
     };
   }
 
+  // Meetings requirement follows the status box: 5 for members, 10 for rushees
+  // (matches the homepage requirement sheet). The gauge is rebuilt when it flips.
+  var MEET_GOAL = 5, SHEET_SEEN = false;
+  function buildMeetingsGauge() {
+    return makeGauge($('g-meetings'), { label: 'Meetings', unit: 'ATTENDED', max: 12, goal: MEET_GOAL, major: 3, minor: 1 });
+  }
   var G = {
-    dental: makeGauge($('g-dental'), { label: 'Dental hours', unit: 'HRS', max: 10, goal: 5, major: 2, minor: 1, decimals: true }),
-    total: makeGauge($('g-total'), { label: 'Total hours', unit: 'HRS · GOAL 40', max: 50, goal: 40, major: 10, minor: 2, big: true, decimals: true }),
-    nondental: makeGauge($('g-nondental'), { label: 'Non-dental hours', unit: 'HRS', max: 10, goal: 5, major: 2, minor: 1, decimals: true })
+    socials: makeGauge($('g-socials'), { label: 'Socials', unit: 'ATTENDED · 5 HRS EACH', max: 3, goal: 1, major: 1, minor: 1 }),
+    nondental: makeGauge($('g-nondental'), { label: 'Service hours', unit: 'HRS', max: 50, goal: 10, major: 10, minor: 5, decimals: true }),
+    total: makeGauge($('g-total'), { label: 'Total hours', unit: 'HRS · GOAL 50', max: 200, goal: 50, major: 50, minor: 10, big: true, decimals: true }),
+    meetings: buildMeetingsGauge(),
+    dental: makeGauge($('g-dental'), { label: 'Dental hours', unit: 'HRS', max: 50, goal: 10, major: 10, minor: 5, decimals: true })
   };
+
+  // Member vs Rushee, read straight off the chapter sheet: on it = member (5
+  // meetings required), not on it = rushee (10). Stays on "Checking…" until
+  // the sheet (or its cache) has answered at least once.
+  function applyStatus(d) {
+    var box = $('cl-status'), nameEl = $('cl-status-name'), subEl = $('cl-status-sub');
+    if (!box || !SHEET_SEEN) return;
+    var member = !!d.sheetFound;
+    box.classList.toggle('is-rushee', !member);
+    nameEl.textContent = member ? 'Member' : 'Rushee';
+    subEl.textContent = member
+      ? 'Found on the chapter points sheet'
+      : 'Not on the member sheet — rushee requirements apply';
+    var goal = member ? 5 : 10;
+    if (goal !== MEET_GOAL) {
+      MEET_GOAL = goal;
+      G.meetings = buildMeetingsGauge();
+      var mr = $('cl-req-meet'); if (mr) mr.textContent = MEET_GOAL;
+    }
+  }
 
   // start-up sweep, like a car cluster saying hello — then settle on real values
   if (!REDUCED) setTimeout(function () {
-    G.dental.set(10); G.total.set(50); G.nondental.set(10);
+    G.dental.set(50); G.total.set(200); G.nondental.set(50); G.meetings.set(12); G.socials.set(3);
     setTimeout(function () {
-      var f = loggedSums(), b = DATA || { dental: 0, total: 0, nonDental: 0 };
+      var f = loggedSums(), b = DATA || { dental: 0, total: 0, nonDental: 0, meetingsN: 0, socialsN: 0 };
       G.dental.set(num(b.dental) + f.dental);
-      G.total.set((num(b.total) || 0) + f.dental + f.non);
       G.nondental.set(num(b.nonDental) + f.non);
+      G.meetings.set(num(b.meetingsN));
+      G.socials.set(num(b.socialsN) + f.socials);
+      G.total.set((num(b.total) || 0) + f.dental + f.non + f.socials * 5);
     }, 900);
   }, 350);
+
+  // cursor lens glow — follows the mouse across the cluster glass
+  (function initClusterGlow() {
+    var box = $('cluster'), glow = $('cl-glow');
+    if (!box || !glow || REDUCED) return;
+    box.addEventListener('mousemove', function (e) {
+      var r = box.getBoundingClientRect();
+      glow.style.transform = 'translate(' + (e.clientX - r.left - 320) + 'px,' + (e.clientY - r.top - 320) + 'px)';
+    });
+  })();
 
   /* ================= Sheet sync ================= */
   var SHEET_ID = '1yXCL-EK5xeVeIATHolpgLdSzQcEDcndSCJL4bbnPFE4';
@@ -210,7 +250,8 @@
       first: find(/^first name/i), last: find(/^last name/i), email: find(/^email/i),
       gpa: find(/approved gpa/i), dues: find(/dues paid/i), meets: find(/meets hour/i),
       total: find(/^total hours/i), nond: find(/^total non-dental/i),
-      dent: find(/^total dental/i), meetN: find(/^total meetings/i)
+      dent: find(/^total dental/i), meetN: find(/^total meetings/i),
+      soc: find(/^total socials?/i)
     };
     var meetings = [], lastMeetCol = -1;
     cols.forEach(function (l, i) {
@@ -248,11 +289,13 @@
     var dent = row ? num(row[idx.dent]) : 0;
     var nond = row ? num(row[idx.nond]) : 0;
     var meetN = row ? num(row[idx.meetN]) : 0;
+    var soc = row ? num(row[idx.soc]) : 0;
     var totCol = row ? num(row[idx.total]) : 0;
     return {
       found: !!row,
-      dental: dent, nonDental: nond, meetingsN: meetN,
-      total: totCol > 0 ? totCol : dent + nond + meetN,
+      dental: dent, nonDental: nond, meetingsN: meetN, socialsN: soc,
+      // meetings count an hour apiece and socials five toward the total
+      total: totCol > 0 ? totCol : dent + nond + meetN + soc * 5,
       gpa: row ? row[idx.gpa] : null, dues: row ? row[idx.dues] : null, meetsReq: row ? row[idx.meets] : null,
       meetings: meetings.map(function (m) { return { n: m.n, title: m.title, went: row ? num(row[m.i]) > 0 : false }; }),
       svc: svc, at: Date.now()
@@ -271,39 +314,19 @@
 
   function renderSheet(dRaw) {
     var d = foldLogged(dRaw);                 // fold in the member's self-logged hours
+    applyStatus(d);                           // Member/Rushee box + meetings goal first
     G.total.set(d.total); G.dental.set(d.dental); G.nondental.set(d.nonDental);
-
-    // fuel bar
-    var cells = Math.max(d.meetings.length, 12);
-    var lit = Math.min(Math.round(d.meetingsN), cells);
-    var fc = $('fuel-cells'), html = '';
-    for (var i = 0; i < cells; i++) html += '<span class="cell' + (i < lit ? ' lit' : '') + '"></span>';
-    // pin sits in the gap right after cell #5 (cells are flex:1 with 4px gaps)
-    var gapTotal = (cells - 1) * 4;
-    html += '<span class="goal-pin" style="left:calc((100% - ' + gapTotal + 'px) * ' + (5 / cells) + ' + ' + (5 * 4 - 3) + 'px);"></span>';
-    if (fc.dataset.sig !== lit + '/' + cells) { fc.dataset.sig = lit + '/' + cells; fc.innerHTML = html; }
-    $('fuel-n').textContent = Math.round(d.meetingsN);
-    $('fuel-max').textContent = cells;
-
-    // odometer
-    var str = (Math.round(d.total * 10) / 10).toFixed(1);
-    str = ('00000' + str).slice(-5);
-    var seen = false;
-    $('odo').innerHTML = str.split('').map(function (ch) {
-      if (ch !== '0' && ch !== '.') seen = true;
-      if (ch === '.') return '<span class="unit" style="padding:0 1px;">.</span>';
-      return '<span class="digit' + (seen || ch !== '0' ? '' : ' dim') + '">' + ch + '</span>';
-    }).join('') + '<span class="unit">HRS</span>';
+    G.meetings.set(d.meetingsN); G.socials.set(d.socialsN);
 
     // standing chips
     setChip($('chip-gpa'), yes(d.gpa) ? true : no(d.gpa) ? false : null,
       yes(d.gpa) ? 'GPA approved' : no(d.gpa) ? 'GPA — see exec' : 'GPA — awaiting review');
     setChip($('chip-dues'), yes(d.dues) ? true : no(d.dues) ? false : null,
       yes(d.dues) ? 'Dues paid' : no(d.dues) ? 'Dues unpaid' : 'Dues — pending');
-    var reqMet = yes(d.meetsReq) || (d.total >= 40 && d.meetingsN >= 5 && d.dental >= 5 && d.nonDental >= 5);
-    var toGo = Math.max(0, 40 - d.total);
+    var reqMet = yes(d.meetsReq) || (d.total >= 50 && d.meetingsN >= MEET_GOAL && d.dental >= 10 && d.nonDental >= 10 && d.socialsN >= 1);
+    var toGo = Math.max(0, 50 - d.total);
     setChip($('chip-req'), reqMet ? true : null,
-      reqMet ? '40-hour requirement met' : '40-hour requirement — ' + (Math.round(toGo * 10) / 10) + ' to go');
+      reqMet ? '50-hour requirement met' : '50-hour requirement — ' + (Math.round(toGo * 10) / 10) + ' to go');
 
     renderMeetings(d);
     renderService(d);
@@ -329,17 +352,26 @@
     return fetchSheet().then(function (resp) {
       var d = parseSheet(resp);
       if (!d) throw new Error('bad payload');
+      SHEET_SEEN = true;
       DATA = d; lastFetch = Date.now();
       try { writeLS(CACHE_KEY, d); } catch (e) {}
       renderSheet(d);
       setSync('live', 'Live · synced ' + fmtTime(Date.now()));
-    }).catch(function () {
+    }).catch(function (e) {
+      if (e && e.message && !/timeout|network|bad payload/.test(e.message)) console.error('sheet render failed:', e);
       setSync('err', DATA ? 'Offline · showing last sync' : 'Sheet unreachable — retrying');
     });
   }
 
   var cached = readLS(CACHE_KEY, null);
-  if (cached && cached.meetings) { DATA = cached; renderSheet(cached); setSync('busy', 'Connecting…'); }
+  // boot render is wrapped so a bad/stale cache can only cost this paint, never
+  // the rest of the dashboard (chat, members, gallery… all init below)
+  if (cached && cached.meetings) {
+    SHEET_SEEN = true; // the cache came from a real fetch, so the status box may speak
+    DATA = cached;
+    try { renderSheet(cached); } catch (e) { console.error('cached sheet render failed:', e); }
+    setSync('busy', 'Connecting…');
+  }
   setTimeout(function () { sync(false); }, REDUCED ? 0 : 1400); // let the start-up sweep play
   setInterval(function () { if (document.visibilityState === 'visible') sync(false); }, 60000);
   document.addEventListener('visibilitychange', function () {
@@ -449,7 +481,7 @@
       return;
     }
     var max = 0;
-    d.svc.dental.concat(d.svc.nondental).forEach(function (c) { max = Math.max(max, c.hours); });
+    d.svc.dental.concat(d.svc.nondental, d.svc.social || []).forEach(function (c) { max = Math.max(max, c.hours); });
     var group = function (title, items, total) {
       var live = items.filter(function (c) { return c.hours > 0; });
       var rows = live.map(function (c) {
@@ -467,7 +499,8 @@
     };
     panel.innerHTML =
       group('Dental', d.svc.dental, d.dental) +
-      group('Non-dental', d.svc.nondental, d.nonDental) +
+      group('Service', d.svc.nondental, d.nonDental) +
+      ((d.svc.social && d.svc.social.length) ? group('Social', d.svc.social, d.socialsN * 5) : '') +
       '<p class="svc-empty" style="border-top:1px solid rgba(163,196,233,.11);padding-top:14px;font-size:12.5px;">Logged something that isn&rsquo;t here? Nudge the service chair — this reads straight off their sheet.</p>';
   }
 
@@ -2035,7 +2068,9 @@
     { name: 'Campus volunteering', kind: 'nondental' },
     { name: 'Fundraiser / philanthropy', kind: 'nondental' },
     { name: 'Tabling / recruitment', kind: 'nondental' },
-    { name: 'Tutoring / mentoring', kind: 'nondental' }
+    { name: 'Tutoring / mentoring', kind: 'nondental' },
+    { name: 'Chapter social', kind: 'social' },
+    { name: 'Family night', kind: 'social' }
   ];
 
   function readHours() { var a = readLS(HOURS_KEY, []); return Array.isArray(a) ? a : []; }
@@ -2048,9 +2083,15 @@
   function saveCustomCats(list) { writeLS(HCATS_KEY, list); }
 
   function loggedSums() {
-    var d = 0, n = 0, c = 0;
-    myHours().forEach(function (e) { var h = num(e.hours); if (e.kind === 'dental') d += h; else n += h; c++; });
-    return { dental: d, non: n, count: c };
+    var d = 0, n = 0, s = 0, c = 0;
+    myHours().forEach(function (e) {
+      var h = num(e.hours);
+      if (e.kind === 'dental') d += h;
+      else if (e.kind === 'social') s += h;   // for socials, "hours" is the count attended
+      else n += h;
+      c++;
+    });
+    return { dental: d, non: n, socials: s, count: c };
   }
 
   // every tag we know: seeds + sheet categories + created + already-used
@@ -2065,6 +2106,7 @@
     if (DATA && DATA.svc) {
       (DATA.svc.dental || []).forEach(function (c) { add(c.name, 'dental'); });
       (DATA.svc.nondental || []).forEach(function (c) { add(c.name, 'nondental'); });
+      (DATA.svc.social || []).forEach(function (c) { add(c.name, 'social'); });
     }
     readCustomCats().forEach(function (c) { add(c.name, c.kind); });
     readHours().forEach(function (e) { if (e && e.byId === ME.id) add(e.cat, e.kind); });
@@ -2088,12 +2130,14 @@
       dental: num(base.dental) + sums.dental,
       nonDental: num(base.nonDental) + sums.non,
       meetingsN: num(base.meetingsN),
-      total: (num(base.total) || 0) + sums.dental + sums.non,
+      socialsN: num(base.socialsN) + sums.socials,
+      total: (num(base.total) || 0) + sums.dental + sums.non + sums.socials * 5,
       gpa: base.gpa, dues: base.dues, meetsReq: base.meetsReq,
       meetings: base.meetings || [],
       svc: {
         dental: (base.svc && base.svc.dental ? base.svc.dental.slice() : []),
-        nondental: (base.svc && base.svc.nondental ? base.svc.nondental.slice() : [])
+        nondental: (base.svc && base.svc.nondental ? base.svc.nondental.slice() : []),
+        social: (base.svc && base.svc.social ? base.svc.social.slice() : [])
       },
       at: base.at || Date.now()
     };
@@ -2103,12 +2147,13 @@
       arr.push({ name: name, hours: hours, logged: true });
     };
     myHours().forEach(function (e) {
-      merge(e.kind === 'dental' ? d.svc.dental : d.svc.nondental, String(e.cat || 'Service').trim(), num(e.hours));
+      if (e.kind === 'social') merge(d.svc.social, String(e.cat || 'Social').trim(), num(e.hours) * 5);
+      else merge(e.kind === 'dental' ? d.svc.dental : d.svc.nondental, String(e.cat || 'Service').trim(), num(e.hours));
     });
     return d;
   }
   function blankData() {
-    return { found: false, dental: 0, nonDental: 0, meetingsN: 0, total: 0, gpa: null, dues: null, meetsReq: null, meetings: [], svc: { dental: [], nondental: [] }, at: Date.now() };
+    return { found: false, dental: 0, nonDental: 0, meetingsN: 0, socialsN: 0, total: 0, gpa: null, dues: null, meetsReq: null, meetings: [], svc: { dental: [], nondental: [], social: [] }, at: Date.now() };
   }
   function repaint() { renderSheet(DATA || blankData()); }
 
@@ -2122,28 +2167,39 @@
     var logKind = 'dental', editId = null;
 
     function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
-    function setKind(k) { logKind = (k === 'dental') ? 'dental' : 'nondental'; segBtns.forEach(function (b) { var on = b.getAttribute('data-kind') === logKind; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
+    function setKind(k) {
+      logKind = (k === 'dental' || k === 'social') ? k : 'nondental';
+      segBtns.forEach(function (b) { var on = b.getAttribute('data-kind') === logKind; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+      // socials are logged as a count — each one counts five hours toward the total
+      var lbl = $('log-hours-label');
+      if (lbl) lbl.textContent = logKind === 'social' ? 'Socials attended' : 'Hours';
+      hrsIn.placeholder = logKind === 'social' ? '1' : '2.5';
+      hrsIn.step = logKind === 'social' ? '1' : '0.5';
+    }
     function niceDate(s) { var d = new Date(s + 'T00:00:00'); return isNaN(d) ? s : d.toLocaleDateString([], { month: 'short', day: 'numeric' }); }
 
     function fillDatalist() {
       dl.innerHTML = allCats().map(function (c) {
-        return '<option value="' + esc(c.name) + '">' + (c.kind === 'dental' ? 'Dental' : 'Non-dental') + '</option>';
+        return '<option value="' + esc(c.name) + '">' + (c.kind === 'dental' ? 'Dental' : c.kind === 'social' ? 'Social' : 'Service') + '</option>';
       }).join('');
     }
     function renderList() {
       var mine = myHours();
-      var s = loggedSums(), tot = Math.round((s.dental + s.non) * 10) / 10;
+      var s = loggedSums(), tot = Math.round((s.dental + s.non + s.socials * 5) * 10) / 10;
       $('log-cta-sub').textContent = mine.length
         ? (mine.length + ' entr' + (mine.length === 1 ? 'y' : 'ies') + ' · ' + tot + ' hr' + (tot === 1 ? '' : 's') + ' logged')
         : 'Add service & volunteer hours yourself';
       if (!mine.length) { list.innerHTML = '<p class="log-empty">Nothing logged yet. Add your first service or volunteer hours above — they count toward your gauges right away.</p>'; return; }
       list.innerHTML = mine.map(function (e) {
         var h = Math.round(num(e.hours) * 10) / 10;
+        var hrsTx = e.kind === 'social'
+          ? (h + ' social' + (h === 1 ? '' : 's') + ' · ' + (h * 5) + ' hrs')
+          : (h + ' hr' + (h === 1 ? '' : 's'));
         return '<div class="log-row" data-id="' + esc(e.id) + '">' +
-          '<div class="log-row-main"><span class="log-kind log-kind-' + (e.kind === 'dental' ? 'dental' : 'non') + '">' + (e.kind === 'dental' ? 'Dental' : 'Non-dental') + '</span>' +
+          '<div class="log-row-main"><span class="log-kind log-kind-' + (e.kind === 'dental' ? 'dental' : e.kind === 'social' ? 'social' : 'non') + '">' + (e.kind === 'dental' ? 'Dental' : e.kind === 'social' ? 'Social' : 'Service') + '</span>' +
           '<span class="log-row-cat">' + esc(e.cat) + '</span>' +
           (e.note ? '<span class="log-row-note">' + esc(e.note) + '</span>' : '') + '</div>' +
-          '<div class="log-row-side"><span class="log-row-hrs">' + h + ' hr' + (h === 1 ? '' : 's') + '</span>' +
+          '<div class="log-row-side"><span class="log-row-hrs">' + hrsTx + '</span>' +
           '<span class="log-row-date">' + esc(niceDate(e.date)) + '</span>' +
           '<button type="button" class="log-mini" data-log-edit="' + esc(e.id) + '">Edit</button>' +
           '<button type="button" class="log-mini log-del" data-log-del="' + esc(e.id) + '">Delete</button></div>' +
@@ -2172,11 +2228,29 @@
       if (known) return;
       var custom = readCustomCats(); custom.push({ name: String(name).trim(), kind: kind }); saveCustomCats(custom);
     }
+    // Which sheet column should this entry land in? A tag that matches one of the
+    // sheet's own category columns goes there; anything custom falls back to
+    // "Other Dental" / "Other Volunteering" (socials to "Social") — the specific
+    // type still lives here on the site and rides along in the payload so the
+    // bridge script can note it on the cell.
+    function sheetCategoryFor(cat, kind) {
+      var key = String(cat || '').toLowerCase().trim();
+      if (DATA && DATA.svc) {
+        var cols = (DATA.svc.dental || []).concat(DATA.svc.nondental || []);
+        for (var i = 0; i < cols.length; i++) {
+          if (String(cols[i].name).toLowerCase().trim() === key && !cols[i].logged) return cols[i].name;
+        }
+      }
+      if (kind === 'social') return 'Social';
+      return kind === 'dental' ? 'Other Dental' : 'Other Volunteering';
+    }
     function pushToSheet(entry) {
       if (!HOUR_LOG_ENDPOINT) return;
       try {
         fetch(HOUR_LOG_ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ name: ME.name, email: ME.email, category: entry.cat, kind: entry.kind, hours: entry.hours, date: entry.date, note: entry.note }) });
+          body: JSON.stringify({ name: ME.name, email: ME.email, category: entry.cat,
+            sheetCategory: sheetCategoryFor(entry.cat, entry.kind),
+            kind: entry.kind, hours: entry.hours, date: entry.date, note: entry.note }) });
       } catch (err) { /* best-effort; site store stays source of truth */ }
     }
 
