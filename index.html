@@ -93,11 +93,17 @@ body.nav-open{overflow:hidden;}
    position:sticky on the page (officer-profiles pin, pillar-stories backdrop).
    html{overflow-x:clip} already prevents sideways page scroll. */
 @media(max-width:860px){.nav-links{display:none !important;}.nav-burger{display:flex;}}
-/* Hero title (GSAP-owned): gold extending rules flanking the eyebrow, per-char
-   gradient (SplitText re-parents chars, so the clip gradient must live on each
-   char, not the parent), and a soft backlight that breathes behind the title. */
+/* Hero title (GSAP-owned): gold extending rules flanking the eyebrow, a soft
+   breathing backlight, per-letter "ink" texture, and accent hairlines anchored
+   to glyph features that run off the page.
+   Structure after JS setup: .ht-char (outer, entrance/exit transforms) wraps
+   .ht-ink (inner: idle drift + the clip texture). The texture is one big field
+   (grain + blue/gold radial pools + near-white base) that each letter samples
+   via background-position, so gradients flow continuously across the word. */
 .hero-rule{display:block;height:2px;width:clamp(34px,6.5vw,110px);border-radius:2px;background:linear-gradient(90deg,transparent 0%,#B9975B 28%,#DCC08A 50%,#B9975B 72%,transparent 100%);transform-origin:center;}
-#hero-title .ht-char{background:linear-gradient(180deg,#123258 0%,#2A5C90 52%,#4B9CD3 100%);-webkit-background-clip:text;background-clip:text;}
+#hero-title .ht-char{display:inline-block;transform-style:preserve-3d;}
+#hero-title .ht-ink{display:inline-block;color:transparent;-webkit-text-fill-color:transparent;-webkit-background-clip:text;background-clip:text;background-image:url('grain.png'),radial-gradient(46% 150% at 14% 18%,rgba(75,156,211,.62) 0%,rgba(75,156,211,0) 72%),radial-gradient(34% 130% at 40% 92%,rgba(75,156,211,.34) 0%,rgba(75,156,211,0) 70%),radial-gradient(38% 130% at 60% 82%,rgba(185,151,91,.5) 0%,rgba(185,151,91,0) 68%),radial-gradient(44% 150% at 88% 14%,rgba(127,178,224,.55) 0%,rgba(127,178,224,0) 72%),linear-gradient(180deg,#FDFEFF 0%,#ECF2F9 55%,#C2D7EA 100%);background-blend-mode:multiply,screen,screen,screen,screen,normal;}
+.hero-accent{position:absolute;pointer-events:none;border-radius:2px;}
 #hero-backlight{position:absolute;left:50%;top:62%;width:min(64vw,940px);height:min(22vw,320px);transform:translate(-50%,-50%);background:radial-gradient(50% 50% at 50% 50%,rgba(75,156,211,.32) 0%,rgba(75,156,211,.10) 46%,transparent 72%);mix-blend-mode:screen;pointer-events:none;opacity:.6;z-index:0;}
 .join-btn:hover{transform:translateY(-2px);}
 .cta-gold:hover{transform:translateY(-3px);}
@@ -847,7 +853,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <h1 id="hero-h1" style="margin:0;font-weight:900;letter-spacing:-0.02em;text-transform:uppercase;position:relative;">
       <span id="hero-backlight" aria-hidden="true"></span>
       <span id="hero-eyebrow" style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:clamp(14px,1.8vw,28px);font-size:clamp(1rem,1.5vw,2.1rem);color:#B9975B;letter-spacing:0.18em;font-weight:800;line-height:1;margin-bottom:clamp(8px,0.9vw,15px);"><i class="hero-rule" aria-hidden="true"></i><span id="hero-eyebrow-text">LEARN. SERVE. LEAD.</span><i class="hero-rule" aria-hidden="true"></i></span>
-      <span id="hero-title" style="position:relative;z-index:1;display:block;background:linear-gradient(180deg,#123258 0%,#2A5C90 52%,#4B9CD3 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;width:100vw;text-align:center;font-size:8vw;line-height:1;filter:drop-shadow(0 0 22px rgba(75,156,211,.38)) drop-shadow(0 18px 38px rgba(3,9,20,.55));">Delta Delta Sigma</span>
+      <span id="hero-title" style="position:relative;z-index:1;display:block;background:linear-gradient(180deg,#FDFEFF 0%,#EAF1F8 52%,#BCD3E8 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;width:100vw;text-align:center;font-size:8vw;line-height:1;filter:drop-shadow(0 14px 32px rgba(3,9,20,.6)) drop-shadow(0 0 24px rgba(127,178,224,.25));">Delta Delta Sigma</span>
     </h1>
     <div id="hero-sub" style="color:#7FB2E0;font-weight:600;letter-spacing:4px;font-size:clamp(11px,1vw,14px);text-transform:uppercase;">UNC'S LARGEST PRE-DENTAL SOCIETY</div>
     <div style="margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:clamp(64px,7vh,96px);padding-top:clamp(40px,8vh,110px);">
@@ -4365,13 +4371,15 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 })();
 </script>
 
-<!-- Hero title choreography: GSAP entrance + scroll-scrubbed line-by-line exit -->
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<!-- Hero title choreography: living letters, glyph accent lines that run off
+     the page, and a fast scrubbed exit where letters collapse into lines.
+     GSAP is self-hosted (vendor/) so the effect never depends on a CDN. -->
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/SplitText.min.js"></script>
 <script>
 (function initHeroTitle(){
-  if (!window.gsap || !window.ScrollTrigger || !window.SplitText) return; // CDN blocked → static title stays
+  if (!window.gsap || !window.ScrollTrigger || !window.SplitText) return; // static title stays
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
   const hero = document.getElementById('top');
@@ -4379,65 +4387,177 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   const title = document.getElementById('hero-title');
   const eyebrow = document.getElementById('hero-eyebrow');
   const eyeText = document.getElementById('hero-eyebrow-text');
-  const rules = gsap.utils.toArray('.hero-rule');
   const backlight = document.getElementById('hero-backlight');
   const sub = document.getElementById('hero-sub');
   if (!hero || !h1 || !title || !sub) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; // static, no hide
 
-  // Hide immediately (this script runs before first paint at end of body) so
-  // the entrance never flashes the resting state; revealed in the same tick
-  // the timeline is built.
+  // Hide before first paint; revealed the same tick the entrance is built.
   gsap.set([h1, sub], { autoAlpha: 0 });
 
-  const mm = gsap.matchMedia();
-  document.fonts.ready.then(() => {
-    mm.add({
-      motionOK: '(prefers-reduced-motion: no-preference)',
-      reduce: '(prefers-reduced-motion: reduce)'
-    }, (ctx) => {
-      if (ctx.conditions.reduce) {
-        gsap.set([h1, sub], { autoAlpha: 1 });
-        return;
-      }
+  // Accent hairlines anchored to glyph features of "DELTA DELTA SIGMA"
+  // (char index → feature height fraction, direction, color, opacity).
+  // 'l'/'r' run horizontally off the page; 'up' runs vertically off the top.
+  const LINE_SPECS = [
+    [1,  .30, 'l',  '#EAF1F8', .38],  // E: upper bar
+    [3,  .05, 'l',  '#B9975B', .55],  // T: cap line
+    [4,  .66, 'r',  '#7FB2E0', .45],  // A: crossbar
+    [7,  .95, 'l',  '#B9975B', .50],  // L: baseline
+    [8,  .05, 'r',  '#EAF1F8', .34],  // T: cap line
+    [11, 0,   'up', '#EAF1F8', .50],  // I: stem, straight up and off
+    [12, .52, 'r',  '#B9975B', .50],  // G: bar
+    [14, .95, 'r',  '#7FB2E0', .45],  // A: baseline
+  ];
 
-      const split = new SplitText(title, { type: 'words,chars', mask: 'chars', wordsClass: 'ht-word', charsClass: 'ht-char' });
+  let ctx = null, split = null, lineLayer = null;
 
-      // ---- Entrance: rules extend, eyebrow settles, chars rise out of their
-      // masks word by word, subtitle drifts up last.
-      const inTl = gsap.timeline({ defaults: { ease: 'power4.out' } });
-      inTl.set(h1, { autoAlpha: 1 })
-          .from(rules, { scaleX: 0, autoAlpha: 0, duration: 1.15, ease: 'power3.inOut' }, 0)
-          .from(eyeText, { autoAlpha: 0, letterSpacing: '0.46em', duration: 1.05, ease: 'power3.out' }, 0.05)
-          .from(split.chars, { yPercent: 118, rotation: 5, duration: 1.15, stagger: { each: 0.04, from: 'start' } }, 0.18)
-          .from(backlight, { autoAlpha: 0, scale: 0.82, duration: 1.4, ease: 'power2.out' }, 0.35)
-          .fromTo(sub, { autoAlpha: 0, y: 16, letterSpacing: '9px' }, { autoAlpha: 1, y: 0, letterSpacing: '4px', duration: 0.9, ease: 'power3.out' }, 0.8);
+  function build(skipIntro){
+    if (ctx) ctx.revert();
+    if (split) { split.revert(); split = null; }
+    if (lineLayer) { lineLayer.remove(); lineLayer = null; }
 
-      // Idle life: the backlight breathes very slowly behind the title
-      // (scale only — opacity belongs to the scrubbed exit below).
-      gsap.to(backlight, { scale: 1.06, duration: 3.6, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: 2.1 });
+    ctx = gsap.context(() => {
+      split = new SplitText(title, { type: 'words,chars', charsClass: 'ht-char', wordsClass: 'ht-word' });
+      const chars = split.chars;
 
-      // ---- Scroll exit, scrubbed: line by line, shape by shape. Eyebrow text
-      // tracks apart as its rules retract, title chars lift into their masks
-      // from the edges inward, subtitle disperses last. Exit tweens use y (px)
-      // and fromTo(immediateRender:false) so they never fight the entrance's
-      // yPercent/autoAlpha channels.
-      const outTl = gsap.timeline({
-        scrollTrigger: { trigger: hero, start: 'top top', end: '55% top', scrub: 0.5 },
-        defaults: { ease: 'power2.in', immediateRender: false }
+      // Inner "ink" span per letter: carries the clip texture and the idle
+      // drift, while entrance/exit transforms live on the outer char — the
+      // two never fight over the same transform.
+      const inks = chars.map(c => {
+        const s = document.createElement('span');
+        s.className = 'ht-ink';
+        while (c.firstChild) s.appendChild(c.firstChild);
+        c.appendChild(s);
+        return s;
       });
-      outTl.fromTo(eyeText, { opacity: 1 }, { opacity: 0, letterSpacing: '0.55em', duration: 0.24 }, 0)
-           .fromTo(rules, { scaleX: 1 }, { scaleX: 0, duration: 0.22, ease: 'power2.inOut' }, 0.02)
-           .fromTo(eyebrow, { y: 0 }, { y: -44, duration: 0.3 }, 0)
-           .fromTo(split.chars, { y: 0 }, {
-              y: (i) => -(110 + (i % 3) * 55),
-              rotation: (i) => (i % 2 ? 6 : -6),
-              duration: 0.5,
-              stagger: { each: 0.022, from: 'edges' }
-            }, 0.14)
-           .fromTo(backlight, { opacity: 0.6 }, { opacity: 0, duration: 0.4 }, 0.2)
-           .fromTo(sub, { opacity: 1, y: 0 }, { opacity: 0, y: -30, letterSpacing: '11px', duration: 0.28 }, 0.42);
+
+      // Each letter samples its slice of one word-wide texture field so the
+      // radial color pools and grain flow continuously across the title.
+      const tb = title.getBoundingClientRect();
+      const fieldSize = Math.round(tb.width) + 'px ' + Math.round(tb.height) + 'px';
+      chars.forEach((c, i) => {
+        const r = c.getBoundingClientRect();
+        inks[i].style.backgroundSize = 'auto, ' + fieldSize + ', ' + fieldSize + ', ' + fieldSize + ', ' + fieldSize + ', ' + fieldSize;
+        inks[i].style.backgroundPosition = Math.round(tb.left - r.left) + 'px ' + Math.round(tb.top - r.top) + 'px';
+      });
+
+      // Build the accent lines from live glyph geometry.
+      lineLayer = document.createElement('div');
+      lineLayer.setAttribute('aria-hidden', 'true');
+      lineLayer.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:2;';
+      hero.appendChild(lineLayer);
+      const hr = hero.getBoundingClientRect();
+      const lines = LINE_SPECS.map(([idx, frac, dir, colr, alpha]) => {
+        const c = chars[idx];
+        if (!c) return null;
+        const r = c.getBoundingClientRect();
+        const el = document.createElement('i');
+        el.className = 'hero-accent';
+        el.dataset.dir = dir;
+        if (dir === 'up') {
+          const x = r.left + r.width / 2 - hr.left;
+          const yEnd = r.top - hr.top + r.height * 0.12;
+          el.style.cssText += 'left:' + (x - 1) + 'px;top:0;width:2px;height:' + yEnd + 'px;transform-origin:50% 100%;background:linear-gradient(0deg,' + colr + ' 0%,' + colr + ' 55%,transparent 100%);';
+        } else if (dir === 'l') {
+          const x = r.left - hr.left + r.width * 0.16;
+          const y = r.top - hr.top + r.height * frac;
+          el.style.cssText += 'left:0;top:' + y + 'px;width:' + x + 'px;height:2px;transform-origin:100% 50%;background:linear-gradient(270deg,' + colr + ' 0%,' + colr + ' 70%,transparent 100%);';
+        } else {
+          const x = r.left - hr.left + r.width * 0.84;
+          const y = r.top - hr.top + r.height * frac;
+          el.style.cssText += 'left:' + x + 'px;top:' + y + 'px;width:' + (hr.width - x) + 'px;height:2px;transform-origin:0% 50%;background:linear-gradient(90deg,' + colr + ' 0%,' + colr + ' 70%,transparent 100%);';
+        }
+        el.style.opacity = alpha;
+        lineLayer.appendChild(el);
+        return el;
+      }).filter(Boolean);
+      const lineScale = (el) => el.dataset.dir === 'up' ? { scaleY: 0 } : { scaleX: 0 };
+
+      // ---------- Entrance: every letter arrives its own way ----------
+      const inTl = gsap.timeline();
+      inTl.set(h1, { autoAlpha: 1 }, 0)
+          .from(eyebrow.querySelectorAll('.hero-rule'), { scaleX: 0, autoAlpha: 0, duration: 1.1, ease: 'power3.inOut' }, 0)
+          .from(eyeText, { autoAlpha: 0, letterSpacing: '0.46em', duration: 1, ease: 'power3.out' }, 0.05)
+          .from(backlight, { autoAlpha: 0, scale: 0.8, duration: 1.3, ease: 'power2.out' }, 0.3)
+          .fromTo(sub, { autoAlpha: 0, y: 16, letterSpacing: '9px' }, { autoAlpha: 1, y: 0, letterSpacing: '4px', duration: 0.9, ease: 'power3.out' }, 1.25);
+
+      const enterMoves = [
+        { y: '-1.5em', opacity: 0, ease: 'bounce.out', duration: 1.05 },
+        { y: '1.2em', opacity: 0, ease: 'back.out(2.4)', duration: 0.9 },
+        { rotationX: -95, opacity: 0, transformOrigin: '50% 100%', ease: 'power4.out', duration: 1 },
+        { x: '-1.4em', skewX: 24, opacity: 0, ease: 'expo.out', duration: 0.95 },
+        { scale: 0.1, opacity: 0, transformOrigin: '50% 80%', ease: 'elastic.out(1,0.5)', duration: 1.25 },
+        { rotation: 130, scale: 0.5, opacity: 0, ease: 'power3.out', duration: 0.95 },
+        { scaleY: 0.04, opacity: 0, ease: 'expo.out', duration: 0.85 },           // unfurls from a flat line
+        { scaleX: 0.05, y: '-0.4em', opacity: 0, transformOrigin: '50% 100%', ease: 'back.out(1.8)', duration: 0.9 },
+      ];
+      const order = gsap.utils.shuffle(chars.map((_, i) => i));
+      chars.forEach((c, i) => inTl.from(c, { ...enterMoves[i % enterMoves.length] }, 0.2 + order[i] * 0.055));
+      lines.forEach((el, i) => inTl.from(el, { ...lineScale(el), opacity: 0, duration: 0.9, ease: 'expo.inOut' }, 1.05 + i * 0.08));
+      if (skipIntro) inTl.progress(1);
+
+      // ---------- Idle: the title never sits still ----------
+      const idleDelay = skipIntro ? 0 : 2;
+      inks.forEach((s, i) => {
+        gsap.to(s, {
+          y: (i % 2 ? 1 : -1) * gsap.utils.random(2.5, 4.5),
+          rotation: (i % 3 === 0 ? -1 : 1) * gsap.utils.random(0.5, 1.4),
+          duration: gsap.utils.random(2.2, 3.6), ease: 'sine.inOut',
+          repeat: -1, yoyo: true, delay: idleDelay + gsap.utils.random(0, 1.2)
+        });
+      });
+      gsap.to(backlight, { scale: 1.06, duration: 3.6, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: idleDelay });
+
+      // ---------- Exit: ~a third of a viewport of scroll and it's gone.
+      // Letters collapse into lines and fire off the page; eyebrow leads,
+      // subtitle trails. Scrubbed, so scrolling back reassembles everything.
+      const vh = window.innerHeight, vw = window.innerWidth;
+      const outTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: hero, start: 'top top',
+          end: () => '+=' + Math.round(window.innerHeight * 0.32),
+          scrub: 0.35,
+          onUpdate(self) { if (self.progress > 0.02 && inTl.isActive()) inTl.progress(1).kill(); }
+        },
+        defaults: { ease: 'power1.in', immediateRender: false }
+      });
+      const exitMoves = [
+        { from: { scaleX: 1, y: 0, opacity: 1 },               to: { scaleX: 0.04, y: -vh * 0.6, opacity: 0 } },          // → vertical line, up
+        { from: { scaleY: 1, y: 0, opacity: 1 },               to: { scaleY: 3.4, y: -vh * 0.55, opacity: 0, transformOrigin: '50% 0%' } }, // streak
+        { from: { scaleY: 1, x: 0, opacity: 1 },               to: { scaleY: 0.05, x: vw * 0.55, opacity: 0 } },           // → flat line, right
+        { from: { rotation: 0, x: 0, y: 0, opacity: 1 },       to: { rotation: 110, x: vw * 0.2, y: -vh * 0.45, opacity: 0 } },
+        { from: { scaleY: 1, x: 0, opacity: 1 },               to: { scaleY: 0.05, x: -vw * 0.55, opacity: 0 } },          // → flat line, left
+        { from: { rotation: 0, y: 0, opacity: 1 },             to: { rotation: -70, y: -vh * 0.7, opacity: 0 } },
+      ];
+      outTl.fromTo(eyeText, { opacity: 1 }, { opacity: 0, letterSpacing: '0.55em', duration: 0.2 }, 0)
+           .fromTo(eyebrow.querySelectorAll('.hero-rule'), { scaleX: 1 }, { scaleX: 0, duration: 0.2, ease: 'power2.inOut' }, 0.02)
+           .fromTo(eyebrow, { y: 0 }, { y: -40, duration: 0.26 }, 0)
+           .fromTo(backlight, { opacity: 0.6 }, { opacity: 0, duration: 0.35 }, 0.2);
+      const order2 = gsap.utils.shuffle(chars.map((_, i) => i));
+      chars.forEach((c, i) => {
+        const m = exitMoves[i % exitMoves.length];
+        outTl.fromTo(c, { ...m.from }, { ...m.to, duration: 0.55 }, 0.12 + order2[i] * 0.024);
+      });
+      lines.forEach((el, i) => {
+        const grow = el.dataset.dir === 'up' ? { scaleY: 1.25 } : { scaleX: 1.25 };
+        outTl.fromTo(el, { opacity: +el.style.opacity }, { ...grow, opacity: 0, duration: 0.3 }, 0.06 + i * 0.02);
+      });
+      outTl.fromTo(sub, { opacity: 1, y: 0 }, { opacity: 0, y: -26, letterSpacing: '11px', duration: 0.26 }, 0.6);
     });
     ScrollTrigger.refresh();
+  }
+
+  document.fonts.ready.then(() => {
+    build(false);
+    // Rebuild geometry (texture field, accent lines, exit vectors) when the
+    // viewport truly changes size — not on mobile URL-bar jitter.
+    let lastW = window.innerWidth, t = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        if (Math.abs(window.innerWidth - lastW) > 60) { lastW = window.innerWidth; build(true); }
+      }, 250);
+    });
   });
 })();
 </script>
