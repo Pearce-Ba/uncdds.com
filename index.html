@@ -93,6 +93,12 @@ body.nav-open{overflow:hidden;}
    position:sticky on the page (officer-profiles pin, pillar-stories backdrop).
    html{overflow-x:clip} already prevents sideways page scroll. */
 @media(max-width:860px){.nav-links{display:none !important;}.nav-burger{display:flex;}}
+/* Hero title (GSAP-owned): gold extending rules flanking the eyebrow, per-char
+   gradient (SplitText re-parents chars, so the clip gradient must live on each
+   char, not the parent), and a soft backlight that breathes behind the title. */
+.hero-rule{display:block;height:2px;width:clamp(34px,6.5vw,110px);border-radius:2px;background:linear-gradient(90deg,transparent 0%,#B9975B 28%,#DCC08A 50%,#B9975B 72%,transparent 100%);transform-origin:center;}
+#hero-title .ht-char{background:linear-gradient(180deg,#123258 0%,#2A5C90 52%,#4B9CD3 100%);-webkit-background-clip:text;background-clip:text;}
+#hero-backlight{position:absolute;left:50%;top:62%;width:min(64vw,940px);height:min(22vw,320px);transform:translate(-50%,-50%);background:radial-gradient(50% 50% at 50% 50%,rgba(75,156,211,.32) 0%,rgba(75,156,211,.10) 46%,transparent 72%);mix-blend-mode:screen;pointer-events:none;opacity:.6;z-index:0;}
 .join-btn:hover{transform:translateY(-2px);}
 .cta-gold:hover{transform:translateY(-3px);}
 .cta-outline:hover{background:rgba(215,226,234,.12);}
@@ -838,11 +844,12 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,#0A1A30 0%,rgba(10,26,48,.86) 8%,rgba(10,26,48,0) 25%,rgba(10,26,48,0) 56%,rgba(6,15,32,.5) 80%,rgba(4,10,22,.9) 100%);"></div>
   <div id="hero-tint" style="position:absolute;top:0;left:0;width:820px;height:820px;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:soft-light;transition:opacity .55s ease;will-change:transform,background;z-index:1;background:radial-gradient(circle,rgba(75,156,211,.6) 0%,rgba(75,156,211,.14) 46%,transparent 70%);"></div>
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:clamp(72px,17vh,140px) clamp(20px,4vw,48px) clamp(48px,6vw,80px);perspective:1200px;gap:clamp(14px,2.2vw,26px);z-index:2;">
-    <h1 data-reveal="0.08" style="margin:0;font-weight:900;line-height:0.84;letter-spacing:-0.02em;text-transform:uppercase;">
-      <span style="display:block;font-size:clamp(1rem,1.5vw,2.1rem);color:#B9975B;letter-spacing:0.18em;font-weight:800;margin-bottom:6px;">LEARN. SERVE. LEAD.</span>
-      <span style="display:block;background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 78%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;width:100vw;text-align:center;font-size:8vw;">Delta Delta Sigma</span>
+    <h1 id="hero-h1" style="margin:0;font-weight:900;letter-spacing:-0.02em;text-transform:uppercase;position:relative;">
+      <span id="hero-backlight" aria-hidden="true"></span>
+      <span id="hero-eyebrow" style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:clamp(14px,1.8vw,28px);font-size:clamp(1rem,1.5vw,2.1rem);color:#B9975B;letter-spacing:0.18em;font-weight:800;line-height:1;margin-bottom:clamp(8px,0.9vw,15px);"><i class="hero-rule" aria-hidden="true"></i><span id="hero-eyebrow-text">LEARN. SERVE. LEAD.</span><i class="hero-rule" aria-hidden="true"></i></span>
+      <span id="hero-title" style="position:relative;z-index:1;display:block;background:linear-gradient(180deg,#123258 0%,#2A5C90 52%,#4B9CD3 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;width:100vw;text-align:center;font-size:8vw;line-height:1;filter:drop-shadow(0 0 22px rgba(75,156,211,.38)) drop-shadow(0 18px 38px rgba(3,9,20,.55));">Delta Delta Sigma</span>
     </h1>
-    <div data-reveal="0" style="color:#7FB2E0;font-weight:600;letter-spacing:4px;font-size:clamp(11px,1vw,14px);text-transform:uppercase;">UNC'S LARGEST PRE-DENTAL SOCIETY</div>
+    <div id="hero-sub" style="color:#7FB2E0;font-weight:600;letter-spacing:4px;font-size:clamp(11px,1vw,14px);text-transform:uppercase;">UNC'S LARGEST PRE-DENTAL SOCIETY</div>
     <div style="margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:clamp(64px,7vh,96px);padding-top:clamp(40px,8vh,110px);">
       <!-- Next on the calendar — liquid-glass lens panel, holds its place while the buttons below chase the cursor -->
       <div data-reveal="0.34" class="nm-wrap">
@@ -4355,6 +4362,83 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   });
 })();
 
+})();
+</script>
+
+<!-- Hero title choreography: GSAP entrance + scroll-scrubbed line-by-line exit -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script>
+(function initHeroTitle(){
+  if (!window.gsap || !window.ScrollTrigger || !window.SplitText) return; // CDN blocked → static title stays
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  const hero = document.getElementById('top');
+  const h1 = document.getElementById('hero-h1');
+  const title = document.getElementById('hero-title');
+  const eyebrow = document.getElementById('hero-eyebrow');
+  const eyeText = document.getElementById('hero-eyebrow-text');
+  const rules = gsap.utils.toArray('.hero-rule');
+  const backlight = document.getElementById('hero-backlight');
+  const sub = document.getElementById('hero-sub');
+  if (!hero || !h1 || !title || !sub) return;
+
+  // Hide immediately (this script runs before first paint at end of body) so
+  // the entrance never flashes the resting state; revealed in the same tick
+  // the timeline is built.
+  gsap.set([h1, sub], { autoAlpha: 0 });
+
+  const mm = gsap.matchMedia();
+  document.fonts.ready.then(() => {
+    mm.add({
+      motionOK: '(prefers-reduced-motion: no-preference)',
+      reduce: '(prefers-reduced-motion: reduce)'
+    }, (ctx) => {
+      if (ctx.conditions.reduce) {
+        gsap.set([h1, sub], { autoAlpha: 1 });
+        return;
+      }
+
+      const split = new SplitText(title, { type: 'words,chars', mask: 'chars', wordsClass: 'ht-word', charsClass: 'ht-char' });
+
+      // ---- Entrance: rules extend, eyebrow settles, chars rise out of their
+      // masks word by word, subtitle drifts up last.
+      const inTl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+      inTl.set(h1, { autoAlpha: 1 })
+          .from(rules, { scaleX: 0, autoAlpha: 0, duration: 1.15, ease: 'power3.inOut' }, 0)
+          .from(eyeText, { autoAlpha: 0, letterSpacing: '0.46em', duration: 1.05, ease: 'power3.out' }, 0.05)
+          .from(split.chars, { yPercent: 118, rotation: 5, duration: 1.15, stagger: { each: 0.04, from: 'start' } }, 0.18)
+          .from(backlight, { autoAlpha: 0, scale: 0.82, duration: 1.4, ease: 'power2.out' }, 0.35)
+          .fromTo(sub, { autoAlpha: 0, y: 16, letterSpacing: '9px' }, { autoAlpha: 1, y: 0, letterSpacing: '4px', duration: 0.9, ease: 'power3.out' }, 0.8);
+
+      // Idle life: the backlight breathes very slowly behind the title
+      // (scale only — opacity belongs to the scrubbed exit below).
+      gsap.to(backlight, { scale: 1.06, duration: 3.6, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: 2.1 });
+
+      // ---- Scroll exit, scrubbed: line by line, shape by shape. Eyebrow text
+      // tracks apart as its rules retract, title chars lift into their masks
+      // from the edges inward, subtitle disperses last. Exit tweens use y (px)
+      // and fromTo(immediateRender:false) so they never fight the entrance's
+      // yPercent/autoAlpha channels.
+      const outTl = gsap.timeline({
+        scrollTrigger: { trigger: hero, start: 'top top', end: '55% top', scrub: 0.5 },
+        defaults: { ease: 'power2.in', immediateRender: false }
+      });
+      outTl.fromTo(eyeText, { opacity: 1 }, { opacity: 0, letterSpacing: '0.55em', duration: 0.24 }, 0)
+           .fromTo(rules, { scaleX: 1 }, { scaleX: 0, duration: 0.22, ease: 'power2.inOut' }, 0.02)
+           .fromTo(eyebrow, { y: 0 }, { y: -44, duration: 0.3 }, 0)
+           .fromTo(split.chars, { y: 0 }, {
+              y: (i) => -(110 + (i % 3) * 55),
+              rotation: (i) => (i % 2 ? 6 : -6),
+              duration: 0.5,
+              stagger: { each: 0.022, from: 'edges' }
+            }, 0.14)
+           .fromTo(backlight, { opacity: 0.6 }, { opacity: 0, duration: 0.4 }, 0.2)
+           .fromTo(sub, { opacity: 1, y: 0 }, { opacity: 0, y: -30, letterSpacing: '11px', duration: 0.28 }, 0.42);
+    });
+    ScrollTrigger.refresh();
+  });
 })();
 </script>
 </body>
