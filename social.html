@@ -104,6 +104,8 @@ a:focus-visible,button:focus-visible{outline:2px solid #C95E97;outline-offset:3p
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<style>.skip-link{position:fixed;left:12px;top:-64px;z-index:10001;background:#13294B;color:#fff;padding:12px 20px;border-radius:10px;font-weight:700;font-size:14px;letter-spacing:1px;text-decoration:none;box-shadow:0 6px 20px -6px rgba(0,0,0,.6);transition:top .18s ease;}.skip-link:focus{top:12px;outline:3px solid #4B9CD3;outline-offset:2px;}</style>
 
 <nav class="subnav">
   <a class="subnav-brand" href="index.html"><img src="logo-dds.png" alt="DDS" onerror="this.src='https://placehold.co/40x40/13294B/4B9CD3'"><span>UNC DDS</span></a>
@@ -130,7 +132,7 @@ a:focus-visible,button:focus-visible{outline:2px solid #C95E97;outline-offset:3p
 </header>
 
 <!-- PAPER BODY -->
-<main class="arch">
+<main class="arch" id="main-content" tabindex="-1">
   <div class="arch-grain"></div>
   <div class="arch-in">
     <div class="feat">
