@@ -1,14 +1,14 @@
 [
  {
-  "up": 1783819561782,
-  "at": 1783819561781,
   "members": [
    "ex1",
    "umr9hrkfmv17w9"
   ],
-  "id": "dm-ex1-umr9hrkfmv17w9",
+  "at": 1783819561781,
   "kind": "dm",
   "name": "",
-  "by": "ex1"
+  "by": "ex1",
+  "id": "dm-ex1-umr9hrkfmv17w9",
+  "up": 1783819561782
  }
 ]
