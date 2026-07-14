@@ -297,6 +297,10 @@ a.calv-wev:hover{filter:brightness(1.3);}
 /* pushed out from the pills so the pair reads as bookends, not row items */
 .cta-mini-l{margin-right:clamp(10px,2.6vw,40px);}
 .cta-mini-r{margin-left:clamp(10px,2.6vw,40px);}
+/* Mobile: force the CTA row to break into exactly two lines —
+   [Bite + Meet the Officers] / [Member Login + Meeting Notes] */
+.cta-row-break{display:none;}
+@media(max-width:700px){.cta-row-break{display:block;flex-basis:100%;width:100%;height:0;}}
 .cta-tilt{display:block;transition:transform .45s cubic-bezier(.22,.61,.36,1);}
 .cta-mini-l .cta-tilt{transform:rotate(-8deg);}
 .cta-mini-r .cta-tilt{transform:rotate(8deg);}
@@ -372,6 +376,8 @@ a.calv-wev:hover{filter:brightness(1.3);}
   .cmb-l.cmb-wide{height:6px;margin-top:2px;}
   .cmb-page,.cmb-face{padding:6px 5px;}
   .cta-mini-l,.cta-mini-r{margin:0;}
+  /* Compact hero pills so each shares its line with the icon beside it */
+  #top .cta-gold,#top .cta-outline{min-width:0 !important;height:46px !important;padding:0 clamp(14px,4.5vw,22px) !important;font-size:10.5px !important;letter-spacing:1.4px !important;}
 }
 @media(prefers-reduced-motion:reduce){
   .cta-mini:hover .cmn-pen{animation:none;}
@@ -792,8 +798,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 @media(prefers-reduced-motion:reduce){.bl-aurora i,.join-aurora i{animation:none;}.aur-glow{display:none;}}
 /* ===== Mobile / responsive ===== */
 @media(max-width:820px){
-  .pres-inner{flex-direction:column !important;gap:24px !important;}
-  .pres-photo{width:100% !important;min-height:0 !important;aspect-ratio:16/10 !important;align-self:auto !important;}
+  .pres-photo{float:none !important;width:min(100%,340px) !important;aspect-ratio:4/5 !important;margin:0 auto 26px !important;}
 }
 @media(max-width:768px){
   .of-grid{grid-template-columns:1fr !important;}
@@ -878,7 +883,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener" class="nav-dd-link" role="menuitem">Instagram<span>&rarr;</span></a>
         <a href="https://www.linkedin.com/company/unc-delta-delta-sigma-dds" target="_blank" rel="noopener" class="nav-dd-link" role="menuitem">LinkedIn<span>&rarr;</span></a>
         <a href="#join" class="nav-dd-link" role="menuitem">Listserv<span>&rarr;</span></a>
-        <a href="mailto:ddsexec@unc.edu" class="nav-dd-link" role="menuitem">Email The Exec<span>&rarr;</span></a>
+        <a href="#exec-copy" class="nav-dd-link" role="menuitem">Email The Exec<span>&rarr;</span></a>
       </div>
     </div>
     <span data-auth-mount class="nav-auth-pill" style="display:inline-flex;align-items:center;"></span>
@@ -914,7 +919,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener">Instagram</a>
     <a href="https://www.linkedin.com/company/unc-delta-delta-sigma-dds" target="_blank" rel="noopener">LinkedIn</a>
     <a href="#join">Listserv</a>
-    <a href="mailto:ddsexec@unc.edu">Email The Exec</a>
+    <a href="#exec-copy">Email The Exec</a>
     <a href="login.html">Member Login</a>
     <a href="dashboard.html" class="nav-mobile-cta">Dashboard</a>
   </div>
@@ -962,6 +967,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
           <span class="cm-tip">The Bite &middot; Newsletter</span>
         </a>
         <a data-cta-magnet href="#officers" class="cta-gold" style="display:inline-flex;align-items:center;justify-content:center;padding:16px clamp(26px,3vw,38px);border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:clamp(12px,2vw,18px);text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -12px rgba(185,151,91,.85);transition:transform .2s;letter-spacing:2px;min-width:280px;height:60px;">Meet the Officers&nbsp;→</a>
+        <i class="cta-row-break" aria-hidden="true"></i>
         <a data-cta-magnet href="login.html" id="hero-login" class="cta-outline" style="display:inline-flex;align-items:center;justify-content:center;padding:16px clamp(26px,3vw,38px);border-radius:999px;border:1.5px solid rgba(215,226,234,.6);color:#EAF1F8;font-weight:700;font-size:clamp(11px,1.5vw,15px);letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;min-width:280px;height:60px;background:rgba(10,26,48,.35);">Member Login</a>
         <!-- Meeting notes: the sheet of paper itself is the button (flanks the pills on the right) -->
         <a data-cta-magnet href="archive.html" class="cta-mini cta-mini-r" aria-label="Meeting notes — read the chapter minutes in The Archive">
@@ -989,21 +995,21 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 <!-- PRESIDENT LETTER -->
 <section id="president-letter" style="background:#13294B;color:#fff;padding:clamp(72px,11vw,150px) clamp(12px,2vw,24px);position:relative;overflow:clip;">
   <div id="pres-glow" style="position:absolute;top:0;left:0;width:860px;height:860px;border-radius:50%;background:radial-gradient(circle,rgba(75,156,211,.3) 0%,rgba(75,156,211,.1) 45%,transparent 70%);mix-blend-mode:screen;pointer-events:none;opacity:0;transition:opacity .5s ease,transform .22s ease-out;will-change:transform;z-index:1;"></div>
-  <div class="pres-inner" style="max-width:1320px;margin:0 auto;display:flex;gap:clamp(36px,5vw,64px);align-items:stretch;position:relative;z-index:2;">
-    <div data-reveal="0" class="pres-photo" style="flex:none;width:clamp(300px,34%,460px);position:relative;border-radius:22px;overflow:hidden;align-self:stretch;min-height:400px;">
+  <div class="pres-inner" style="max-width:1320px;margin:0 auto;display:block;position:relative;z-index:2;">
+    <div data-reveal="0" class="pres-photo" style="float:left;width:clamp(280px,32%,420px);aspect-ratio:4/5;position:relative;border-radius:22px;overflow:hidden;margin:0 clamp(28px,4vw,56px) 18px 0;">
       <img src="slot-president-photo.webp" alt="Pearce Barnes" style="display:block;width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;box-shadow:0 30px 70px -28px rgba(0,0,0,.7);">
       <div style="position:absolute;left:18px;bottom:18px;background:rgba(10,26,48,.78);backdrop-filter:blur(4px);padding:10px 16px;border-radius:10px;border:1px solid rgba(75,156,211,.4);z-index:2;">
         <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#7FB2E0;font-weight:600;">2026-2027</div>
         <div style="font-size:15px;font-weight:600;color:#EAF1F8;">Pearce Barnes</div>
       </div>
     </div>
-    <div data-reveal="0.12" style="flex:1;min-width:0;">
+    <div data-reveal="0.12" style="min-width:0;">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
         <span style="width:34px;height:1.5px;background:#B9975B;display:block;"></span>
         <span data-ce="pres-eyebrow" style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;">A Letter From the President</span>
       </div>
       <h2 data-ce="pres-h2" style="margin:0 0 22px;font-family:'Lora',serif;font-style:italic;font-weight:500;font-size:clamp(1.6rem,3vw,2.5rem);line-height:1.25;color:#EAF1F8;">Welcome to Delta Delta Sigma!</h2>
-      <div class="pres-body" style="border-left:2px solid rgba(75,156,211,.35);padding:6px 0 6px 24px;font-family:'Lora',serif;font-size:clamp(.95rem,1.3vw,1.1rem);line-height:1.8;">
+      <div class="pres-body" style="font-family:'Lora',serif;font-size:clamp(.95rem,1.3vw,1.1rem);line-height:1.8;">
         <p data-ce="pres-p1" style="margin:0 0 14px;">"Don't reinvent the wheel." – This timeless idiom was the most resonant advice I received as I began my journey through Chapel Hill.</p>
         <p data-ce="pres-p2" style="margin:0 0 14px;">My father stressed this notion, that amidst the fears of professional misguide and social eccentricity, two principles would guide my early experiences.</p>
         <p data-ce="pres-p3" style="margin:0 0 14px;">(1) Firstly, he advised that I lean on those who came before me. To not reinvent the wheel is to learn from the successes and the failures of those in recent past. To take advantage of the resources hiding in plain sight. Amongst the many corners of Carolina, DDS revealed itself to me as an aggregate of gems.</p>
@@ -1662,7 +1668,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
     </div>
     <div data-reveal="0.1" style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:clamp(56px,8vw,96px);">
       <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener" class="ig-btn" style="display:inline-flex;align-items:center;gap:10px;padding:16px 34px;border-radius:999px;background:#4B9CD3;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:transform .2s;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>Follow @unc_dds</a>
-      <button type="button" id="exec-copy" class="email-btn" data-email="ddsexec@unc.edu" style="display:inline-flex;align-items:center;gap:9px;padding:16px 34px;border-radius:999px;border:1.5px solid #D7E2EA;background:transparent;color:#D7E2EA;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,color .2s;">
+      <button type="button" id="exec-copy" class="email-btn" data-email="ddsexec@unc.edu" style="scroll-margin-top:140px;display:inline-flex;align-items:center;gap:9px;padding:16px 34px;border-radius:999px;border:1.5px solid #D7E2EA;background:transparent;color:#D7E2EA;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,color .2s;">
         <span class="exec-copy-ic" aria-hidden="true" style="display:inline-flex;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         </span>

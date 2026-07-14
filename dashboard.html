@@ -151,9 +151,9 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .cl-status small{color:var(--ink3);font-size:10.5px;letter-spacing:.5px;}
 .cl-status.is-rushee{border-color:rgba(98,225,255,.4);background:rgba(33,150,198,.1);}
 .cl-status.is-rushee b{color:var(--cyan-hi);}
-.cl-reqline{color:var(--ink3);font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:600;text-align:right;line-height:1.9;max-width:420px;}
+.cl-reqline{color:var(--ink3);font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:600;text-align:right;line-height:1.9;white-space:nowrap;}
 .cl-reqline b{color:var(--gold-hi);font-family:var(--grotesk);font-weight:600;}
-@media(max-width:700px){.cl-reqline{text-align:left;}}
+@media(max-width:700px){.cl-reqline{text-align:left;font-size:clamp(7px,2.3vw,10.5px);letter-spacing:.5px;}}
 /* three-point radial glow baked into the back of the cluster, with a whisper of
    grain masked to the glows themselves so the noise lives only in the light */
 #cluster .cl-bg{position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
