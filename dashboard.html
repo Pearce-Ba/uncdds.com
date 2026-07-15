@@ -491,10 +491,27 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .mention-opt b{font-size:13px;font-weight:600;color:inherit;}
 .mention-opt span{font-size:10.5px;color:var(--ink3);margin-left:auto;letter-spacing:.4px;}
 /* ---------- Members directory (profiles in space) ---------- */
-.mem-search-wrap{align-self:flex-end;}
+.mem-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-self:flex-end;}
 #mem-search{background:rgba(6,14,29,.75);border:1px solid var(--line);border-radius:12px;color:var(--ink);font-family:var(--mont);font-size:13px;padding:10px 14px;width:min(240px,42vw);transition:border-color .2s;}
 #mem-search:focus{outline:none;border-color:var(--blue-hi);}
-.mem-space{position:relative;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:clamp(12px,1.8vw,20px);padding:6px 2px;}
+#mem-edit.on{border-color:rgba(227,194,124,.6);color:var(--gold-hi);box-shadow:0 0 20px -8px rgba(227,194,124,.7);}
+.mem-editbar{margin:14px 0 4px;padding:11px 16px;border:1px dashed rgba(227,194,124,.45);border-radius:14px;background:rgba(227,194,124,.06);color:var(--gold-hi);font-size:12.5px;line-height:1.55;}
+.mem-group{margin-top:20px;}
+.mem-group-head{display:flex;align-items:center;gap:12px;margin:0 0 10px;min-height:30px;}
+.mem-group-head h4{margin:0;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;color:var(--ink3);font-weight:700;}
+.mem-more{border:1px solid var(--line);background:rgba(151,186,227,.06);border-radius:999px;color:var(--ink2);font-family:var(--mont);font-size:11px;letter-spacing:.6px;font-weight:600;padding:6px 14px;cursor:pointer;transition:border-color .2s,color .2s;}
+.mem-more:hover{border-color:rgba(127,178,224,.5);color:var(--ink);}
+.mem-pager{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.mem-pager+.mem-more{margin-left:10px;}
+.mem-pager[hidden]+.mem-more{margin-left:auto;}
+.mem-arrow{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:rgba(151,186,227,.06);color:var(--ink2);font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s;}
+.mem-arrow:hover:not(:disabled){border-color:rgba(127,178,224,.5);color:var(--ink);}
+.mem-arrow:disabled{opacity:.3;cursor:default;}
+#mem-pageinfo{font-size:11px;color:var(--ink3);letter-spacing:.6px;min-width:74px;text-align:center;}
+.mem-exec-row,.mem-space{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(12px,1.8vw,20px);padding:6px 2px;}
+.mem-editing .mem-card{animation:none;border-style:dashed;border-color:rgba(227,194,124,.35);}
+.mem-editing .mem-card:hover{border-color:rgba(227,194,124,.7);box-shadow:0 24px 46px -24px rgba(227,194,124,.6);}
+.mem-editing .mem-card::after{content:"\270E edit";position:absolute;top:10px;left:12px;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-hi);font-weight:700;}
 .mem-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:clamp(18px,2.4vw,26px) 16px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(165deg,rgba(151,186,227,.09),rgba(11,24,46,.5));cursor:pointer;color:var(--ink);font-family:var(--mont);overflow:hidden;transition:transform .28s cubic-bezier(.2,.7,.3,1),border-color .28s,box-shadow .28s;animation:memfloat var(--dur,7s) ease-in-out var(--dly,0s) infinite;}
 .mem-card:hover{transform:translateY(-6px);border-color:rgba(127,178,224,.5);box-shadow:0 24px 46px -24px rgba(75,156,211,.7);}
 .mem-card::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0%,rgba(127,178,224,.14),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none;}
@@ -516,6 +533,18 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .mem-detail-av img{width:100%;height:100%;object-fit:cover;}
 .mem-detail h3{margin:0;font-family:var(--grotesk);font-weight:600;font-size:1.5rem;}
 .mem-detail-meta{color:var(--ink3);font-size:12px;letter-spacing:.4px;margin-top:4px;}
+.mem-detail-mail{display:block;width:fit-content;margin-top:5px;color:var(--blue-hi);font-size:12px;letter-spacing:.3px;text-decoration:none;word-break:break-all;}
+.mem-detail-mail:hover{text-decoration:underline;}
+/* exec-only chapter-status editor inside the profile modal */
+.mem-status-edit{margin-top:16px;padding:14px 16px;border:1px dashed rgba(227,194,124,.45);border-radius:16px;background:rgba(227,194,124,.05);}
+.mem-status-edit h5{margin:0 0 10px;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-hi);}
+.mse-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.mse-row select,.mse-row input{background:rgba(6,14,29,.85);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:var(--mont);font-size:13px;padding:9px 12px;}
+.mse-row select:focus,.mse-row input:focus{outline:none;border-color:var(--gold-hi);}
+.mse-row input{flex:1;min-width:170px;}
+.mse-note{margin:9px 0 0;font-size:11.5px;color:var(--ink3);line-height:1.5;}
+.mse-note.ok{color:var(--gold-hi);}
+.mse-note.err{color:#ff9e9e;}
 .mem-detail-chip{display:inline-block;margin-top:8px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;color:var(--gold-hi);border:1px solid var(--acc-line);border-radius:999px;padding:4px 11px;}
 .mem-tags.is-quote{font-family:'Lora',serif;font-style:italic;color:var(--ink2);-webkit-line-clamp:3;}
 .mem-detail-quote{margin:16px 0 0;padding:0 0 0 16px;border-left:3px solid var(--acc-hi);font-family:'Lora',serif;font-style:italic;font-size:1.12rem;line-height:1.55;color:var(--ink);}
@@ -542,7 +571,8 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
   .chat-rail.open{transform:none;}
   .chat-head-back{display:flex;}
 }
-@media(max-width:520px){.mem-space{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}.mem-detail-grid{grid-template-columns:1fr;}}
+@media(max-width:960px){.mem-exec-row,.mem-space{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media(max-width:520px){.mem-exec-row,.mem-space{grid-template-columns:repeat(2,minmax(0,1fr));}.mem-detail-grid{grid-template-columns:1fr;}}
 
 /* ---------- Family ---------- */
 .fam-chips{display:flex;gap:9px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:thin;scrollbar-color:rgba(151,186,227,.25) transparent;}
@@ -911,9 +941,33 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
         <h2>Chapter members</h2>
         <p class="sub">Everyone signed into the chapter, floating in one place. Open a profile to read their story, message them, or find them on the family tree.</p>
       </div>
-      <div class="mem-search-wrap"><input id="mem-search" type="search" placeholder="Search members&hellip;" aria-label="Search members"></div>
+      <div class="mem-tools">
+        <input id="mem-search" type="search" placeholder="Search members&hellip;" aria-label="Search members">
+        <button class="btn" id="mem-edit" type="button" hidden>&#9998; Edit chapter members</button>
+      </div>
     </div>
-    <div id="mem-space" class="mem-space"></div>
+    <div class="mem-editbar" id="mem-editbar" hidden>Edit mode is on &mdash; search or click any member to set their chapter status: give them a board title, create a brand-new role, or return them to general member.</div>
+    <div id="mem-dir">
+      <div class="mem-group">
+        <div class="mem-group-head">
+          <h4>Executive board</h4>
+          <button class="mem-more" id="mem-exec-more" type="button" hidden>See more</button>
+        </div>
+        <div id="mem-exec-row" class="mem-exec-row"></div>
+      </div>
+      <div class="mem-group">
+        <div class="mem-group-head">
+          <h4>Members</h4>
+          <div class="mem-pager" id="mem-pager" hidden>
+            <button class="mem-arrow" id="mem-prev" type="button" aria-label="Previous 10 members">&#8249;</button>
+            <span id="mem-pageinfo" aria-live="polite"></span>
+            <button class="mem-arrow" id="mem-next" type="button" aria-label="Next 10 members">&#8250;</button>
+          </div>
+          <button class="mem-more" id="mem-all-more" type="button" hidden>See more</button>
+        </div>
+        <div id="mem-space" class="mem-space"></div>
+      </div>
+    </div>
   </section>
 
   <!-- ======== Chat ======== -->

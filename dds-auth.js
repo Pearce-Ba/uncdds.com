@@ -19,7 +19,7 @@
     'pjbarnes@unc.edu': 'President',
     'ltellez@unc.edu': 'Vice President',
     'bjgroth@unc.edu': 'Secretary',
-    'aapatel5@email.unc.edu': 'Treasurer',
+    'aapatel5@ad.unc.edu': 'Treasurer',
     'emillian@unc.edu': 'Service Coordinator',
     'breeh@unc.edu': 'Student Ambassador',
     'yunahkim@unc.edu': 'Website/Social Media',
@@ -260,6 +260,40 @@
       });
       if (changed) { m.up = Date.now(); saveMembers(list); notify(); }
       return { ok: true, changed: changed };
+    },
+
+    /* Known board titles, deduped — feeds the directory's status editor
+       so the president can reuse a title or type a brand-new one. */
+    execTitles: function () {
+      var seen = {}, out = [];
+      Object.keys(EXEC_BOARD).forEach(function (k) {
+        var t = EXEC_BOARD[k];
+        if (!seen[t]) { seen[t] = 1; out.push(t); }
+      });
+      return out;
+    },
+
+    /* Exec-only: change another member's chapter status from the directory.
+       A non-empty title promotes the row to role:'exec' with that title
+       (an existing board title or a brand-new one); an empty title returns
+       them to a general member. Editing your own row is blocked so the
+       board can't lock itself out. Note: a member whose email is on the
+       EXEC_BOARD roster above gets re-stamped with that title on their
+       next sign-in — edit the roster to change those permanently. */
+    execSetStatus: function (id, title) {
+      var me = api.current();
+      if (!me || !api.isExec(me)) return { ok: false, err: 'Exec only.' };
+      if (id === me.id) return { ok: false, err: 'You can’t change your own status.' };
+      var list = loadMembers();
+      var m = list.find(function (r) { return r.id === id; });
+      if (!m) return { ok: false, err: 'Member not found.' };
+      title = String(title || '').trim();
+      if (title) { m.role = 'exec'; m.execTitle = title; }
+      else { m.role = 'member'; delete m.execTitle; }
+      m.up = Date.now();
+      saveMembers(list);
+      notify();
+      return { ok: true, member: api.profile(id) };
     },
 
     /* The member's real board title ("President", "Treasurer", ...), or

@@ -1212,7 +1212,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
           </div>
         </div>
         <div class="om-cta-row">
-          <a class="om-cta" href="dashboard.html#members">Meet every member<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="om-cta" id="om-see-all" href="dashboard.html#members">Meet every member<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <span class="om-cta-sub">Sign in to see the live directory &amp; message anyone.</span>
         </div>
       </div>
@@ -2496,7 +2496,7 @@ const OFFICERS = [
   { idx:3, name:'Aaryan Patel',   role:'Treasurer',            major:'',
     bio:'Oversees chapter finances, ensuring resources are allocated effectively to maximize member value and experiences.',
     quote:'Here to help you find your people in DDS.', quoteBy:'Aaryan',
-    email:'aapatel5@email.unc.edu', phone:'', instagram:'', linkedin:'',
+    email:'aapatel5@ad.unc.edu', phone:'', instagram:'', linkedin:'',
     photos:[],
     photo:'slot-officer-photo-4.webp', bgPhoto:'slot-officer-photo-4.webp', softPhoto:'slot-officer-photo-4.webp' },
   { idx:4, name:'Emily Lian',     role:'Service Coordinator',  major:'',
@@ -3915,35 +3915,56 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 })();
 
 // ---- Our Members: auto-cycling cover-story spotlight ----
+// Indexes REAL chapter members: anyone who has set up their profile with a
+// photo and a bio/quote is pulled from the shared roster and featured here.
+// The sample cast below only shows until at least one member qualifies.
 (function initMemberSpotlight(){
   const sec = document.getElementById('members-preview');
   if (!sec) return;
-  const MEMBERS = [
-    { name:'Maya Feldman',  role:'Class of 2026 · Biology',        focus:'Oral & Maxillofacial Surgery', fc:'#4B9CD3',
+  const SAMPLE = [
+    { name:'Maya Feldman',  role:'Class of 2026 · Biology',        focus:'Oral & Maxillofacial Surgery', fc:'#4B9CD3', img:'slot-officer-photo-1.webp',
       quote:'The OR is where biology stops being a textbook. I scrub in every chance I get, and it’s the reason I’m here.' },
-    { name:'Chris Okafor',  role:'Class of 2025 · Chemistry',      focus:'Pediatric Dentistry',          fc:'#B9975B',
+    { name:'Chris Okafor',  role:'Class of 2025 · Chemistry',      focus:'Pediatric Dentistry',          fc:'#B9975B', img:'slot-officer-photo-2.webp',
       quote:'A kid who leaves unafraid of the chair is a patient for life. That first visit is everything.' },
-    { name:'Priya Shah',    role:'Class of 2027 · Biology',        focus:'Orthodontics',                 fc:'#3FB7A6',
+    { name:'Priya Shah',    role:'Class of 2027 · Biology',        focus:'Orthodontics',                 fc:'#3FB7A6', img:'slot-officer-photo-5.webp',
       quote:'There’s a quiet math to moving teeth a millimeter at a time — I could study it for hours.' },
-    { name:'Ethan Cole',    role:'Class of 2027 · Public Health',  focus:'Public Health Dentistry',      fc:'#E58AA5',
+    { name:'Ethan Cole',    role:'Class of 2027 · Public Health',  focus:'Public Health Dentistry',      fc:'#E58AA5', img:'slot-officer-photo-7.webp',
       quote:'Access is the whole game. I want to build clinics in the counties that never had one.' },
-    { name:'Hannah Wu',     role:'Class of 2026 · Materials Sci.', focus:'Biomaterials Research',        fc:'#9B8CE0',
+    { name:'Hannah Wu',     role:'Class of 2026 · Materials Sci.', focus:'Biomaterials Research',        fc:'#9B8CE0', img:'slot-officer-photo-6.webp',
       quote:'The composite in a filling started in a lab like the one I work in. Research is dentistry’s future tense.' },
-    { name:'Dev Patel',     role:'Class of 2028 · Neuroscience',   focus:'Endodontics',                  fc:'#62C6D8',
+    { name:'Dev Patel',     role:'Class of 2028 · Neuroscience',   focus:'Endodontics',                  fc:'#62C6D8', img:'slot-officer-photo-4.webp',
       quote:'Everyone dreads a root canal — I want to be the reason they walk out saying it was nothing.' }
   ];
-  const imgs = Array.from(sec.querySelectorAll('#om-portrait img'));
-  const thumbs = Array.from(sec.querySelectorAll('.om-thumb'));
+  const PALETTE = ['#4B9CD3','#B9975B','#3FB7A6','#E58AA5','#9B8CE0','#62C6D8'];
+  const portrait = document.getElementById('om-portrait');
+  const rail = document.getElementById('om-rail');
   const nameEl = document.getElementById('om-name');
   const roleEl = document.getElementById('om-role');
   const focusEl = document.getElementById('om-focus-t');
   const quoteEl = document.getElementById('om-quote');
   const detailEl = document.getElementById('om-detail');
   const pindex = document.getElementById('om-pindex');
+  let MEMBERS = [], imgs = [], thumbs = [], realList = [];
   let cur = 0, timer = null;
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // a profile counts as "set up" once it has a photo and a bio/quote
+  const profileReady = (m) => !!(m.photo && (m.bio || m.quote || m.interests));
+  const realCast = () => {
+    try {
+      return (window.DDSAuth ? DDSAuth.members() : []).filter(profileReady).map((m, i) => ({
+        name: m.name,
+        role: 'Class of ' + (m.gradYear || '—') + (m.major ? ' · ' + m.major : ''),
+        focus: (DDSAuth.execTitle && DDSAuth.execTitle(m)) || String(m.interests || '').split(/[,;·]/)[0].trim() || 'DDS Member',
+        fc: PALETTE[i % PALETTE.length],
+        quote: m.quote || m.bio,
+        img: m.photo
+      }));
+    } catch (e) { return []; }
+  };
+
   const show = (i) => {
+    if (!MEMBERS.length) return;
     cur = (i + MEMBERS.length) % MEMBERS.length;
     const m = MEMBERS[cur];
     imgs.forEach((im, k) => im.classList.toggle('on', k === cur));
@@ -3956,9 +3977,32 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     pindex.textContent = String(cur + 1).padStart(2, '0') + ' / ' + String(MEMBERS.length).padStart(2, '0');
   };
   const advance = () => show(cur + 1);
-  const restart = () => { if (REDUCED) return; clearInterval(timer); timer = setInterval(advance, 5200); };
+  const restart = () => { clearInterval(timer); if (REDUCED || MEMBERS.length < 2) return; timer = setInterval(advance, 5200); };
 
-  thumbs.forEach((t) => t.addEventListener('click', () => { show(+t.getAttribute('data-i')); restart(); }));
+  // (re)build the portrait stack + thumb rail for whichever cast is active
+  const build = (list) => {
+    MEMBERS = list; cur = 0;
+    portrait.querySelectorAll('img').forEach((im) => im.remove());
+    rail.innerHTML = '';
+    list.forEach((m, i) => {
+      const im = document.createElement('img');
+      im.src = m.img; im.alt = '';
+      portrait.insertBefore(im, pindex);
+      const b = document.createElement('button');
+      b.className = 'om-thumb'; b.type = 'button';
+      b.style.setProperty('--fc', m.fc);
+      b.setAttribute('aria-label', m.name);
+      const ti = document.createElement('img'); ti.src = m.img; ti.alt = '';
+      b.appendChild(ti);
+      b.addEventListener('click', () => { show(i); restart(); });
+      rail.appendChild(b);
+    });
+    imgs = Array.from(portrait.querySelectorAll('img'));
+    thumbs = Array.from(rail.querySelectorAll('.om-thumb'));
+    show(0);
+    restart();
+  };
+
   document.getElementById('om-prev').addEventListener('click', () => { show(cur - 1); restart(); });
   document.getElementById('om-next').addEventListener('click', () => { show(cur + 1); restart(); });
   sec.addEventListener('mouseenter', () => clearInterval(timer));
@@ -3967,8 +4011,16 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   if ('IntersectionObserver' in window) {
     new IntersectionObserver((es) => es.forEach((e) => { e.isIntersecting ? restart() : clearInterval(timer); }),
       { threshold: 0.25 }).observe(sec);
-  } else { restart(); }
-  show(0);
+  }
+
+  // The "Meet every member" CTA links straight to the dashboard directory.
+  // (Its old on-page overlay now lives in dds-announce.js as the one-time
+  // "Members with profiles" intro card in the announcement stack.)
+
+  // real members first — refreshed after the cloud roster arrives
+  const load = () => { realList = realCast(); build(realList.length ? realList : SAMPLE); };
+  load();
+  if (window.DDSCloud && DDSCloud.enabled && DDSCloud.pullNow) DDSCloud.pullNow(['members']).then(load).catch(() => {});
 })();
 
 // ---- Our Members: a cursor spotlight that lights up the text behind it ----
