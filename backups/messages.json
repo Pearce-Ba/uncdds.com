@@ -1,16 +1,16 @@
 [
  {
+  "del": true,
   "id": "xmrfx7q9lbox1v",
-  "up": 1783819546802,
-  "del": true
+  "up": 1783819546802
  },
  {
+  "id": "xmrh442nhhva2d",
+  "text": "Goat",
   "at": 1783819566701,
-  "byId": "ex1",
+  "up": 1783819566701,
   "by": "Pearce Barnes",
   "ch": "dm-ex1-umr9hrkfmv17w9",
-  "text": "Goat",
-  "id": "xmrh442nhhva2d",
-  "up": 1783819566701
+  "byId": "ex1"
  }
 ]
