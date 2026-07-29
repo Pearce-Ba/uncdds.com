@@ -125,7 +125,13 @@ body.nav-open{overflow:hidden;}
 #exec-copy.is-copied{background:#B9975B;border-color:#B9975B;color:#0A1A30;}
 #exec-copy .exec-copy-txt{transition:none;}
 #exec-copy:focus-visible{outline:2px solid #B9975B;outline-offset:3px;}
-.cal-btn:hover{transform:translateY(-3px);}
+/* "Add …" subscribe buttons — one per calendar, each wearing its calendar's hue (--cc) */
+.cal-adds{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:clamp(9px,1.4vw,14px);}
+.cal-btn{--cc:#4B9CD3;display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:999px;border:1px solid var(--cc);background:var(--cc);color:#0A1A30;font-weight:700;font-size:12px;letter-spacing:1.8px;text-transform:uppercase;text-decoration:none;box-shadow:0 14px 32px -20px var(--cc);transition:transform .2s,box-shadow .2s,filter .2s;}
+.cal-btn:hover{transform:translateY(-3px);filter:brightness(1.07);box-shadow:0 20px 40px -18px var(--cc);}
+.cal-btn:focus-visible{outline:2px solid var(--cc);outline-offset:3px;}
+.cal-btn svg{flex:none;}
+@media(max-width:520px){.cal-btn{padding:12px 18px;font-size:11px;letter-spacing:1.3px;gap:7px;}}
 @keyframes mq-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes mq-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}
 @keyframes of-float1{0%,100%{transform:translate(-8%,-6%) scale(1);}50%{transform:translate(10%,8%) scale(1.18);}}
@@ -155,7 +161,10 @@ body.nav-open{overflow:hidden;}
 .upe-day{color:#7FB2E0;font-weight:700;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;}
 .upe-time{color:#8CA6C4;font-size:11.5px;letter-spacing:.4px;}
 .upe-body{flex:1;min-width:0;}
+.upe-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
 .upe-title{margin:0;font-weight:700;font-size:clamp(1rem,1.5vw,1.15rem);color:#EAF1F8;letter-spacing:.2px;}
+/* which calendar an event came from — same hue as its chips and its Add button */
+.upe-cal{flex:none;border:1px solid;border-radius:999px;padding:2px 9px;font-size:9.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;line-height:1.7;white-space:nowrap;}
 .upe-loc{display:inline-flex;align-items:center;gap:6px;margin-top:5px;color:#B9975B;font-weight:600;font-size:11.5px;letter-spacing:1px;text-transform:uppercase;}
 .upe-desc{margin:8px 0 0;color:#A9C0D8;font-weight:300;line-height:1.65;font-size:.92rem;white-space:pre-line;}
 .upe-more{border:0;background:none;padding:0;color:#7FB2E0;font-family:inherit;font-weight:600;font-size:.85rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
@@ -169,6 +178,25 @@ body.nav-open{overflow:hidden;}
 .calv-btn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 12px;border-radius:999px;border:1px solid rgba(127,178,224,.35);background:rgba(75,156,211,.1);color:#BFD7EC;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s;}
 .calv-btn:hover{background:rgba(75,156,211,.24);color:#fff;}
 .calv-title{margin:0;font-weight:800;text-transform:uppercase;letter-spacing:1px;font-size:clamp(.95rem,1.6vw,1.25rem);color:#E8F0F8;text-align:center;flex:1;}
+/* Calendar filter tags — rounded pills between the date and the week/month
+   toggle. Each carries its calendar's hue in --cc (fill/border precomputed in
+   --cbg/--cbd); all start checked and any combination can be on at once. */
+.calv-filters{flex:none;display:flex;flex-wrap:wrap;gap:7px;align-items:center;justify-content:center;}
+.calv-chip{--cc:#4B9CD3;--cbg:rgba(75,156,211,.14);--cbd:rgba(75,156,211,.5);
+  display:inline-flex;align-items:center;gap:7px;padding:7px 13px 7px 10px;border-radius:999px;
+  border:1px solid rgba(127,178,224,.24);background:rgba(255,255,255,.03);color:#7E97B4;
+  font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;
+  cursor:pointer;white-space:nowrap;transition:background .2s,border-color .2s,color .2s,opacity .2s;}
+.calv-chip .cc-box{flex:none;width:14px;height:14px;border-radius:5px;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s,color .2s;}
+.calv-chip .cc-box svg{opacity:0;transition:opacity .18s;}
+.calv-chip[aria-pressed="true"]{color:var(--cc);background:var(--cbg);border-color:var(--cbd);}
+.calv-chip[aria-pressed="true"] .cc-box{background:var(--cc);border-color:var(--cc);color:#0A1A30;}
+.calv-chip[aria-pressed="true"] .cc-box svg{opacity:1;}
+.calv-chip[aria-pressed="false"]{opacity:.6;}
+.calv-chip:hover{opacity:1;color:var(--cc);border-color:var(--cbd);}
+.calv-chip:focus-visible{outline:2px solid var(--cc);outline-offset:2px;}
+/* below ~1180px the four pills get their own centred row so the bar stays balanced */
+@media(max-width:1180px){.calv-bar{row-gap:12px;}.calv-filters{order:4;flex-basis:100%;}}
 .calv-toggle{display:flex;border:1px solid rgba(127,178,224,.35);border-radius:999px;overflow:hidden;}
 .calv-tab{border:0;background:none;color:#9FBEDC;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:9px 18px;cursor:pointer;transition:background .2s,color .2s;}
 .calv-tab[aria-pressed="true"]{background:#4B9CD3;color:#0A1A30;}
@@ -196,9 +224,11 @@ a.calv-ev:hover{filter:brightness(1.3);}
   transition:opacity .26s ease,transform .34s cubic-bezier(.21,1.02,.55,1),top .3s ease,left .3s ease,width .3s ease,height .3s ease,visibility 0s linear .34s;}
 .calv-pop.show{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);
   transition:opacity .22s ease,transform .34s cubic-bezier(.21,1.02,.55,1),top .3s ease,left .3s ease,width .3s ease,height .3s ease,visibility 0s;}
-.calv-pop-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex:none;}
+.calv-pop-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex:none;flex-wrap:wrap;}
 .calv-pop-dot{width:9px;height:9px;border-radius:50%;background:var(--evc,#4B9CD3);flex:none;}
 .calv-pop-head time{color:#9FBEDC;font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;}
+/* names the calendar this event is drawn from, in that calendar's hue */
+.calv-pop-cal{margin-left:auto;flex:none;border:1px solid var(--evc,#4B9CD3);border-radius:999px;padding:2px 9px;color:var(--evc,#4B9CD3);font-size:9.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;white-space:nowrap;}
 .calv-pop-title{margin:0 0 4px;color:#EAF1F8;font-weight:800;font-size:15px;line-height:1.3;flex:none;}
 .calv-pop-loc{display:flex;align-items:center;gap:6px;color:#8FA9C4;font-size:11.5px;margin-bottom:8px;flex:none;}
 .calv-pop-body{flex:1;min-height:0;overflow-y:auto;color:#C9D9E8;font-size:12.5px;line-height:1.6;font-weight:300;scrollbar-width:thin;scrollbar-color:rgba(151,186,227,.3) transparent;padding-right:4px;}
@@ -277,6 +307,7 @@ a.calv-wev:hover{filter:brightness(1.3);}
 .nm-glass .upe-day{color:#93C2EC;text-shadow:0 1px 3px rgba(0,0,0,.55);}
 .nm-glass .upe-time{color:#C6D6E8;text-shadow:0 1px 3px rgba(0,0,0,.5);}
 .nm-glass .upe-title{color:#FFFFFF;text-shadow:0 1px 6px rgba(0,0,0,.55);}
+.nm-glass .upe-cal{text-shadow:0 1px 3px rgba(0,0,0,.5);}
 .nm-glass .upe-loc{color:#E4C67F;text-shadow:0 1px 3px rgba(0,0,0,.5);}
 .nm-glass .upe-desc{margin-top:4px;color:#D6E2EF;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 4px rgba(0,0,0,.5);}
 .nm-glass .upe-ell,.nm-glass .upe-more{display:none;}
@@ -1836,9 +1867,10 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div style="color:#7FB2E0;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-bottom:18px;">Stay In The Loop</div>
       <h2 style="margin:0 0 22px;font-weight:900;text-transform:uppercase;line-height:.86;letter-spacing:-0.02em;font-size:clamp(2.4rem,8vw,6rem);background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Our Calendar</h2>
       <p style="margin:0 auto;max-width:560px;color:#A9C0D8;font-weight:300;line-height:1.65;font-size:clamp(.98rem,1.4vw,1.18rem);">Professional and social events for the semester — meetings, service, and socials, all in one place.</p>
-      <div style="margin-top:clamp(24px,3vw,34px);">
-        <a href="https://calendar.google.com/calendar/u/0?cid=NTRlYzRhMjhiM2UxMmQ0NDJkNzJmMDMxZmUyZDY0NGI2MGZmYmY0YzNiYmM2OGMzY2EwZGE2YjkzMzFlNGFkZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank" rel="noopener" class="cal-btn" style="display:inline-flex;align-items:center;gap:10px;padding:16px 34px;border-radius:999px;background:#4B9CD3;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:transform .2s;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>Add to Calendar</a>
-      </div>
+      <!-- One "Add …" button per calendar, in the same left-to-right order and
+           the same colours as the filter tags below. Built by JS from
+           DDSEvents.CALENDARS so the exec button appears only for exec. -->
+      <div class="cal-adds" id="cal-adds" style="margin-top:clamp(24px,3vw,34px);"></div>
     </div>
     <!-- Live upcoming events — pulled straight from the Google Calendar below -->
     <div id="cal-upcoming" style="max-width:780px;margin:0 auto;">
@@ -1860,6 +1892,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
             <button type="button" class="calv-btn" id="calv-next" aria-label="Next"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
           </div>
           <h3 class="calv-title" id="calv-title" aria-live="polite"></h3>
+          <div class="calv-filters" id="calv-filters" role="group" aria-label="Which calendars to show"></div>
           <div class="calv-toggle" role="group" aria-label="Calendar view">
             <button type="button" class="calv-tab" id="calv-tab-week" aria-pressed="false">Week</button>
             <button type="button" class="calv-tab" id="calv-tab-month" aria-pressed="true">Month</button>
@@ -1876,7 +1909,10 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <svg class="calv-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
       </summary>
       <div style="border:1px solid rgba(75,156,211,.3);border-radius:24px;overflow:hidden;box-shadow:0 30px 80px -40px rgba(0,0,0,.7);background:#0A1A30;margin-top:14px;">
-        <iframe id="gcal-frame" data-src="https://calendar.google.com/calendar/embed?height=800&wkst=1&ctz=America%2FNew_York&title=UNC%20DDS%20Professional%20and%20Social%20Calendar&showPrint=0&showCalendars=0&src=NTRlYzRhMjhiM2UxMmQ0NDJkNzJmMDMxZmUyZDY0NGI2MGZmYmY0YzNiYmM2OGMzY2EwZGE2YjkzMzFlNGFkZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23e67c73" title="UNC DDS Calendar" style="border:0;display:block;width:100%;height:min(800px,80vh);" frameborder="0" scrolling="no"></iframe>
+        <!-- src is assembled at open time from every calendar the viewer may
+             see; showCalendars=1 gives Google's own checkbox list so each one
+             can be switched on and off inside the single embedded calendar -->
+        <iframe id="gcal-frame" title="UNC DDS Calendar" style="border:0;display:block;width:100%;height:min(800px,80vh);" frameborder="0" scrolling="no"></iframe>
       </div>
     </details>
     <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;margin-top:clamp(56px,8vw,100px);padding-top:28px;border-top:1px solid rgba(255,255,255,.12);">
@@ -2020,26 +2056,61 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
   windowDays: 62,
   maxItems: 1,
   cacheKey: 'dds-events-hero-cache-v1',
-  empty: 'No meetings on the calendar just yet — check back soon.'
+  empty: 'Nothing on the calendar just yet — check back soon.'
 });
 // ---- Week / month calendar views, drawn live from the Google Calendar ----
 (function initCalViews(){
   var body = document.getElementById('calv-body');
   if (!body || !window.DDSEvents || !DDSEvents.fetchRange) return;
   var titleEl = document.getElementById('calv-title');
-  var VIEW_KEY = 'dds-calv-view', LS_KEY = 'dds-calv-cache-v2';
+  var filtersEl = document.getElementById('calv-filters');
+  var VIEW_KEY = 'dds-calv-view', LS_KEY = 'dds-calv-cache-v3', CALS_KEY = 'dds-calv-cals-v1';
   var view = 'month';
   try { if (localStorage.getItem(VIEW_KEY) === 'week') view = 'week'; } catch (e) {}
   var anchor = new Date(); anchor.setHours(0,0,0,0);
   var reqId = 0;
-  var curEvs = [];   // events behind the currently painted view (chips carry data-ei indexes)
+  var allEvs = [];   // everything fetched for the painted range, before filtering
+  var curEvs = [];   // events actually painted (chips carry data-ei indexes into this)
   var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
+  var rgba = DDSEvents.rgba;
 
-  // Google Calendar's standard event palette; no colorId = the calendar default
-  var GCOLORS = {1:'#7986cb',2:'#33b679',3:'#8e24aa',4:'#e67c73',5:'#f6bf26',6:'#f4511e',7:'#039be5',8:'#616161',9:'#3f51b5',10:'#0b8043',11:'#d50000'};
+  /* An event wears the colour of the calendar it came from — meetings red,
+     service yellow, socials green, exec light blue — so the grid, the filter
+     tags and the Add buttons all read as one system. */
   var DEFC = '#e67c73';
-  function colorOf(ev){ return GCOLORS[ev.colorId] || DEFC; }
-  function rgba(hex,a){ var n = parseInt(hex.slice(1),16); return 'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+a+')'; }
+  function colorOf(ev){ return ev.calColor || DEFC; }
+
+  /* ---- which calendars are switched on ---------------------------------
+     Every calendar the viewer may see starts checked; unchecking is what gets
+     remembered, so a calendar added later (or the exec one appearing on
+     sign-in) shows up on by default rather than silently hidden. */
+  var offCals = {};
+  try { (JSON.parse(localStorage.getItem(CALS_KEY)) || []).forEach(function(k){ offCals[k] = true; }); } catch (e) {}
+  function saveCals(){
+    try { localStorage.setItem(CALS_KEY, JSON.stringify(Object.keys(offCals).filter(function(k){ return offCals[k]; }))); } catch (e) {}
+  }
+  function shown(ev){ return !offCals[ev.cal]; }
+
+  var CHECK = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  function renderFilters(){
+    filtersEl.innerHTML = DDSEvents.activeCals().map(function(c){
+      var on = !offCals[c.key];
+      return '<button type="button" class="calv-chip" data-cal="' + c.key + '" aria-pressed="' + on + '"' +
+        ' title="' + esc(c.short) + ' — click to show or hide these events"' +
+        ' style="--cc:' + c.color + ';--cbg:' + rgba(c.color,.14) + ';--cbd:' + rgba(c.color,.5) + ';">' +
+        '<span class="cc-box" aria-hidden="true">' + CHECK + '</span>' + esc(c.label) + '</button>';
+    }).join('');
+  }
+  filtersEl.addEventListener('click', function(e){
+    var chip = e.target.closest('.calv-chip');
+    if (!chip) return;
+    var key = chip.getAttribute('data-cal');
+    offCals[key] = !offCals[key];
+    chip.setAttribute('aria-pressed', String(!offCals[key]));
+    saveCals();
+    hidePop();
+    paintFiltered();
+  });
 
   function timeRange(ev){
     if (ev.allDay) return 'All day';
@@ -2078,9 +2149,14 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
     });
     return byDay;
   }
-  function chipStyle(ev, bgA){
+  /* Shared chip plumbing: the index the hover card looks up, a native tooltip
+     naming the source calendar (the fallback where the hover card can't go —
+     touch screens, the tiny mobile bars), and the calendar's colour. */
+  function chipAttrs(ev, bgA){
     var c = colorOf(ev);
-    return 'style="--evc:' + c + ';background:' + rgba(c, bgA) + ';border-color:' + rgba(c,.36) + ';border-left-color:' + c + ';"';
+    return ' data-ei="' + curEvs.indexOf(ev) + '"' +
+      ' title="' + esc((ev.calLabel ? ev.calLabel + ' calendar · ' : '') + ev.title) + '"' +
+      ' style="--evc:' + c + ';background:' + rgba(c, bgA) + ';border-color:' + rgba(c,.36) + ';border-left-color:' + c + ';"';
   }
 
   function renderMonth(evs){
@@ -2094,7 +2170,7 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
         var inner = '<span class="ce-t">' + esc(ev.allDay ? 'All day' : ev.start.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' })) + '</span>' +
           '<span class="ce-n">' + esc(ev.title) + '</span>' +
           (ev.location ? '<span class="ce-l">' + esc(ev.location) + '</span>' : '');
-        var ei = ' data-ei="' + curEvs.indexOf(ev) + '" ' + chipStyle(ev,.13);
+        var ei = chipAttrs(ev,.13);
         return ev.link
           ? '<a class="calv-ev"' + ei + ' href="' + esc(ev.link) + '" target="_blank" rel="noopener">' + inner + '</a>'
           : '<span class="calv-ev"' + ei + '>' + inner + '</span>';
@@ -2117,7 +2193,7 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
       var d = new Date(a); d.setDate(a.getDate()+i);
       var items = (byDay[d.toDateString()] || []).map(function(ev){
         var inner = '<time>' + esc(timeRange(ev)) + '</time><span>' + esc(ev.title) + (ev.location ? ' · ' + esc(ev.location) : '') + '</span>';
-        var ei = ' data-ei="' + curEvs.indexOf(ev) + '" ' + chipStyle(ev,.10);
+        var ei = chipAttrs(ev,.10);
         return ev.link
           ? '<a class="calv-wev"' + ei + ' href="' + esc(ev.link) + '" target="_blank" rel="noopener">' + inner + '</a>'
           : '<div class="calv-wev"' + ei + '>' + inner + '</div>';
@@ -2156,12 +2232,25 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
     document.getElementById('calv-tab-week').setAttribute('aria-pressed', String(view === 'week'));
     document.getElementById('calv-tab-month').setAttribute('aria-pressed', String(view === 'month'));
   }
+  /* Re-draw from what's already fetched — toggling a tag never refetches. */
+  function paintFiltered(){
+    var cals = DDSEvents.activeCals();
+    if (cals.length && cals.every(function(c){ return offCals[c.key]; })){
+      curEvs = [];
+      body.innerHTML = '<div class="calv-load">No calendars selected — switch one back on above.</div>';
+      return;
+    }
+    curEvs = allEvs.filter(shown);
+    (view === 'week' ? renderWeek : renderMonth)(curEvs);
+  }
   function update(){
     syncTabs();
+    renderFilters();
     hidePop();
     var r = range(), id = ++reqId;
-    var key = view + ':' + r.a.toISOString().slice(0,10);
-    var paint = function(evs){ if (id !== reqId) return; curEvs = evs; (view === 'week' ? renderWeek : renderMonth)(evs); };
+    var cals = DDSEvents.activeCals();
+    var key = view + ':' + r.a.toISOString().slice(0,10) + ':' + cals.map(function(c){ return c.key; }).join('+');
+    var paint = function(evs){ if (id !== reqId) return; allEvs = evs; paintFiltered(); };
     var cached = readCache(key);
     if (cached) paint(cached);
     else body.innerHTML = '<div class="calv-load">Loading the calendar…</div>';
@@ -2281,7 +2370,8 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
   function fillPop(ev){
     var PIN = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
     pop.innerHTML =
-      '<div class="calv-pop-head"><span class="calv-pop-dot"></span><time>' + esc(fmtRange(ev)) + '</time></div>' +
+      '<div class="calv-pop-head"><span class="calv-pop-dot"></span><time>' + esc(fmtRange(ev)) + '</time>' +
+        (ev.calLabel ? '<span class="calv-pop-cal">' + esc(ev.calLabel) + '</span>' : '') + '</div>' +
       '<h4 class="calv-pop-title">' + esc(ev.title) + '</h4>' +
       (ev.location ? '<div class="calv-pop-loc">' + PIN + esc(ev.location) + '</div>' : '') +
       '<div class="calv-pop-body">' + (descHtml(ev) || '<p style="color:#54708E;font-style:italic;">No description.</p>') + attHtml(ev) + '</div>' +
@@ -2341,15 +2431,52 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
 
   // stay fresh while the tab is open, same cadence as the list above
   setInterval(function(){ if (document.visibilityState === 'visible') update(); }, 300000);
+  // signing in or out changes which calendars exist — rebuild the tags and refetch
+  try { if (window.DDSAuth && DDSAuth.onChange) DDSAuth.onChange(update); } catch (e) {}
   update();
 })();
-// The raw Google embed only loads once its dropdown is opened
+/* ---- "Add …" buttons, one per calendar the viewer may see ----
+   Each links to Google's subscribe URL for that calendar, so the copy that
+   lands in someone's own calendar keeps updating instead of freezing at
+   whatever a downloaded snapshot held. */
+(function initCalAdds(){
+  var wrap = document.getElementById('cal-adds');
+  if (!wrap || !window.DDSEvents) return;
+  var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
+  var ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>';
+  function render(){
+    wrap.innerHTML = DDSEvents.activeCals().map(function(c){
+      return '<a class="cal-btn" style="--cc:' + c.color + ';" href="' + esc(c.subscribe) + '" target="_blank" rel="noopener"' +
+        ' title="Subscribe to the DDS ' + esc(c.label) + ' calendar">' + ICON + 'Add ' + esc(c.short) + '</a>';
+    }).join('');
+  }
+  render();
+  try { if (window.DDSAuth && DDSAuth.onChange) DDSAuth.onChange(render); } catch (e) {}
+})();
+/* The raw Google embed only loads once its dropdown is opened. Its src carries
+   every calendar the viewer may see, each with its own colour, and
+   showCalendars=1 so Google's own checkbox list can switch them on and off
+   inside the one embedded calendar. */
 (function(){
   var det = document.getElementById('cal-embed'), fr = document.getElementById('gcal-frame');
-  if (!det || !fr) return;
-  det.addEventListener('toggle', function(){
-    if (det.open && !fr.src) fr.src = fr.getAttribute('data-src');
-  });
+  if (!det || !fr || !window.DDSEvents) return;
+  function src(){
+    var cals = DDSEvents.activeCals();
+    return 'https://calendar.google.com/calendar/embed?height=800&wkst=1&ctz=America%2FNew_York' +
+      '&title=' + encodeURIComponent('UNC DDS Calendar') +
+      '&showPrint=0&showTz=0&showCalendars=1&mode=MONTH' +
+      cals.map(function(c){ return '&src=' + encodeURIComponent(c.cid); }).join('') +
+      cals.map(function(c){ return '&color=' + encodeURIComponent(c.color); }).join('');
+  }
+  var loaded = null;   // the src currently in the frame, null until first open
+  function sync(){
+    if (!det.open){ loaded = null; fr.removeAttribute('src'); return; }
+    var s = src();
+    if (s !== loaded){ loaded = s; fr.src = s; }
+  }
+  det.addEventListener('toggle', sync);
+  // an exec signing in mid-visit gets the exec calendar folded into the embed
+  try { if (window.DDSAuth && DDSAuth.onChange) DDSAuth.onChange(sync); } catch (e) {}
 })();
 // Radial glow that tracks the cursor inside the glass lens (fade in/out is CSS-driven)
 (function () {
