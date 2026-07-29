@@ -35,6 +35,12 @@
     if (title) { m.role = 'exec'; m.execTitle = title; }
   }
 
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
   function loadMembers() {
     try { return JSON.parse(localStorage.getItem(MEMBERS_KEY)) || []; }
     catch (e) { return []; }
@@ -339,10 +345,87 @@
 
     onChange: function (fn) { listeners.push(fn); },
 
-    /* Send a signed-out visitor to the login page, then back. */
+    /* Send a signed-out visitor to the login page, then back. Reserved for
+       pages that have nothing to show a visitor at all (member.html). Every
+       other surface is browsable signed-out and calls promptLogin() at the
+       moment the visitor tries to record something. */
     requireLogin: function (next) {
       if (api.current()) return true;
       location.href = 'login.html?next=' + encodeURIComponent(next || (location.pathname.split('/').pop() || 'index.html') + location.hash);
+      return false;
+    },
+
+    /* The soft gate. Nothing on this site is hidden from a visitor — but
+       writing (notes, ratings, chat, photos, comments, hours…) needs an
+       account, so this raises a small overlay explaining what the action
+       needs instead of yanking the page away. Returns true when the member
+       is already signed in, so callers read as:
+           if (!DDSAuth.promptLogin(next, 'post in chapter chat')) return; */
+    promptLogin: function (next, action) {
+      if (api.current()) return true;
+      var back = next || (location.pathname.split('/').pop() || 'index.html') + location.search + location.hash;
+      var href = 'login.html?next=' + encodeURIComponent(back);
+
+      if (!document.getElementById('dds-gate-css')) {
+        var st = document.createElement('style');
+        st.id = 'dds-gate-css';
+        st.textContent = [
+          '.dds-gate{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;',
+          'background:rgba(6,13,26,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .22s ease;}',
+          '.dds-gate.on{opacity:1;}',
+          '.dds-gate-card{position:relative;width:min(420px,100%);background:#13294B;color:#F5F7FA;border:1px solid rgba(185,151,91,.42);',
+          'border-radius:18px;padding:30px 28px 26px;text-align:center;box-shadow:0 26px 70px rgba(0,0,0,.55);',
+          'transform:translateY(12px) scale(.97);transition:transform .24s cubic-bezier(.2,.8,.3,1);',
+          'font-family:Montserrat,system-ui,-apple-system,Segoe UI,sans-serif;}',
+          '.dds-gate.on .dds-gate-card{transform:none;}',
+          '.dds-gate-ico{width:44px;height:44px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;',
+          'background:rgba(185,151,91,.16);border:1px solid rgba(185,151,91,.5);color:#B9975B;}',
+          '.dds-gate-card h3{margin:0 0 8px;font-size:1.16rem;font-weight:800;letter-spacing:.2px;color:#fff;}',
+          '.dds-gate-card p{margin:0 0 20px;font-size:.86rem;line-height:1.65;color:#D7E2EA;}',
+          '.dds-gate-btns{display:flex;flex-direction:column;gap:9px;}',
+          '.dds-gate-btns a,.dds-gate-btns button{display:block;width:100%;padding:12px 16px;border-radius:999px;font:inherit;',
+          'font-size:.83rem;font-weight:700;letter-spacing:.4px;cursor:pointer;text-decoration:none;border:1px solid transparent;transition:.18s;}',
+          '.dds-gate-go{background:#B9975B;color:#13294B;}.dds-gate-go:hover{background:#c9a76a;}',
+          '.dds-gate-new{background:transparent;color:#F5F7FA;border-color:rgba(215,226,234,.36);}',
+          '.dds-gate-new:hover{border-color:#B9975B;color:#B9975B;}',
+          '.dds-gate-no{background:none;color:#9FB6CE;border:0;font-size:.78rem;font-weight:600;padding:4px;}',
+          '.dds-gate-no:hover{color:#D7E2EA;}'
+        ].join('');
+        document.head.appendChild(st);
+      }
+
+      var old = document.getElementById('dds-gate');
+      if (old) old.remove();
+
+      var ov = document.createElement('div');
+      ov.className = 'dds-gate';
+      ov.id = 'dds-gate';
+      ov.setAttribute('role', 'dialog');
+      ov.setAttribute('aria-modal', 'true');
+      ov.innerHTML =
+        '<div class="dds-gate-card">' +
+          '<div class="dds-gate-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>' +
+          '<h3>Members only — but only to write</h3>' +
+          '<p>Browse as much as you like. To ' + esc(action || 'save this') +
+            ', sign in with your UNC email so the chapter knows who it came from.</p>' +
+          '<div class="dds-gate-btns">' +
+            '<a class="dds-gate-go" href="' + href + '">Sign in&nbsp;→</a>' +
+            '<a class="dds-gate-new" href="' + href + '&mode=new">Create an account</a>' +
+            '<button class="dds-gate-no" type="button">Keep looking around</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(ov);
+
+      var close = function () {
+        ov.classList.remove('on');
+        document.removeEventListener('keydown', onKey);
+        setTimeout(function () { ov.remove(); }, 240);
+      };
+      var onKey = function (e) { if (e.key === 'Escape') close(); };
+      ov.querySelector('.dds-gate-no').addEventListener('click', close);
+      ov.addEventListener('mousedown', function (e) { if (e.target === ov) close(); });
+      document.addEventListener('keydown', onKey);
+      requestAnimationFrame(function () { ov.classList.add('on'); });
       return false;
     },
 

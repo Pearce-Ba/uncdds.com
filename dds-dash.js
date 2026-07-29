@@ -6,8 +6,25 @@
 (function () {
   'use strict';
 
-  if (!window.DDSAuth || !DDSAuth.requireLogin('dashboard.html' + location.search + location.hash)) return;
+  if (!window.DDSAuth) return;
+
+  /* The dashboard is open to visitors: everything renders read-only and the
+     sign-in prompt only appears the moment someone tries to record something.
+     GUEST_ID is deliberately unlike any real member id so the dozens of
+     `byId === ME.id` ownership checks below all answer "no" for a visitor. */
+  var GUEST_ID = '__guest__';
   var ME = DDSAuth.current();
+  var GUEST = !ME;
+  if (GUEST) ME = { id: GUEST_ID, name: 'Guest', email: '', photo: '', role: 'guest' };
+
+  var BACK = 'dashboard.html' + location.search + location.hash;
+  /* Soft gate for every write path. `action` finishes the sentence
+     "To ___, sign in with your UNC email". */
+  function needAuth(action) {
+    if (!GUEST) return true;
+    DDSAuth.promptLogin(BACK, action);
+    return false;
+  }
 
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) {
@@ -29,24 +46,55 @@
     var m = /-?\d+(\.\d+)?/.exec(String(v == null ? '' : v)); return m ? parseFloat(m[0]) : 0;
   };
 
+  /* A visitor sees the whole dashboard; this just says so up front, so the
+     empty gauges read as "not signed in" rather than "you've done nothing". */
+  function buildGuestBanner() {
+    var sub = document.querySelector('#hello .hello-sub');
+    if (sub) sub.textContent = 'This is the chapter’s dashboard — hours, meeting notes, class reviews, resources, chat and the photo gallery. Look around all you like; signing in is only needed to record something of your own.';
+
+    var b = document.createElement('div');
+    b.className = 'guest-banner';
+    b.innerHTML =
+      '<div class="gb-txt"><b>You’re browsing as a guest.</b>' +
+      '<span>Your own hours, notes and messages appear here once you sign in with your UNC email.</span></div>' +
+      '<div class="gb-btns"><a class="gb-go" href="login.html?next=' + encodeURIComponent(BACK) + '">Sign in&nbsp;&rarr;</a>' +
+      '<a class="gb-new" href="login.html?mode=new&next=' + encodeURIComponent(BACK) + '">Create account</a></div>';
+    var st = $('standing');
+    if (st) st.after(b); else $('hello').appendChild(b);
+  }
+
   /* ================= Top bar / greeting ================= */
   (function initShell() {
     var first = ME.name.split(/\s+/)[0];
-    $('tb-name').textContent = first;
-    if (ME.photo) {
-      var img = document.createElement('img'); img.src = ME.photo; img.alt = '';
-      $('tb-avatar').replaceWith(img);
-    } else {
-      $('tb-avatar').textContent = first.charAt(0).toUpperCase();
-    }
-    $('tb-signout').addEventListener('click', function () { DDSAuth.signOut(); location.href = 'index.html'; });
+    var today = new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
 
-    var h = new Date().getHours();
-    var greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-    $('hello-h1').innerHTML = greet + ', <em>' + esc(first) + '.</em>';
-    var meTitle = DDSAuth.isExec(ME) ? (DDSAuth.execTitle(ME) || 'Exec Board') : null;
-    $('hello-date').textContent = (meTitle ? meTitle + ' — ' : 'Member dashboard — ') +
-      new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    if (GUEST) {
+      // Visitor: the profile chip and Sign out become one "Sign in" action.
+      var chip = $('tb-profile');
+      chip.href = 'login.html?next=' + encodeURIComponent(BACK);
+      chip.title = 'Sign in to your member account';
+      $('tb-avatar').textContent = '·';
+      $('tb-name').textContent = 'Sign in';
+      $('tb-signout').hidden = true;
+      $('hello-h1').innerHTML = 'Welcome to the <em>chapter dashboard.</em>';
+      $('hello-date').textContent = 'Viewing as a guest — ' + today;
+      buildGuestBanner();
+    } else {
+      $('tb-name').textContent = first;
+      if (ME.photo) {
+        var img = document.createElement('img'); img.src = ME.photo; img.alt = '';
+        $('tb-avatar').replaceWith(img);
+      } else {
+        $('tb-avatar').textContent = first.charAt(0).toUpperCase();
+      }
+      $('tb-signout').addEventListener('click', function () { DDSAuth.signOut(); location.href = 'index.html'; });
+
+      var h = new Date().getHours();
+      var greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+      $('hello-h1').innerHTML = greet + ', <em>' + esc(first) + '.</em>';
+      var meTitle = DDSAuth.isExec(ME) ? (DDSAuth.execTitle(ME) || 'Exec Board') : null;
+      $('hello-date').textContent = (meTitle ? meTitle + ' — ' : 'Member dashboard — ') + today;
+    }
 
     // scroll-spy for the top nav chips
     var links = Array.prototype.slice.call(document.querySelectorAll('.tb-nav a'));
@@ -335,8 +383,11 @@
       var n = document.createElement('p');
       n.id = 'nf-note';
       n.style.cssText = 'margin:14px 0 0;color:#9FB6CE;font-size:12.5px;line-height:1.6;max-width:60ch;';
-      n.innerHTML = 'You&rsquo;re not on the chapter sheet yet — official hours appear once the exec board adds <b style="color:#E3C27C;">' + esc(ME.name) + '</b> (' + esc(ME.email) + ') to it. Anything you log below counts toward your gauges in the meantime.';
-      $('standing').after(n);
+      n.innerHTML = GUEST
+        ? 'These dials read <b style="color:#E3C27C;">zero</b> because nobody is signed in — sign in and they fill with your own hours from the chapter sheet.'
+        : 'You&rsquo;re not on the chapter sheet yet — official hours appear once the exec board adds <b style="color:#E3C27C;">' + esc(ME.name) + '</b> (' + esc(ME.email) + ') to it. Anything you log below counts toward your gauges in the meantime.';
+      var anchor = document.querySelector('#hello .guest-banner') || $('standing');
+      anchor.after(n);
     } else if (d.sheetFound && $('nf-note')) $('nf-note').remove();
   }
 
@@ -441,7 +492,7 @@
           '<button class="m-notebtn' + (note ? ' has' : '') + '" type="button">' + (note ? 'Note ·' : 'Note') + '</button>' +
         '</div>' +
         '<div class="m-note">' +
-          '<textarea maxlength="1200" placeholder="What stuck with you from this one?">' + esc(note ? note.t : '') + '</textarea>' +
+          '<textarea maxlength="1200"' + (GUEST ? ' readonly placeholder="Sign in to write your own note — the chapter’s notes are below."' : ' placeholder="What stuck with you from this one?"') + '>' + esc(note ? note.t : '') + '</textarea>' +
           '<span class="save-state"></span>' +
           '<div class="m-others" data-others="' + key + '">' + othersNotesHtml(key) + '</div>' +
         '</div>' +
@@ -450,13 +501,16 @@
   }
 
   $('m-list').addEventListener('click', function (e) {
+    // a guest clicking into the (read-only) box is asking to write one
+    if (GUEST && e.target.tagName === 'TEXTAREA') { needAuth('write a meeting note'); return; }
     var btn = e.target.closest('.m-notebtn'); if (!btn) return;
     var row = btn.closest('.m-row');
     row.classList.toggle('open');
-    if (row.classList.contains('open')) row.querySelector('textarea').focus();
+    if (row.classList.contains('open') && !GUEST) row.querySelector('textarea').focus();
   });
   $('m-list').addEventListener('input', function (e) {
     if (e.target.tagName !== 'TEXTAREA') return;
+    if (!needAuth('write a meeting note')) { e.target.value = ''; return; }
     var row = e.target.closest('.m-row'), key = row.getAttribute('data-key');
     var state = row.querySelector('.save-state'), btn = row.querySelector('.m-notebtn');
     state.textContent = 'Saving…'; state.classList.remove('saved');
@@ -657,6 +711,7 @@
   });
 
   function openClsModal(code) {
+    if (!needAuth('rate a class')) return;
     var mine = code ? clsAll().find(function (e) {
       return e.kind === 'class' && e.byId === ME.id && e.code.toUpperCase() === code.toUpperCase();
     }) : null;
@@ -670,6 +725,7 @@
     (code ? $('cf-take') : $('cf-code')).focus();
   }
   function openProfModal(code, prof) {
+    if (!needAuth('rate a professor')) return;
     var mine = (code && prof) ? clsAll().find(function (e) {
       return e.kind === 'prof' && e.byId === ME.id && e.code.toUpperCase() === code.toUpperCase() &&
         String(e.prof || '').toLowerCase() === prof.toLowerCase();
@@ -800,6 +856,7 @@
 
   function dmId(a, b) { return 'dm-' + [a, b].sort().join('-'); }
   function startDM(otherId) {
+    if (!needAuth('message a member')) return;
     if (!otherId || otherId === ME.id) return;
     var id = dmId(ME.id, otherId);
     var chans = channelsStored();
@@ -826,7 +883,8 @@
     // announcements are read-only for everyone off the exec board
     var lock = c.id === ANNOUNCE.id && !(DDSAuth.isExec && DDSAuth.isExec(ME));
     $('chat-input').disabled = lock;
-    $('chat-input').placeholder = lock ? 'Only exec can post announcements.' : 'Message… use @ to mention';
+    $('chat-input').placeholder = lock ? 'Only exec can post announcements.'
+      : GUEST ? 'Sign in to join the conversation…' : 'Message… use @ to mention';
     $('chat-send').disabled = lock;
     $('chat-attach').disabled = lock;
     renderRail();
@@ -946,7 +1004,10 @@
     $('chat-pend-txt').textContent = msg || 'Photo attached — add a caption or just hit send.';
     $('chat-pend-txt').classList.toggle('chat-err', !!isErr);
   }
-  $('chat-attach').addEventListener('click', function () { $('chat-file').click(); });
+  $('chat-attach').addEventListener('click', function () {
+    if (!needAuth('send a photo in chat')) return;
+    $('chat-file').click();
+  });
   $('chat-file').addEventListener('change', function () {
     var f = this.files && this.files[0]; this.value = '';
     if (!f) return;
@@ -956,6 +1017,7 @@
   $('chat-pend-x').addEventListener('click', function () { setPending(null, null, false); });
 
   function sendChat() {
+    if (!needAuth('post in chapter chat')) return;
     var ta = $('chat-input'), text = ta.value.trim();
     if (!text && !chatImg) return;
     if (curChan === ANNOUNCE.id && !(DDSAuth.isExec && DDSAuth.isExec(ME))) return;
@@ -1314,6 +1376,7 @@
     }).join('') : '<div class="res-fempty" style="padding:10px;">No other members yet.</div>';
   }
   function openNewChat() {
+    if (!needAuth('start a direct message or group')) return;
     cnMode = 'dm'; cnPicked = {};
     document.querySelectorAll('[data-cn-mode]').forEach(function (t) { t.classList.toggle('on', t.getAttribute('data-cn-mode') === 'dm'); });
     $('cn-name-fld').hidden = true;
@@ -1483,6 +1546,7 @@
   }
 
   function openFamModal(opts) {
+    if (!needAuth(opts.mode === 'edit' ? 'edit your family card' : 'add yourself to the family tree')) return;
     fmState = { mode: opts.mode, role: 'little', id: opts.id || null, photo: null, pdf: null };
     $('fm-err').textContent = ''; $('fm-photo').value = ''; $('fm-link').value = ''; $('fm-pdf').value = '';
     $('fm-fam').innerHTML = famList.map(function (f) { return '<option value="' + esc(f.name) + '">' + esc(f.name) + ' — ' + esc(f.big.name) + '</option>'; }).join('');
@@ -1677,7 +1741,10 @@
   $('gallery').addEventListener('click', function (e) {
     var alb = e.target.closest('[data-alb]');
     if (alb) { openAlbum(+alb.getAttribute('data-alb')); return; }
-    if (e.target.closest('#alb-new')) { $('alb-err').textContent = ''; $('alb-name').value = ''; $('alb-modal').hidden = false; $('alb-name').focus(); return; }
+    if (e.target.closest('#alb-new')) {
+      if (!needAuth('start a new album')) return;
+      $('alb-err').textContent = ''; $('alb-name').value = ''; $('alb-modal').hidden = false; $('alb-name').focus(); return;
+    }
     var ph = e.target.closest('[data-ph]');
     if (ph) openLightbox(+ph.getAttribute('data-ph'));
   });
@@ -1724,6 +1791,7 @@
       : '';
   }
   $('gal-upload').addEventListener('click', function () {
+    if (!needAuth('add photos to the gallery')) return;
     upData = [];
     $('up-err').textContent = ''; $('up-title').value = ''; $('up-cap').value = ''; $('up-file').value = '';
     $('up-preview').style.display = 'none';
@@ -1824,6 +1892,7 @@
   });
   $('lb-cform').addEventListener('submit', function (e) {
     e.preventDefault();
+    if (!needAuth('comment on a photo')) return;
     var text = $('lb-cinput').value.trim(); if (!text) return;
     var p = lbList[lbIdx]; if (!p) return;
     var all = readLS(COM_KEY, {});
@@ -1980,6 +2049,7 @@
   }
 
   function openResModal(rec, presetCat) {
+    if (!needAuth(rec ? 'edit a resource' : 'share a resource with the chapter')) return;
     resEditing = rec ? rec.id : null;
     resFile = rec && (rec.fileId || rec.fileData) ? { fileId: rec.fileId, fileData: rec.fileData, fileName: rec.fileName, mime: rec.mime } : null;
     $('rf-title').textContent = rec ? 'Edit this resource' : 'Add a resource';
@@ -2363,6 +2433,7 @@
 
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
+      if (!needAuth('log service hours')) return;
       var cat = catIn.value.trim(), hours = Math.round(num(hrsIn.value) * 100) / 100, date = dateIn.value || today();
       if (!cat) { catIn.focus(); return; }
       if (!(hours > 0)) { hrsIn.focus(); return; }
@@ -2398,7 +2469,11 @@
       wrap.classList.add('open'); cta.setAttribute('aria-expanded', 'true');
       if (scroll) setTimeout(function () { cta.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' }); }, 60);
     }
-    function toggleLog() { if (wrap.classList.contains('open')) { wrap.classList.remove('open'); cta.setAttribute('aria-expanded', 'false'); } else openLog(false); }
+    function toggleLog() {
+      if (wrap.classList.contains('open')) { wrap.classList.remove('open'); cta.setAttribute('aria-expanded', 'false'); return; }
+      if (!needAuth('log service hours')) return;   // ask before they fill the form in, not after
+      openLog(false);
+    }
     cta.addEventListener('click', toggleLog);
 
     resetForm(); refresh(); repaint();

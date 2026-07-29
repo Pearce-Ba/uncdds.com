@@ -396,7 +396,7 @@
 
   function openComposer(note, onSave) {
     var me = DDSAuth.current();
-    if (!me) { DDSAuth.requireLogin((location.pathname.split('/').pop() || 'index.html') + location.hash); return; }
+    if (!me) { DDSAuth.promptLogin((location.pathname.split('/').pop() || 'index.html') + location.search + location.hash, 'publish meeting notes'); return; }
     if (!DDSMinutes.canWrite(me)) { alert('Chapter minutes are published by the exec board. Comments and annotations are open to every member — open any note to add yours.'); return; }
     build();
     editingId = note && note.id ? note.id : null;

@@ -370,7 +370,7 @@ function sizePhoto(){
 /* ================= annotation mode ================= */
 var annMode = localStorage.getItem(ANMODE_KEY) === '1';
 function toggleAnnMode(){
-  if (!DDSAuth.current()) { DDSAuth.requireLogin('note.html' + location.search); return; }
+  if (!DDSAuth.promptLogin('note.html' + location.search, 'highlight and annotate this record')) return;
   annMode = !annMode;
   localStorage.setItem(ANMODE_KEY, annMode ? '1' : '0');
   sheet.classList.toggle('anmode', annMode);
@@ -564,7 +564,7 @@ document.getElementById('nt-anpop-cancel').addEventListener('click', function(){
 document.getElementById('nt-anpop-save').addEventListener('click', function(){
   if (!pendingSel) return;
   var me = DDSAuth.current();
-  if (!me) { DDSAuth.requireLogin('note.html' + location.search); return; }
+  if (!me) { DDSAuth.promptLogin('note.html' + location.search, 'save this annotation'); return; }
   DDSMinutes.addAnnotation(noteId, {
     color: pickedColor, quote: pendingSel.quote, start: pendingSel.start, len: pendingSel.len,
     comment: anpopText.value

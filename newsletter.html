@@ -595,7 +595,7 @@ cpImgInput.addEventListener('change', function(){
 var editingId = null;
 function openComposer(editPost){
   var me = DDSAuth.current();
-  if (!me) { DDSAuth.requireLogin('newsletter.html#write'); return; }
+  if (!me) { DDSAuth.promptLogin('newsletter.html#write', 'write for The Bite'); return; }
   cpErr.classList.remove('show');
   editingId = editPost && editPost.id ? editPost.id : null;
   var h3 = composer.querySelector('.cp-in h3');
@@ -618,7 +618,7 @@ document.getElementById('cp-form').addEventListener('submit', function(e){
   e.preventDefault();
   cpErr.classList.remove('show');
   var me = DDSAuth.current();
-  if (!me) { DDSAuth.requireLogin('newsletter.html#write'); return; }
+  if (!me) { DDSAuth.promptLogin('newsletter.html#write', 'publish this post'); return; }
   var title = document.getElementById('cp-title').value.trim();
   var body = document.getElementById('cp-body').value.trim();
   var tags = selTags.slice();

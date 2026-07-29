@@ -588,6 +588,32 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .op-cube.is-copied{background:rgba(185,151,91,.22);border-color:rgba(185,151,91,.55);color:#EBD9AF;}
 .op-cube.is-copied .op-cube-lbl{color:#EBD9AF;}
 @media(max-width:520px){.op-reach{grid-template-columns:1fr;} .op-reach-cubes{max-width:230px;}}
+/* "Skip the officers" escape hatch — rides above the pinned progress bar so a
+   visitor can jump to Big/Little without scrolling all eight panels. Fades in
+   once the section is genuinely pinned and out again at the very end. */
+.op-skip{position:absolute;left:50%;bottom:calc(clamp(22px,4vh,42px) + 22px);transform:translate(-50%,10px);
+  z-index:7;display:inline-flex;align-items:center;gap:9px;padding:10px 20px;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:11.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:#EAF1F8;text-decoration:none;background:rgba(14,18,26,.62);border:1px solid rgba(255,255,255,.22);
+  -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);box-shadow:0 14px 34px -16px rgba(0,0,0,.9);
+  opacity:0;pointer-events:none;transition:opacity .35s ease,transform .35s ease,background .2s ease,border-color .2s ease,color .2s ease;}
+.op-skip.show{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
+.op-skip:hover{background:rgba(185,151,91,.9);border-color:rgba(185,151,91,.95);color:#1a1408;}
+.op-skip:focus-visible{outline:2px solid #B9975B;outline-offset:3px;opacity:1;pointer-events:auto;transform:translate(-50%,0);}
+.op-skip svg{flex:none;transition:transform .2s ease;}
+.op-skip:hover svg{transform:translateY(2px);}
+@media (prefers-reduced-motion: reduce){.op-skip{transition:opacity .01s;}}
+/* Mobile: the section un-pins into a vertical stack, so the button rides along
+   as a floating chip while any part of the officer profiles is on screen. It
+   sits under the nav rather than at the bottom — the bottom corners already
+   belong to the motion toggle and the announcement stack. */
+@media(max-width:768px){
+  .op-skip{position:fixed;left:50%;right:auto;top:70px;bottom:auto;z-index:99;
+    transform:translate(-50%,-10px);padding:9px 16px;font-size:10.5px;}
+  .op-skip.show{transform:translate(-50%,0);}
+  .op-skip:focus-visible{transform:translate(-50%,0);}
+  .op-skip svg{transform:rotate(0);}
+}
 /* Big Little family tree */
 #big-little{position:relative;overflow:clip;}
 /* Family rail — horizontal scroll of family cards with fan-out back cards.
@@ -1114,7 +1140,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
       </button>
     </div>
-    <p class="galc-hint">Albums open inside the member dashboard — you&rsquo;ll be asked to sign in first if you aren&rsquo;t already.</p>
+    <p class="galc-hint">Albums open inside the member dashboard — anyone can browse them; signing in is only needed to add your own photos.</p>
     <div style="display:flex;justify-content:center;padding:clamp(22px,3vw,32px) clamp(20px,4vw,48px) clamp(72px,10vw,120px);">
       <a href="dashboard.html#gallery" class="browse-btn" style="display:inline-flex;align-items:center;padding:16px clamp(26px,3vw,38px);border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:clamp(11px,1vw,14px);letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -12px rgba(185,151,91,.85);transition:transform .2s;">Browse Gallery&nbsp;→</a>
     </div>
@@ -1244,7 +1270,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         </div>
         <div class="om-cta-row">
           <a class="om-cta" id="om-see-all" href="dashboard.html#members">Meet every member<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          <span class="om-cta-sub">Sign in to see the live directory &amp; message anyone.</span>
+          <span class="om-cta-sub">Browse the live directory free — sign in to message anyone.</span>
         </div>
       </div>
     </div>
@@ -1571,6 +1597,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       <div style="position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.5;mix-blend-mode:overlay;z-index:5;"></div>
       <div class="hpin-only" style="position:absolute;top:clamp(22px,4vh,40px);left:0;right:0;text-align:center;pointer-events:none;z-index:6;color:rgba(255,255,255,.6);font-size:12px;letter-spacing:2px;text-transform:uppercase;">Officer Profiles · keep scrolling&nbsp;↓</div>
       <div class="hpin-only" style="position:absolute;left:50%;transform:translateX(-50%);bottom:clamp(22px,4vh,42px);width:min(420px,60vw);height:3px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden;z-index:6;pointer-events:none;"><div data-hpin-progress style="height:100%;width:0%;background:linear-gradient(90deg,#4B9CD3,#B9975B);border-radius:999px;transition:width .05s;"></div></div>
+      <a class="op-skip" id="op-skip" href="#big-little">Skip to Big/Little<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
       <div id="tooth-officers" style="position:absolute;top:0;left:0;width:30px;height:39px;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform;filter:drop-shadow(0 4px 10px rgba(0,0,0,.65));"><img src="slot-hero-portrait.webp" alt="" style="display:block;width:100%;height:100%;object-fit:contain;"></div>
     </div>
   </div>
@@ -2509,8 +2536,11 @@ DDSEvents.mount(document.getElementById('upe-hero'), {
   const heroBtn = document.getElementById('hero-login');
   const setHero = (m) => {
     if (!heroBtn) return;
-    heroBtn.textContent = m ? 'Dashboard' : 'Member Login';
-    heroBtn.href = m ? 'dashboard.html' : 'login.html';
+    // The dashboard is open to visitors now — signing in is only needed to
+    // record something there, so send everyone to it. The nav still carries
+    // the Login link for members coming back.
+    heroBtn.textContent = m ? 'Dashboard' : 'Member Dashboard';
+    heroBtn.href = 'dashboard.html';
   };
   if (window.DDSAuth) { setHero(DDSAuth.current()); DDSAuth.onChange(setHero); }
 
@@ -3187,13 +3217,44 @@ ddsWrapAbout();
     maxShift = Math.max(0, track.scrollWidth - stage.clientWidth);
     wrap.style.height = (window.innerHeight + maxShift) + 'px';
   };
-  const onScroll = () => {
-    if (mobileMQ.matches) return;
-    const top = wrap.getBoundingClientRect().top;
-    const scrolled = Math.min(Math.max(-top, 0), maxShift);
-    track.style.transform = 'translate3d(' + (-scrolled) + 'px,0,0)';
-    if (bar) bar.style.width = (maxShift ? (scrolled/maxShift)*100 : 0) + '%';
+  // Escape hatch: jump straight to Big/Little instead of scrolling all eight
+  // officers. Visible while the section owns the viewport, gone once the
+  // visitor has all but arrived at the next section anyway.
+  const skip = document.getElementById('op-skip');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const syncSkip = () => {
+    if (!skip) return;
+    const r = wrap.getBoundingClientRect();
+    const vh = window.innerHeight;
+    let show;
+    if (mobileMQ.matches) {
+      // stacked layout — show whenever the officer stack is on screen at all
+      show = r.top < vh * 0.55 && r.bottom > vh * 0.45;
+    } else {
+      // pinned — from a moment after the pin engages until the last panel
+      const scrolled = Math.min(Math.max(-r.top, 0), maxShift);
+      const p = maxShift ? scrolled / maxShift : 0;
+      show = r.top <= 1 && r.bottom > vh + 40 && p > 0.02 && p < 0.965;
+    }
+    skip.classList.toggle('show', show);
   };
+  const onScroll = () => {
+    if (!mobileMQ.matches) {
+      const top = wrap.getBoundingClientRect().top;
+      const scrolled = Math.min(Math.max(-top, 0), maxShift);
+      track.style.transform = 'translate3d(' + (-scrolled) + 'px,0,0)';
+      if (bar) bar.style.width = (maxShift ? (scrolled/maxShift)*100 : 0) + '%';
+    }
+    syncSkip();
+  };
+  if (skip) skip.addEventListener('click', (e) => {
+    const target = document.getElementById('big-little');
+    if (!target) return;                       // let the plain #hash do its job
+    e.preventDefault();
+    const y = Math.round(target.getBoundingClientRect().top + window.scrollY);
+    window.scrollTo({top: y, behavior: reduced ? 'auto' : 'smooth'});
+    skip.classList.remove('show');
+  });
   layout(); onScroll();
   window.addEventListener('scroll', onScroll, {passive:true});
   window.addEventListener('resize', () => { layout(); onScroll(); }, {passive:true});
@@ -4548,8 +4609,8 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   const showErr = (msg) => { mErr.textContent = msg; mErr.classList.add('show'); };
 
   function openModal(opts){
-    // Adding to the tree is a member action — send visitors to the login page first
-    if (window.DDSAuth && !DDSAuth.current()) { DDSAuth.requireLogin('index.html#big-little'); return; }
+    // Browsing the tree is open to everyone; adding to it is a member action
+    if (window.DDSAuth && !DDSAuth.promptLogin('index.html#big-little', 'add yourself to the family tree')) return;
     attachTarget = null; editTarget = null;
     photoData = null; photoKept = null;
     mErr.classList.remove('show');

@@ -108,7 +108,7 @@
   function introCard() {
     return '<div class="ddsa-card">' +
       '<div class="ddsa-head">' + PEOPLE + 'Members with profiles</div>' +
-      '<p class="ddsa-txt">Every member who has set up their profile — a photo and a bio — is indexed in the member directory. Sign in to read their full stories and message them.</p>' +
+      '<p class="ddsa-txt">Every member who has set up their profile — a photo and a bio — is indexed in the member directory. Read their full stories any time; sign in when you want to message them.</p>' +
       '<a class="ddsa-cta" href="dashboard.html#members">Open the full directory &rarr;</a>' +
       '<button class="ddsa-x" type="button" data-ax="__dirintro" aria-label="Dismiss members-with-profiles intro">&#10005;</button>' +
       '</div>';

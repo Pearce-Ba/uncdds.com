@@ -344,7 +344,8 @@ document.getElementById('a-export').addEventListener('click', function(){ DDSAut
 DDSAuth.onChange(render);
 render();
 
-if (location.hash === '#new') setMode('up');
+// #new, or ?mode=new — the sign-in prompt's "Create an account" button
+if (location.hash === '#new' || /[?&]mode=(new|up)\b/.test(location.search)) setMode('up');
 })();
 </script>
 </body>
