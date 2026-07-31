@@ -94,14 +94,21 @@
 
   /* One Google event → the shape the rest of the site works with. `rawDesc`
      keeps the original HTML (the week/month grid renders it in a hover card);
-     otherwise the description is flattened for the plain list. */
+     otherwise the description is flattened for the plain list.
+
+     A calendar shared as "See only free/busy" comes back with the summary,
+     description and location stripped and `visibility: private` — the times are
+     real but the details are not ours to see. Say so, rather than passing a busy
+     block off as an "Untitled event" someone forgot to name. */
   function normalize(it, cal, rawDesc) {
+    var hidden = !it.summary && it.visibility === 'private';
     return {
       id: it.id,
       cal: cal.key,
       calLabel: cal.label,
       calColor: cal.color,
-      title: it.summary || 'Untitled event',
+      detailsHidden: hidden,
+      title: it.summary || (hidden ? cal.label + ' — details hidden' : 'Untitled event'),
       start: parseWhen(it.start),
       end: parseWhen(it.end),
       allDay: !!(it.start && it.start.date),
