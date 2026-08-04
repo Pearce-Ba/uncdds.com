@@ -73,6 +73,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .pf-forgot:hover{color:#13294B;}
 .pf-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:520px){.pf-row2{grid-template-columns:1fr;gap:0;}}
+
+/* Rushee / Member switch — new accounts pick their chapter standing here,
+   and it decides which group they land in on the members directory. */
+.pf-standing{margin:0 0 18px;}
+.pf-standing-lbl{display:block;margin-bottom:6px;color:#33719F;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:10.5px;}
+.pf-switch{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:999px;border:1px solid rgba(19,41,75,.28);background:#fff;}
+/* the radios stay in the DOM for keyboard + a11y but are painted by the
+   labels and the sliding thumb, so their own focus ring is suppressed */
+.portal-form .pf-switch input{position:absolute;width:1px;height:1px;margin:0;padding:0;opacity:0;pointer-events:none;}
+.portal-form .pf-switch input:focus-visible{outline:none;}
+.portal-form .pf-switch label{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:7px;margin:0;padding:11px 8px;border-radius:999px;cursor:pointer;color:#5A7798;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:11px;transition:color .25s;}
+.pf-switch-thumb{position:absolute;z-index:1;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);border-radius:999px;background:#13294B;box-shadow:0 8px 18px -8px rgba(19,41,75,.8);transition:transform .28s cubic-bezier(.2,.7,.3,1);}
+#f-st-member:checked~.pf-switch-thumb{transform:translateX(100%);}
+#f-st-rushee:checked~label[for="f-st-rushee"],#f-st-member:checked~label[for="f-st-member"]{color:#F5F7FA;}
+#f-st-rushee:focus-visible~label[for="f-st-rushee"],#f-st-member:focus-visible~label[for="f-st-member"]{outline:2px solid #4B9CD3;outline-offset:2px;}
+.pf-standing .pf-hint{margin-top:7px;}
 .portal-form label.pf-remember{display:flex;align-items:center;gap:10px;margin:2px 0 18px;cursor:pointer;color:#3E5F87;font-weight:600;font-size:12.5px;letter-spacing:.4px;text-transform:none;}
 .portal-form label.pf-remember input{width:17px;height:17px;margin:0;accent-color:#B9975B;cursor:pointer;flex:none;display:inline-block;}
 .pf-err{display:none;margin:0 0 16px;padding:11px 14px;border-radius:10px;background:rgba(190,60,60,.09);border:1px solid rgba(190,70,70,.4);color:#A03030;font-size:12.5px;line-height:1.5;}
@@ -143,7 +159,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
       <div id="pf-auth">
         <div class="pf-toggle" role="tablist">
           <button type="button" id="tab-in" class="active" role="tab" aria-selected="true">Sign In</button>
-          <button type="button" id="tab-up" role="tab" aria-selected="false">New Member</button>
+          <button type="button" id="tab-up" role="tab" aria-selected="false">New Rushee/Member</button>
         </div>
         <h2 class="pf-title" id="pf-title">Welcome back.</h2>
         <p class="pf-sub" id="pf-sub">Sign in with your UNC email to pick up where you left off.</p>
@@ -160,6 +176,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
               <option>2030</option><option>2031</option><option>2032</option><option>2033</option>
             </select></label>
             <label>Major<input type="text" id="f-major" placeholder="e.g. Biology" maxlength="60"></label>
+          </div>
+          <div class="pf-standing" id="f-standing-w" role="radiogroup" aria-labelledby="f-standing-lbl" hidden>
+            <span class="pf-standing-lbl" id="f-standing-lbl">I&rsquo;m joining as</span>
+            <div class="pf-switch">
+              <input type="radio" name="f-standing" id="f-st-rushee" value="rushee" checked>
+              <label for="f-st-rushee">Rushee</label>
+              <input type="radio" name="f-standing" id="f-st-member" value="member">
+              <label for="f-st-member">Member</label>
+              <span class="pf-switch-thumb" aria-hidden="true"></span>
+            </div>
+            <span class="pf-hint">Going through rush right now? Stay on Rushee. Already initiated into the chapter? Switch to Member. Exec can change this for you later.</span>
           </div>
           <label class="pf-remember"><input type="checkbox" id="f-remember" checked>Remember me on this device</label>
           <div class="pf-err" id="pf-err"></div>
@@ -186,6 +213,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
         <div class="acct-rows">
           <div class="acct-row"><span class="k">Class of</span><span class="v" id="a-year">—</span></div>
           <div class="acct-row"><span class="k">Major</span><span class="v" id="a-major">—</span></div>
+          <div class="acct-row"><span class="k">Standing</span><span class="v" id="a-standing">Member</span></div>
           <div class="acct-row"><span class="k">Access</span><span class="v" id="a-role">Member</span></div>
         </div>
         <div class="acct-actions">
@@ -236,6 +264,8 @@ var passLabel = document.getElementById('f-pass-label');
 var forgotBtn = document.getElementById('pf-forgot');
 var fYear = document.getElementById('f-year');
 var fMajor = document.getElementById('f-major');
+var standingW = document.getElementById('f-standing-w');
+var stRushee = document.getElementById('f-st-rushee');
 var fRemember = document.getElementById('f-remember');
 
 /* Eye toggles — show/hide the password fields */
@@ -268,6 +298,7 @@ function setMode(m){
   tabUp.classList.toggle('active', up); tabUp.setAttribute('aria-selected', String(up));
   nameW.hidden = !up;
   extra.hidden = !up;
+  standingW.hidden = !up;
   passHint.hidden = !up;
   pass2W.hidden = !(up || forgot);
   pass2Hint.hidden = !forgot;
@@ -275,9 +306,9 @@ function setMode(m){
   passLabel.textContent = forgot ? 'New password' : 'Password';
   fPass.setAttribute('autocomplete', m === 'in' ? 'current-password' : 'new-password');
   document.getElementById('pf-title').textContent =
-    up ? 'Join the member roster.' : forgot ? 'Reset your password.' : 'Welcome back.';
+    up ? 'Join the chapter roster.' : forgot ? 'Reset your password.' : 'Welcome back.';
   document.getElementById('pf-sub').textContent = up
-    ? 'Create your account with your UNC email — it unlocks posting, the family tree, and gallery uploads.'
+    ? 'Rushee or member, create your account with your UNC email — it unlocks posting, the family tree, and gallery uploads.'
     : forgot
       ? 'Accounts live in this browser’s member table, so the reset happens right here — enter your UNC email and choose a new password.'
       : 'Sign in with your UNC email to pick up where you left off.';
@@ -302,7 +333,8 @@ form.addEventListener('submit', function(e){
     if (fPass.value !== fPass2.value) { showErr('Those passwords don’t match — retype them the same way.'); return; }
     DDSAuth.signUp({
       name: fName.value, email: fEmail.value, password: fPass.value,
-      gradYear: fYear.value, major: fMajor.value
+      gradYear: fYear.value, major: fMajor.value,
+      standing: stRushee.checked ? 'rushee' : 'member'
     }, fRemember.checked).then(done);
   } else if (mode === 'forgot') {
     if (fPass.value !== fPass2.value) { showErr('Those passwords don’t match — retype them the same way.'); return; }
@@ -326,6 +358,8 @@ function render(){
   document.getElementById('a-mail').textContent = m.email;
   document.getElementById('a-year').textContent = m.gradYear || '—';
   document.getElementById('a-major').textContent = m.major || '—';
+  document.getElementById('a-standing').textContent =
+    (DDSAuth.isRushee && DDSAuth.isRushee(m)) ? 'Rushee' : 'Member';
   var exec = DDSAuth.isExec && DDSAuth.isExec(m);
   var title = DDSAuth.execTitle ? DDSAuth.execTitle(m) : null;
   document.getElementById('a-role').textContent = exec ? (title || 'Exec Board') : 'Member';

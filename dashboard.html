@@ -539,6 +539,7 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .mem-name{font-family:var(--grotesk);font-weight:600;font-size:1rem;letter-spacing:.2px;}
 .mem-role{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--blue-hi);font-weight:700;}
 .mem-role.exec{color:var(--gold-hi);}
+.mem-role.rushee{color:var(--orange-hi);}
 .mem-tags{color:var(--ink3);font-size:11.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .mem-badge{position:absolute;top:10px;right:12px;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-hi);font-weight:700;}
 .mem-empty{grid-column:1/-1;padding:30px;text-align:center;color:var(--ink3);}
@@ -562,6 +563,7 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .mse-note.ok{color:var(--gold-hi);}
 .mse-note.err{color:#ff9e9e;}
 .mem-detail-chip{display:inline-block;margin-top:8px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;color:var(--gold-hi);border:1px solid var(--acc-line);border-radius:999px;padding:4px 11px;}
+.mem-detail-chip.rushee{color:var(--orange-hi);border-color:rgba(255,158,87,.4);}
 .mem-tags.is-quote{font-family:'Lora',serif;font-style:italic;color:var(--ink2);-webkit-line-clamp:3;}
 .mem-detail-quote{margin:16px 0 0;padding:0 0 0 16px;border-left:3px solid var(--acc-hi);font-family:'Lora',serif;font-style:italic;font-size:1.12rem;line-height:1.55;color:var(--ink);}
 .ppop-quote{margin:11px 0 0;color:var(--ink);font-family:'Lora',serif;font-style:italic;font-size:12.5px;line-height:1.55;padding-left:11px;border-left:2px solid var(--pink-hi);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
@@ -955,19 +957,18 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
       <div>
         <div class="eyebrow"><span class="tick"></span><span>Directory</span></div>
         <h2>Chapter members</h2>
-        <p class="sub">Everyone signed into the chapter, floating in one place. Open a profile to read their story, message them, or find them on the family tree.</p>
+        <p class="sub">Everyone signed into the chapter, floating in one place &mdash; the board, initiated members, and this semester&rsquo;s rushees. Open a profile to read their story, message them, or find them on the family tree.</p>
       </div>
       <div class="mem-tools">
         <input id="mem-search" type="search" placeholder="Search members&hellip;" aria-label="Search members">
         <button class="btn" id="mem-edit" type="button" hidden>&#9998; Edit chapter members</button>
       </div>
     </div>
-    <div class="mem-editbar" id="mem-editbar" hidden>Edit mode is on &mdash; search or click any member to set their chapter status: give them a board title, create a brand-new role, or return them to general member.</div>
+    <div class="mem-editbar" id="mem-editbar" hidden>Edit mode is on &mdash; search or click anyone to set their chapter status: give them a board title, create a brand-new role, mark them a rushee, or return them to general member.</div>
     <div id="mem-dir">
       <div class="mem-group">
         <div class="mem-group-head">
           <h4>Executive board</h4>
-          <button class="mem-more" id="mem-exec-more" type="button" hidden>See more</button>
         </div>
         <div id="mem-exec-row" class="mem-exec-row"></div>
       </div>
@@ -982,6 +983,18 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
           <button class="mem-more" id="mem-all-more" type="button" hidden>See more</button>
         </div>
         <div id="mem-space" class="mem-space"></div>
+      </div>
+      <div class="mem-group">
+        <div class="mem-group-head">
+          <h4>Rushees</h4>
+          <div class="mem-pager" id="rush-pager" hidden>
+            <button class="mem-arrow" id="rush-prev" type="button" aria-label="Previous 10 rushees">&#8249;</button>
+            <span id="rush-pageinfo" aria-live="polite"></span>
+            <button class="mem-arrow" id="rush-next" type="button" aria-label="Next 10 rushees">&#8250;</button>
+          </div>
+          <button class="mem-more" id="rush-all-more" type="button" hidden>See more</button>
+        </div>
+        <div id="rush-space" class="mem-space"></div>
       </div>
     </div>
   </section>

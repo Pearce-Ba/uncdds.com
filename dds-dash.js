@@ -783,6 +783,7 @@
   function pub(m) {
     if (!m) return null;
     return { id: m.id, name: m.name, gradYear: m.gradYear, major: m.major || '', role: m.role,
+      standing: DDSAuth.standing ? DDSAuth.standing(m) : 'member',
       execTitle: m.execTitle || (DDSAuth.execTitle ? DDSAuth.execTitle(m) : null),
       photo: m.photo || null, quote: m.quote || '', interests: m.interests || '', hobbies: m.hobbies || '',
       favClasses: m.favClasses || '', favProfs: m.favProfs || '',
@@ -1177,19 +1178,27 @@
   });
 
   /* ================= Member directory — profiles in space ==============
-     Exec board sits on the top line (5 visible + "See more"); everyone
-     else fills a 5-wide × 2-tall grid below it, pageable 10 at a time
-     with the ‹ › arrows or expandable in full with "See more". Exec
-     members also get an edit mode to set anyone's chapter status. */
-  var memQuery = '', memPage = 0, memExecOpen = false, memAllOpen = false, memEditMode = false;
-  var MEM_PAGE = 10, MEM_EXEC_ROW = 5;
+     The whole exec board sits on the top line, always fully expanded — it's
+     a fixed, small group, so hiding any of it behind "See more" only cost a
+     click to undo. Initiated members fill a 5-wide × 2-tall grid below it and this
+     semester's rushees fill an identical grid below that; both are pageable
+     10 at a time with the ‹ › arrows or expandable in full with "See more".
+     Exec members also get an edit mode to set anyone's chapter status. */
+  var memQuery = '', memEditMode = false;
+  var MEM_PAGE = 10;
+  // paging state per group — Members and Rushees page independently
+  var memState = { page: 0, open: false }, rushState = { page: 0, open: false };
+
+  function isRushee(m) { return !!(DDSAuth.isRushee && DDSAuth.isRushee(m)); }
 
   function memFiltered() {
     var list = allMembers().slice();
     if (memQuery) {
       var q = memQuery.toLowerCase();
       list = list.filter(function (m) {
-        return [m.name, m.email, m.major, m.interests, m.hobbies, DDSAuth.execTitle && DDSAuth.execTitle(m)]
+        return [m.name, m.email, m.major, m.interests, m.hobbies,
+                isRushee(m) ? 'rushee' : 'member',
+                DDSAuth.execTitle && DDSAuth.execTitle(m)]
           .filter(Boolean).join(' ').toLowerCase().indexOf(q) > -1;
       });
     }
@@ -1203,58 +1212,73 @@
   function memCard(m, i) {
     var p = pub(m);
     var isExec = DDSAuth.isExec && DDSAuth.isExec(m);
-    var role = isExec ? (DDSAuth.execTitle(m) || 'Exec Board') : 'Class of ' + (p.gradYear || '—');
+    var rushee = isRushee(m);
+    var cls = isExec ? ' exec' : rushee ? ' rushee' : '';
+    var year = 'Class of ' + (p.gradYear || '—');
+    var role = isExec ? (DDSAuth.execTitle(m) || 'Exec Board') : rushee ? 'Rushee · ' + year : year;
     var tags = p.quote ? '“' + p.quote + '”' : [p.interests, p.major].filter(Boolean).join(' · ');
     return '<button class="mem-card" type="button" data-mem="' + esc(p.id) + '" style="--dur:' + (6 + (i % 5) * 0.7).toFixed(1) + 's;--dly:' + (i % 6 * 0.35).toFixed(2) + 's;">' +
       (m.id === ME.id ? '<span class="mem-badge">You</span>' : '') +
       avatarHtml(p, 'mem-av') +
       '<span class="mem-name">' + esc(p.name) + '</span>' +
-      '<span class="mem-role' + (isExec ? ' exec' : '') + '">' + esc(role) + '</span>' +
+      '<span class="mem-role' + cls + '">' + esc(role) + '</span>' +
       (tags ? '<span class="mem-tags' + (p.quote ? ' is-quote' : '') + '">' + esc(tags) + '</span>' : '') +
     '</button>';
   }
+  /* Members and Rushees are the same group twice over — same grid, same
+     10-at-a-time pager, same "See more". Only the roster, the element ids,
+     and the empty-state line differ. */
+  function renderPagedGroup(ids, list, st, empty) {
+    var pages = Math.max(1, Math.ceil(list.length / MEM_PAGE));
+    st.page = Math.min(Math.max(st.page, 0), pages - 1);
+    $(ids.host).innerHTML = list.length
+      ? (st.open ? list : list.slice(st.page * MEM_PAGE, st.page * MEM_PAGE + MEM_PAGE)).map(memCard).join('')
+      : '<div class="mem-empty">' + empty + '</div>';
+    var more = $(ids.more);
+    more.hidden = list.length <= MEM_PAGE;
+    more.textContent = st.open ? 'See less' : 'See more (' + list.length + ')';
+    $(ids.pager).hidden = st.open || list.length <= MEM_PAGE;
+    $(ids.prev).disabled = st.page === 0;
+    $(ids.next).disabled = st.page >= pages - 1;
+    $(ids.info).textContent = list.length
+      ? (st.page * MEM_PAGE + 1) + '–' + Math.min(list.length, (st.page + 1) * MEM_PAGE) + ' of ' + list.length : '';
+  }
+  var MEM_IDS = { host: 'mem-space', more: 'mem-all-more', pager: 'mem-pager', prev: 'mem-prev', next: 'mem-next', info: 'mem-pageinfo' };
+  var RUSH_IDS = { host: 'rush-space', more: 'rush-all-more', pager: 'rush-pager', prev: 'rush-prev', next: 'rush-next', info: 'rush-pageinfo' };
+
   function renderMembers() {
     var list = memFiltered();
+    var byName = function (a, b) { return String(a.name).localeCompare(String(b.name)); };
     var execs = list.filter(function (m) { return DDSAuth.isExec && DDSAuth.isExec(m); })
-      .sort(function (a, b) { return execRank(a) - execRank(b) || String(a.name).localeCompare(String(b.name)); });
-    var rest = list.filter(function (m) { return !(DDSAuth.isExec && DDSAuth.isExec(m)); })
-      .sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
+      .sort(function (a, b) { return execRank(a) - execRank(b) || byName(a, b); });
+    var rest = list.filter(function (m) { return !(DDSAuth.isExec && DDSAuth.isExec(m)) && !isRushee(m); }).sort(byName);
+    var rushees = list.filter(function (m) { return !(DDSAuth.isExec && DDSAuth.isExec(m)) && isRushee(m); }).sort(byName);
 
-    // top line: the exec board (5 across, "See more" reveals the rest)
-    var execHost = $('mem-exec-row');
-    execHost.innerHTML = execs.length
-      ? (memExecOpen ? execs : execs.slice(0, MEM_EXEC_ROW)).map(memCard).join('')
+    // top line: the whole exec board, always in full — it's only ever a handful
+    $('mem-exec-row').innerHTML = execs.length
+      ? execs.map(memCard).join('')
       : '<div class="mem-empty">' + (memQuery ? 'No exec members match “' + esc(memQuery) + '.”' : 'Board members appear up here once they sign in.') + '</div>';
-    var em = $('mem-exec-more');
-    em.hidden = execs.length <= MEM_EXEC_ROW;
-    em.textContent = memExecOpen ? 'See less' : 'See more (' + (execs.length - MEM_EXEC_ROW) + ')';
 
-    // everyone else: 5 × 2 window, arrows page by 10, "See more" opens all
-    var pages = Math.max(1, Math.ceil(rest.length / MEM_PAGE));
-    if (memPage > pages - 1) memPage = pages - 1;
-    if (memPage < 0) memPage = 0;
-    var host = $('mem-space');
-    host.innerHTML = rest.length
-      ? (memAllOpen ? rest : rest.slice(memPage * MEM_PAGE, memPage * MEM_PAGE + MEM_PAGE)).map(memCard).join('')
-      : '<div class="mem-empty">' + (memQuery ? 'No members match “' + esc(memQuery) + '.”' : 'You’re the first ones here. As members sign in, they’ll appear in this constellation.') + '</div>';
-    var am = $('mem-all-more');
-    am.hidden = rest.length <= MEM_PAGE;
-    am.textContent = memAllOpen ? 'See less' : 'See more (' + rest.length + ')';
-    $('mem-pager').hidden = memAllOpen || rest.length <= MEM_PAGE;
-    $('mem-prev').disabled = memPage === 0;
-    $('mem-next').disabled = memPage >= pages - 1;
-    $('mem-pageinfo').textContent = rest.length
-      ? (memPage * MEM_PAGE + 1) + '–' + Math.min(rest.length, (memPage + 1) * MEM_PAGE) + ' of ' + rest.length : '';
+    renderPagedGroup(MEM_IDS, rest, memState, memQuery
+      ? 'No members match “' + esc(memQuery) + '.”'
+      : 'You’re the first ones here. As members sign in, they’ll appear in this constellation.');
+    renderPagedGroup(RUSH_IDS, rushees, rushState, memQuery
+      ? 'No rushees match “' + esc(memQuery) + '.”'
+      : 'No rushees yet — anyone who signs up as a rushee lands here.');
   }
   $('mem-dir').addEventListener('click', function (e) {
     var c = e.target.closest('[data-mem]'); if (!c) return;
     openMemberModal(c.getAttribute('data-mem'));
   });
-  $('mem-search').addEventListener('input', function () { memQuery = this.value.trim(); memPage = 0; renderMembers(); });
-  $('mem-exec-more').addEventListener('click', function () { memExecOpen = !memExecOpen; renderMembers(); });
-  $('mem-all-more').addEventListener('click', function () { memAllOpen = !memAllOpen; memPage = 0; renderMembers(); });
-  $('mem-prev').addEventListener('click', function () { memPage--; renderMembers(); });
-  $('mem-next').addEventListener('click', function () { memPage++; renderMembers(); });
+  $('mem-search').addEventListener('input', function () {
+    memQuery = this.value.trim(); memState.page = 0; rushState.page = 0; renderMembers();
+  });
+  [[MEM_IDS, memState], [RUSH_IDS, rushState]].forEach(function (pair) {
+    var ids = pair[0], st = pair[1];
+    $(ids.more).addEventListener('click', function () { st.open = !st.open; st.page = 0; renderMembers(); });
+    $(ids.prev).addEventListener('click', function () { st.page--; renderMembers(); });
+    $(ids.next).addEventListener('click', function () { st.page++; renderMembers(); });
+  });
 
   // exec-only: toggle chapter-status editing across the directory
   if (DDSAuth.isExec && DDSAuth.isExec(ME)) $('mem-edit').hidden = false;
@@ -1270,7 +1294,8 @@
     var m = memberById(id); var p = pub(m);
     if (!p) return;
     var isExec = DDSAuth.isExec && DDSAuth.isExec(m);
-    var role = isExec ? (DDSAuth.execTitle(m) || 'Exec Board') : null;
+    var rushee = isRushee(m);
+    var role = isExec ? (DDSAuth.execTitle(m) || 'Exec Board') : rushee ? 'Rushee' : null;
     var meta = ['Class of ' + (p.gradYear || '—'), p.major].filter(Boolean).join('  ·  ');
     // the email this member signed up with, as a mailto link
     var mail = m.email ? '<a class="mem-detail-mail" href="mailto:' + esc(m.email) + '">' + esc(m.email) + '</a>' : '';
@@ -1285,7 +1310,8 @@
         '<h5>Chapter status</h5>' +
         '<div class="mse-row">' +
           '<select id="mse-title" aria-label="Chapter status">' +
-            '<option value=""' + (curTitle ? '' : ' selected') + '>General member</option>' +
+            '<option value=""' + (curTitle || rushee ? '' : ' selected') + '>General member</option>' +
+            '<option value="__rushee"' + (rushee ? ' selected' : '') + '>Rushee</option>' +
             titles.map(function (t) {
               return '<option value="' + esc(t) + '"' + (t === curTitle ? ' selected' : '') + '>' + esc(t) + '</option>';
             }).join('') +
@@ -1294,7 +1320,7 @@
           '<input id="mse-custom" type="text" placeholder="Name the role — e.g. Fundraising Chair" value="' + esc(isCustom ? curTitle : '') + '"' + (isCustom ? '' : ' hidden') + '>' +
           '<button class="btn btn-solid" id="mse-save" type="button">Save status</button>' +
         '</div>' +
-        '<p class="mse-note" id="mse-note">Pick a board title, choose “Custom role…” to create a new one, or “General member” to remove their title.</p>' +
+        '<p class="mse-note" id="mse-note">Pick a board title, choose “Custom role…” to create a new one, “Rushee” to move them to the rushee group, or “General member” to remove their title.</p>' +
       '</div>';
     }
     var bio = [p.interests, p.hobbies].filter(Boolean).join(' · ');
@@ -1313,7 +1339,7 @@
     $('mem-modal-body').innerHTML =
       '<div class="mem-detail-head">' + avatarHtml(p, 'mem-detail-av') +
         '<div><h3>' + esc(p.name) + '</h3><div class="mem-detail-meta">' + esc(meta) + '</div>' + mail +
-        (role ? '<span class="mem-detail-chip">' + esc(role) + '</span>' : '') + '</div>' +
+        (role ? '<span class="mem-detail-chip' + (rushee && !isExec ? ' rushee' : '') + '">' + esc(role) + '</span>' : '') + '</div>' +
       '</div>' +
       statusEd +
       (p.quote ? '<blockquote class="mem-detail-quote">' + esc(p.quote) + '</blockquote>' : '') +
@@ -1331,17 +1357,23 @@
       var sel = wrap.querySelector('#mse-title');
       var custom = wrap.querySelector('#mse-custom');
       var note = wrap.querySelector('#mse-note');
-      var title = sel.value === '__custom' ? custom.value.trim() : sel.value;
+      var toRushee = sel.value === '__rushee';
+      var title = toRushee ? '' : sel.value === '__custom' ? custom.value.trim() : sel.value;
       if (sel.value === '__custom' && !title) {
         note.textContent = 'Name the custom role first.'; note.className = 'mse-note err'; custom.focus(); return;
       }
-      var res = DDSAuth.execSetStatus ? DDSAuth.execSetStatus(sid, title) : { ok: false, err: 'Not available.' };
+      var res = DDSAuth.execSetStatus
+        ? DDSAuth.execSetStatus(sid, title, toRushee ? 'rushee' : 'member')
+        : { ok: false, err: 'Not available.' };
       if (!res.ok) { note.textContent = res.err; note.className = 'mse-note err'; return; }
       renderMembers();
       openMemberModal(sid);   // redraw the profile with the new chip + editor state
       var savedNote = $('mem-modal-body').querySelector('#mse-note');
       if (savedNote) {
-        savedNote.textContent = title ? 'Saved — ' + (res.member ? res.member.name : 'this member') + ' is now ' + title + '.' : 'Saved — back to general member.';
+        var who = res.member ? res.member.name : 'this member';
+        savedNote.textContent = title ? 'Saved — ' + who + ' is now ' + title + '.'
+          : toRushee ? 'Saved — ' + who + ' is now listed under Rushees.'
+          : 'Saved — back to general member.';
         savedNote.className = 'mse-note ok';
       }
       return;

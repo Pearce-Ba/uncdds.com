@@ -32,7 +32,17 @@
      board) picks up next time that member logs in — no manual migration. */
   function syncExecStatus(m) {
     var title = EXEC_BOARD[String(m.email || '').toLowerCase()];
-    if (title) { m.role = 'exec'; m.execTitle = title; }
+    if (title) { m.role = 'exec'; m.execTitle = title; m.standing = 'member'; }
+  }
+
+  /* Chapter standing — 'rushee' or 'member' — chosen on the sign-up form and
+     editable afterwards by exec from the directory. It is deliberately kept
+     apart from `role` ('member' | 'exec'), which is about site permissions:
+     a rushee still gets an ordinary account, they just file under the Rushees
+     group instead of Members. Rows written before this field existed have no
+     `standing`, so absent reads as 'member'. */
+  function standingOf(m) {
+    return m && m.standing === 'rushee' ? 'rushee' : 'member';
   }
 
   function esc(s) {
@@ -136,6 +146,7 @@
       var m = loadMembers().find(function (r) { return r.id === sess.id; });
       return m ? {
         id: m.id, name: m.name, email: m.email, gradYear: m.gradYear, major: m.major, role: m.role,
+        standing: standingOf(m),
         execTitle: m.execTitle || null,
         photo: m.photo || null,
         quote: m.quote || '',
@@ -156,7 +167,7 @@
       var m = loadMembers().find(function (r) { return r.id === id; });
       return m ? {
         id: m.id, name: m.name, gradYear: m.gradYear, major: m.major || '',
-        role: m.role, execTitle: m.execTitle || null,
+        role: m.role, standing: standingOf(m), execTitle: m.execTitle || null,
         photo: m.photo || null, quote: m.quote || '',
         interests: m.interests || '', hobbies: m.hobbies || '',
         instagram: m.instagram || '', linkedin: m.linkedin || '',
@@ -202,7 +213,8 @@
         var member = {
           id: uid(), name: name, email: email, salt: salt, hash: h,
           gradYear: rec.gradYear, major: String(rec.major).trim(),
-          role: 'member', joined: new Date().toISOString()
+          role: 'member', standing: rec.standing === 'rushee' ? 'rushee' : 'member',
+          joined: new Date().toISOString()
         };
         syncExecStatus(member);
         list.push(member);
@@ -221,10 +233,10 @@
         if (!m) return { ok: false, err: 'No account with that email — create one below.' };
         return verifyPassword(m, password || '').then(function (good) {
           if (!good) return { ok: false, err: 'Wrong password. Try again.' };
-          var before = m.role + '|' + (m.execTitle || '') + '|' + m.hash;
+          var before = m.role + '|' + (m.execTitle || '') + '|' + standingOf(m) + '|' + m.hash;
           syncExecStatus(m);
           var finish = function () {
-            if (before !== m.role + '|' + (m.execTitle || '') + '|' + m.hash) {
+            if (before !== m.role + '|' + (m.execTitle || '') + '|' + standingOf(m) + '|' + m.hash) {
               saveMembers(loadMembers().map(function (r) { return r.id === m.id ? m : r; }));
             }
             writeSession({ id: m.id, ts: Date.now() }, !!remember);
@@ -248,6 +260,18 @@
       var m = member || api.current();
       if (!m) return false;
       return m.role === 'exec' || !!EXEC_BOARD[String(m.email || '').toLowerCase()];
+    },
+
+    /* Chapter standing: 'rushee' for someone still going through rush,
+       'member' for everyone else. Board members are never rushees, whatever
+       their row says, so exec wins over a stale standing. */
+    standing: function (member) {
+      var m = member || api.current();
+      if (!m) return 'member';
+      return api.isExec(m) ? 'member' : standingOf(m);
+    },
+    isRushee: function (member) {
+      return api.standing(member) === 'rushee';
     },
 
     /* Exec-only: write officer-card fields onto ANY member's row by email —
@@ -282,11 +306,12 @@
     /* Exec-only: change another member's chapter status from the directory.
        A non-empty title promotes the row to role:'exec' with that title
        (an existing board title or a brand-new one); an empty title returns
-       them to a general member. Editing your own row is blocked so the
+       them to a general member, and standing 'rushee' files them under the
+       Rushees group instead. Editing your own row is blocked so the
        board can't lock itself out. Note: a member whose email is on the
        EXEC_BOARD roster above gets re-stamped with that title on their
        next sign-in — edit the roster to change those permanently. */
-    execSetStatus: function (id, title) {
+    execSetStatus: function (id, title, standing) {
       var me = api.current();
       if (!me || !api.isExec(me)) return { ok: false, err: 'Exec only.' };
       if (id === me.id) return { ok: false, err: 'You can’t change your own status.' };
@@ -296,6 +321,10 @@
       title = String(title || '').trim();
       if (title) { m.role = 'exec'; m.execTitle = title; }
       else { m.role = 'member'; delete m.execTitle; }
+      // a board title always outranks rushee standing; leaving `standing` off
+      // entirely means "title only", so the current standing is left alone
+      if (title) m.standing = 'member';
+      else if (standing) m.standing = standing === 'rushee' ? 'rushee' : 'member';
       m.up = Date.now();
       saveMembers(list);
       notify();
@@ -331,10 +360,11 @@
     /* The member table as a spreadsheet — opens straight into Excel.
        Password hashes and salts are deliberately left out of the export. */
     exportCsv: function () {
-      var cols = ['Name', 'UNC Email', 'Graduation Year', 'Major', 'Role', 'Exec Title', 'Joined'];
+      var cols = ['Name', 'UNC Email', 'Graduation Year', 'Major', 'Standing', 'Role', 'Exec Title', 'Joined'];
       var q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
       var rows = loadMembers().map(function (m) {
-        return [m.name, m.email, m.gradYear, m.major, m.role, api.execTitle(m) || '', (m.joined || '').slice(0, 10)].map(q).join(',');
+        var standing = api.isRushee(m) ? 'Rushee' : 'Member';
+        return [m.name, m.email, m.gradYear, m.major, standing, m.role, api.execTitle(m) || '', (m.joined || '').slice(0, 10)].map(q).join(',');
       });
       var csv = cols.map(q).join(',') + '\n' + rows.join('\n');
       var a = document.createElement('a');

@@ -1202,6 +1202,12 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .om-focus{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
   color:var(--fc,#8fb7de);background:color-mix(in srgb,var(--fc,#8fb7de) 15%,transparent);border:1px solid color-mix(in srgb,var(--fc,#8fb7de) 45%,transparent);transition:color .4s,background .4s,border-color .4s;}
 .om-focus .om-focus-dot{width:7px;height:7px;border-radius:50%;background:var(--fc,#8fb7de);box-shadow:0 0 10px var(--fc,#8fb7de);}
+/* chapter standing, straight off the member's account — board, member, rushee */
+.om-tags{display:flex;flex-wrap:wrap;align-items:center;gap:9px;}
+.om-standing{display:inline-flex;align-items:center;padding:7px 14px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+  color:#9FB6CE;background:rgba(159,182,206,.1);border:1px solid rgba(159,182,206,.28);transition:color .4s,background .4s,border-color .4s;}
+.om-standing.is-exec{color:#E3C27C;background:rgba(227,194,124,.13);border-color:rgba(227,194,124,.42);}
+.om-standing.is-rushee{color:#FFB27A;background:rgba(255,158,87,.13);border-color:rgba(255,158,87,.42);}
 .om-name{margin:18px 0 4px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;font-size:clamp(1.8rem,3.6vw,2.9rem);line-height:1;}
 .om-role{color:#9FB6CE;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
 .om-quote{margin:22px 0 0;font-family:'Lora',serif;font-style:italic;font-size:clamp(1.1rem,1.7vw,1.42rem);line-height:1.55;color:#DCE6F2;max-width:520px;position:relative;padding-left:20px;}
@@ -1248,7 +1254,10 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <span class="om-pindex" id="om-pindex">01 / 06</span>
       </div>
       <div class="om-detail" id="om-detail" style="--fc:#4B9CD3;">
-        <span class="om-focus"><span class="om-focus-dot"></span><span id="om-focus-t">Oral &amp; Maxillofacial Surgery</span></span>
+        <div class="om-tags">
+          <span class="om-focus"><span class="om-focus-dot"></span><span id="om-focus-t">Oral &amp; Maxillofacial Surgery</span></span>
+          <span class="om-standing" id="om-standing">Member</span>
+        </div>
         <h3 class="om-name" id="om-name">Maya Feldman</h3>
         <div class="om-role" id="om-role">Class of 2026 · Biology</div>
         <p class="om-quote" id="om-quote">The OR is where biology stops being a textbook. I scrub in every chance I get, and it&rsquo;s the reason I&rsquo;m here.</p>
@@ -4102,22 +4111,24 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 // ---- Our Members: auto-cycling cover-story spotlight ----
 // Indexes REAL chapter members: anyone who has set up their profile with a
 // photo and a bio/quote is pulled from the shared roster and featured here.
+// The cast runs board → members → rushees so it's the whole chapter on show,
+// not just the officers, and each card names that person's chapter standing.
 // The sample cast below only shows until at least one member qualifies.
 (function initMemberSpotlight(){
   const sec = document.getElementById('members-preview');
   if (!sec) return;
   const SAMPLE = [
-    { name:'Maya Feldman',  role:'Class of 2026 · Biology',        focus:'Oral & Maxillofacial Surgery', fc:'#4B9CD3', img:'slot-officer-photo-1.webp',
+    { name:'Maya Feldman',  role:'Class of 2026 · Biology',        focus:'Oral & Maxillofacial Surgery', standing:'Exec Board', fc:'#4B9CD3', img:'slot-officer-photo-1.webp',
       quote:'The OR is where biology stops being a textbook. I scrub in every chance I get, and it’s the reason I’m here.' },
-    { name:'Chris Okafor',  role:'Class of 2025 · Chemistry',      focus:'Pediatric Dentistry',          fc:'#B9975B', img:'slot-officer-photo-2.webp',
+    { name:'Chris Okafor',  role:'Class of 2025 · Chemistry',      focus:'Pediatric Dentistry',          standing:'Member',     fc:'#B9975B', img:'slot-officer-photo-2.webp',
       quote:'A kid who leaves unafraid of the chair is a patient for life. That first visit is everything.' },
-    { name:'Priya Shah',    role:'Class of 2027 · Biology',        focus:'Orthodontics',                 fc:'#3FB7A6', img:'slot-officer-photo-5.webp',
+    { name:'Priya Shah',    role:'Class of 2027 · Biology',        focus:'Orthodontics',                 standing:'Member',     fc:'#3FB7A6', img:'slot-officer-photo-5.webp',
       quote:'There’s a quiet math to moving teeth a millimeter at a time — I could study it for hours.' },
-    { name:'Ethan Cole',    role:'Class of 2027 · Public Health',  focus:'Public Health Dentistry',      fc:'#E58AA5', img:'slot-officer-photo-7.webp',
+    { name:'Ethan Cole',    role:'Class of 2027 · Public Health',  focus:'Public Health Dentistry',      standing:'Member',     fc:'#E58AA5', img:'slot-officer-photo-7.webp',
       quote:'Access is the whole game. I want to build clinics in the counties that never had one.' },
-    { name:'Hannah Wu',     role:'Class of 2026 · Materials Sci.', focus:'Biomaterials Research',        fc:'#9B8CE0', img:'slot-officer-photo-6.webp',
+    { name:'Hannah Wu',     role:'Class of 2026 · Materials Sci.', focus:'Biomaterials Research',        standing:'Rushee',     fc:'#9B8CE0', img:'slot-officer-photo-6.webp',
       quote:'The composite in a filling started in a lab like the one I work in. Research is dentistry’s future tense.' },
-    { name:'Dev Patel',     role:'Class of 2028 · Neuroscience',   focus:'Endodontics',                  fc:'#62C6D8', img:'slot-officer-photo-4.webp',
+    { name:'Dev Patel',     role:'Class of 2028 · Neuroscience',   focus:'Endodontics',                  standing:'Rushee',     fc:'#62C6D8', img:'slot-officer-photo-4.webp',
       quote:'Everyone dreads a root canal — I want to be the reason they walk out saying it was nothing.' }
   ];
   const PALETTE = ['#4B9CD3','#B9975B','#3FB7A6','#E58AA5','#9B8CE0','#62C6D8'];
@@ -4126,6 +4137,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   const nameEl = document.getElementById('om-name');
   const roleEl = document.getElementById('om-role');
   const focusEl = document.getElementById('om-focus-t');
+  const standingEl = document.getElementById('om-standing');
   const quoteEl = document.getElementById('om-quote');
   const detailEl = document.getElementById('om-detail');
   const pindex = document.getElementById('om-pindex');
@@ -4135,16 +4147,25 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 
   // a profile counts as "set up" once it has a photo and a bio/quote
   const profileReady = (m) => !!(m.photo && (m.bio || m.quote || m.interests));
+  const isExec = (m) => !!(window.DDSAuth && DDSAuth.isExec && DDSAuth.isExec(m));
+  const isRushee = (m) => !!(window.DDSAuth && DDSAuth.isRushee && DDSAuth.isRushee(m));
+  const standingOf = (m) => isExec(m) ? 'Exec Board' : isRushee(m) ? 'Rushee' : 'Member';
+  // board first, then initiated members, then rushees — so the rail always
+  // reaches past the officers into the rest of the chapter
+  const groupRank = (m) => isExec(m) ? 0 : isRushee(m) ? 2 : 1;
   const realCast = () => {
     try {
-      return (window.DDSAuth ? DDSAuth.members() : []).filter(profileReady).map((m, i) => ({
-        name: m.name,
-        role: 'Class of ' + (m.gradYear || '—') + (m.major ? ' · ' + m.major : ''),
-        focus: (DDSAuth.execTitle && DDSAuth.execTitle(m)) || String(m.interests || '').split(/[,;·]/)[0].trim() || 'DDS Member',
-        fc: PALETTE[i % PALETTE.length],
-        quote: m.quote || m.bio,
-        img: m.photo
-      }));
+      return (window.DDSAuth ? DDSAuth.members() : []).filter(profileReady)
+        .sort((a, b) => groupRank(a) - groupRank(b) || String(a.name).localeCompare(String(b.name)))
+        .map((m, i) => ({
+          name: m.name,
+          role: 'Class of ' + (m.gradYear || '—') + (m.major ? ' · ' + m.major : ''),
+          focus: (DDSAuth.execTitle && DDSAuth.execTitle(m)) || String(m.interests || '').split(/[,;·]/)[0].trim() || 'Pre-Dental',
+          standing: standingOf(m),
+          fc: PALETTE[i % PALETTE.length],
+          quote: m.quote || m.bio,
+          img: m.photo
+        }));
     } catch (e) { return []; }
   };
 
@@ -4158,6 +4179,10 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     nameEl.textContent = m.name;
     roleEl.textContent = m.role;
     focusEl.textContent = m.focus;
+    const standing = m.standing || 'Member';
+    standingEl.textContent = standing;
+    standingEl.className = 'om-standing' +
+      (standing === 'Rushee' ? ' is-rushee' : standing === 'Exec Board' ? ' is-exec' : '');
     quoteEl.textContent = m.quote;
     pindex.textContent = String(cur + 1).padStart(2, '0') + ' / ' + String(MEMBERS.length).padStart(2, '0');
   };
