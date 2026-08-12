@@ -91,11 +91,29 @@ body{margin:0;background:#0A1A30;-webkit-font-smoothing:antialiased;font-family:
 .nav-mobile-list a.nav-mobile-cta:hover{color:#0A1A30;}
 .nav-mobile-group{color:#7FB2E0;font-weight:700;font-size:clamp(.66rem,2.6vw,.78rem);letter-spacing:3px;text-transform:uppercase;margin-top:clamp(8px,2vh,16px);opacity:.85;}
 .nav-mobile-group:first-child{margin-top:0;}
+/* Collapsible groups: closed by default so the menu fits one screen */
+.nav-mgroup{width:100%;max-width:420px;}
+.nav-mgroup-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:clamp(9px,1.6vh,14px) 16px;
+  background:transparent;border:0;border-top:1px solid rgba(127,178,224,.16);color:#7FB2E0;cursor:pointer;
+  font-family:'Montserrat',sans-serif;font-weight:700;font-size:clamp(.8rem,3.2vw,1rem);letter-spacing:3px;text-transform:uppercase;
+  transition:color .2s ease;}
+.nav-mgroup:first-of-type .nav-mgroup-btn{border-top:0;}
+.nav-mgroup-btn:hover,.nav-mgroup-btn[aria-expanded="true"]{color:#B9975B;}
+.nav-mgroup-chev{flex:none;transition:transform .34s cubic-bezier(.25,.1,.25,1);}
+.nav-mgroup-btn[aria-expanded="true"] .nav-mgroup-chev{transform:rotate(180deg);}
+.nav-mgroup-drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .38s cubic-bezier(.25,.1,.25,1);}
+.nav-mgroup.open .nav-mgroup-drop{grid-template-rows:1fr;}
+.nav-mgroup-in{overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:clamp(5px,1.6vh,12px);}
+.nav-mgroup.open .nav-mgroup-in{padding:clamp(6px,1.4vh,12px) 0 clamp(8px,1.8vh,14px);}
+.nav-mgroup-in a{font-size:clamp(1.02rem,4.4vw,1.5rem);}
 .nav-mobile-close{position:absolute;top:22px;right:22px;width:46px;height:46px;background:transparent;border:0;cursor:pointer;}
 .nav-mobile-close span{position:absolute;top:50%;left:50%;width:28px;height:2px;background:#D7E2EA;border-radius:2px;}
 .nav-mobile-close span:first-child{transform:translate(-50%,-50%) rotate(45deg);}
 .nav-mobile-close span:last-child{transform:translate(-50%,-50%) rotate(-45deg);}
 body.nav-open{overflow:hidden;}
+/* The announce toast outranks everything (z-index 99999) — while the menu is
+   open it would sit on top of the Dashboard button, so stand it down. */
+body.nav-open #dds-announce{opacity:0;pointer-events:none;}
 /* NOTE: never set overflow-x:hidden on body — it silently breaks every
    position:sticky on the page (officer-profiles pin, pillar-stories backdrop).
    html{overflow-x:clip} already prevents sideways page scroll. */
@@ -121,6 +139,7 @@ body.nav-open{overflow:hidden;}
 .back-btn:hover{color:#EAF1F8;}
 .ig-btn:hover{transform:translateY(-3px);}
 .li-btn:hover{transform:translateY(-3px);}
+.hl-btn:hover,.gm-btn:hover{transform:translateY(-3px);}
 .email-btn:hover{background:rgba(215,226,234,.12);}
 #exec-copy.is-copied{background:#B9975B;border-color:#B9975B;color:#0A1A30;}
 #exec-copy .exec-copy-txt{transition:none;}
@@ -587,7 +606,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 .op-cube.is-copied .op-cube-lbl{color:#EBD9AF;}
 @media(max-width:520px){.op-reach{grid-template-columns:1fr;} .op-reach-cubes{max-width:230px;}}
 /* "Skip the officers" escape hatch — rides above the pinned progress bar so a
-   visitor can jump to Big/Little without scrolling all eight panels. Fades in
+   visitor can jump to the end without scrolling all eight panels. Fades in
    once the section is genuinely pinned and out again at the very end. */
 .op-skip{position:absolute;left:50%;bottom:calc(clamp(22px,4vh,42px) + 22px);transform:translate(-50%,10px);
   z-index:7;display:inline-flex;align-items:center;gap:9px;padding:10px 20px;border-radius:999px;cursor:pointer;
@@ -612,98 +631,30 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   .op-skip:focus-visible{transform:translate(-50%,0);}
   .op-skip svg{transform:rotate(0);}
 }
-/* Big Little family tree */
-#big-little{position:relative;overflow:clip;}
-/* Family rail — horizontal scroll of family cards with fan-out back cards.
-   Arrows + the add tile live OUTSIDE the scroller so they never scroll away. */
-.bl-rail-shell{display:flex;align-items:center;gap:clamp(8px,1.2vw,16px);margin:clamp(34px,4.5vw,56px) 0 clamp(28px,4vw,44px);}
-.bl-rail{flex:1;min-width:0;display:flex;gap:clamp(16px,2.2vw,26px);overflow-x:auto;overflow-y:hidden;padding:12px 12px 32px;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:rgba(75,156,211,.45) rgba(255,255,255,.06);}
-.bl-arrow{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid rgba(75,156,211,.4);background:rgba(9,20,38,.7);color:#7FB2E0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s ease,color .2s ease,opacity .2s ease,transform .2s ease;}
-.bl-arrow:hover:not([disabled]){background:rgba(75,156,211,.18);color:#fff;transform:scale(1.08);}
-.bl-arrow[disabled]{opacity:.25;cursor:default;}
-.bl-add-dock{flex:none;display:flex;align-items:center;padding-left:clamp(6px,1vw,14px);margin-left:clamp(2px,.5vw,6px);border-left:1px dashed rgba(185,151,91,.35);}
-.bl-add-dock .blr-add{width:clamp(116px,11vw,148px);}
-@media(max-width:768px){.bl-arrow{display:none;}.bl-add-dock .blr-add{width:100px;}.bl-add-dock .blr-add .blr-plus{font-size:1.9rem;}}
-.bl-rail::-webkit-scrollbar{height:8px;}
-.bl-rail::-webkit-scrollbar-thumb{background:rgba(75,156,211,.4);border-radius:999px;}
-.bl-rail::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:999px;}
-.blr-wrap{position:relative;flex:none;width:clamp(205px,21vw,244px);scroll-snap-align:center;z-index:1;}
-.blr-wrap:hover,.blr-wrap:focus-within{z-index:6;}
-.blr-back{position:absolute;inset:0;z-index:0;border-radius:22px;background:rgba(11,23,42,.94);border:1px solid rgba(185,151,91,.45);box-shadow:0 24px 54px -26px rgba(0,0,0,.75);transform:translate(9px,7px) rotate(.6deg);transform-origin:bottom left;transition:transform .55s cubic-bezier(.25,.1,.25,1);display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:18px;}
-.blr-wrap:hover .blr-back,.blr-wrap:focus-within .blr-back{transform:translate(84%,14px) rotate(2.6deg);}
-.blr-back>*{opacity:0;transition:opacity .3s ease;}
-.blr-wrap:hover .blr-back>*,.blr-wrap:focus-within .blr-back>*{opacity:1;transition-delay:.16s;}
-.blr-back .pb-btn{align-self:flex-start;}
-.blr-eyebrow{color:#B9975B;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:10.5px;}
-.blr-backname{color:#EAF1F8;font-weight:700;font-size:1.02rem;line-height:1.3;}
-.blr-card{position:relative;z-index:2;display:block;width:100%;text-align:left;cursor:pointer;border:1px solid rgba(75,156,211,.3);border-radius:22px;background:rgba(9,20,38,.72);padding:12px 12px 16px;font-family:'Montserrat',sans-serif;color:#fff;transition:transform .3s cubic-bezier(.25,.1,.25,1),border-color .25s ease,box-shadow .25s ease;box-shadow:0 20px 44px -24px rgba(0,0,0,.7);}
-.blr-card:hover{transform:translateY(-6px);}
-.blr-card.active{border-color:#B9975B;box-shadow:0 24px 54px -22px rgba(185,151,91,.5);}
-.blr-card img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px;background:#0c2042;}
-.blr-fam{margin:12px 0 3px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;font-size:.98rem;color:#EAF1F8;line-height:1.15;}
-.blr-sub{color:#8CA6C4;font-size:11.5px;letter-spacing:.8px;text-transform:uppercase;font-weight:600;}
-.blr-add{flex:none;width:clamp(116px,11vw,148px);aspect-ratio:1;border-radius:50%;border:2px dashed rgba(185,151,91,.6);background:rgba(185,151,91,.05);color:#B9975B;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-family:'Montserrat',sans-serif;text-align:center;transition:transform .25s ease,background .25s ease,border-color .25s ease;}
-.blr-add:hover{transform:scale(1.05);background:rgba(185,151,91,.12);border-color:#B9975B;}
-.blr-add .blr-plus{font-size:2.6rem;font-weight:300;line-height:1;}
-.blr-add .blr-addlbl{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;line-height:1.5;}
-.bl-doc{display:inline-flex;align-items:center;gap:5px;margin-top:2px;color:#B9975B;font-weight:700;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none;}
-.bl-doc:hover{text-decoration:underline;}
-.bl-edit{display:inline-flex;align-items:center;gap:5px;margin-top:4px;padding:4px 12px;border-radius:999px;border:1px solid rgba(75,156,211,.45);background:rgba(75,156,211,.1);color:#7FB2E0;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s;}
-.bl-edit:hover{background:rgba(75,156,211,.24);color:#EAF1F8;}
-/* Add-yourself modal */
-.blm-overlay{position:fixed;inset:0;z-index:300;background:rgba(4,10,22,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s;}
-.blm-overlay.open{opacity:1;visibility:visible;}
-.blm-card{position:relative;width:min(460px,100%);max-height:min(86vh,720px);overflow-y:auto;background:#0e2140;border:1px solid rgba(75,156,211,.4);border-radius:22px;padding:clamp(24px,4vw,34px);box-shadow:0 40px 90px -30px rgba(0,0,0,.85);transform:translateY(14px);transition:transform .3s cubic-bezier(.25,.1,.25,1);}
-.blm-overlay.open .blm-card{transform:none;}
-.blm-close{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#D7E2EA;font-size:16px;cursor:pointer;line-height:1;}
-.blm-close:hover{background:rgba(255,255,255,.12);}
-.blm-card h3{margin:0 0 8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;font-size:1.35rem;color:#EAF1F8;}
-.blm-sub{margin:0 0 20px;color:#8CA6C4;font-size:.9rem;line-height:1.55;}
-.blm-toggle{display:flex;gap:8px;margin-bottom:18px;}
-.blm-toggle button{flex:1;padding:11px 10px;border-radius:12px;border:1px solid rgba(75,156,211,.35);background:rgba(255,255,255,.03);color:#C7D6E6;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:11.5px;cursor:pointer;transition:background .2s,color .2s,border-color .2s;}
-.blm-toggle button.active{background:#B9975B;border-color:#B9975B;color:#0A1A30;}
-.blm-card label{display:block;margin-bottom:14px;color:#7FB2E0;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:10.5px;}
-.blm-card label[hidden]{display:none;}
-.blm-card input,.blm-card select{display:block;width:100%;margin-top:6px;padding:11px 13px;border-radius:11px;border:1px solid rgba(75,156,211,.3);background:rgba(9,20,38,.7);color:#EAF1F8;font-family:'Montserrat',sans-serif;font-size:14px;letter-spacing:normal;text-transform:none;font-weight:500;}
-.blm-card input:focus,.blm-card select:focus{outline:2px solid #4B9CD3;outline-offset:1px;}
-.blm-card input[type=file]{padding:9px;font-size:12.5px;color:#9FB6CE;}
-.blm-err{display:none;margin:0 0 14px;padding:10px 13px;border-radius:10px;background:rgba(200,60,60,.14);border:1px solid rgba(220,90,90,.4);color:#F3B8B8;font-size:12.5px;line-height:1.5;}
-.blm-err.show{display:block;}
-.blm-submit{display:block;width:100%;padding:14px;border-radius:999px;border:0;background:#B9975B;color:#0A1A30;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:12.5px;cursor:pointer;transition:transform .2s;}
-.blm-submit:hover{transform:translateY(-2px);}
-.blm-note{margin:14px 0 0;color:#6E89A6;font-size:11.5px;line-height:1.55;text-align:center;}
-.blm-photoprev{display:flex;align-items:center;gap:14px;margin:-4px 0 16px;padding:10px;border:1px solid rgba(75,156,211,.3);border-radius:14px;background:rgba(9,20,38,.55);}
-.blm-photoprev[hidden]{display:none;}
-.blm-photoprev img{display:block;width:56px;height:70px;object-fit:cover;border-radius:10px;background:#0c2042;}
-.blm-photoprev-meta{display:flex;flex-direction:column;gap:6px;color:#8CA6C4;font-size:11.5px;line-height:1.4;}
-.blm-photoclear{align-self:flex-start;background:none;border:0;padding:0;color:#E08585;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;}
-.blm-photoclear:hover{text-decoration:underline;}
-.blm-delete{display:block;width:100%;margin-top:10px;padding:12px;border-radius:999px;border:1px solid rgba(220,90,90,.45);background:rgba(200,60,60,.1);color:#F3B8B8;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:11.5px;cursor:pointer;transition:background .2s;}
-.blm-delete:hover{background:rgba(200,60,60,.22);}
-.blm-delete[hidden]{display:none;}
-.bl-stage{position:relative;max-width:880px;margin:0 auto;min-height:clamp(430px,52vw,560px);}
-.bl-links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible;}
-.bl-links path{transition:stroke-width .25s ease,opacity .25s ease;}
-.bl-tier{position:relative;z-index:2;display:flex;justify-content:center;}
-.bl-tier-big{margin-bottom:clamp(74px,10vw,132px);}
-.bl-tier-littles{gap:clamp(16px,3vw,44px);flex-wrap:wrap;align-items:flex-start;}
-.bl-node{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;}
-.bl-photo{position:relative;border-radius:20px;overflow:hidden;background:#0c2042;box-shadow:0 24px 50px -24px rgba(0,0,0,.7);transition:transform .3s cubic-bezier(.25,.1,.25,1);}
-.bl-node:hover .bl-photo{transform:translateY(-6px);}
-.bl-photo img{display:block;width:100%;height:100%;object-fit:cover;}
-.bl-photo::after{content:"";position:absolute;inset:0;border-radius:20px;border:1px solid rgba(255,255,255,.14);pointer-events:none;transition:border-color .3s ease;}
-.bl-node-big .bl-photo{width:clamp(152px,17vw,188px);aspect-ratio:4/5;box-shadow:0 30px 64px -26px rgba(185,151,91,.5),0 20px 44px -22px rgba(0,0,0,.7);}
-.bl-node-big .bl-photo::after{border-color:rgba(185,151,91,.55);}
-.bl-node-little .bl-photo{width:clamp(114px,12vw,142px);aspect-ratio:4/5;}
-.bl-node-little:hover .bl-photo::after{border-color:rgba(75,156,211,.75);}
-.bl-role{font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:10.5px;padding:3px 11px;border-radius:999px;}
-.bl-role-big{color:#0A1A30;background:#B9975B;}
-.bl-role-little{color:#7FB2E0;background:rgba(75,156,211,.14);border:1px solid rgba(75,156,211,.4);}
-.bl-name{font-weight:700;font-size:clamp(.92rem,1.2vw,1.05rem);color:#EAF1F8;letter-spacing:.3px;}
-.bl-year{font-size:11px;color:#8CA6C4;letter-spacing:1px;text-transform:uppercase;font-weight:600;}
-.bl-meta{display:flex;flex-direction:column;align-items:center;gap:6px;}
-.bl-note{max-width:640px;margin:clamp(44px,6vw,72px) auto 0;text-align:center;}
-@media(max-width:560px){.bl-tier-big{margin-bottom:64px;}}
+/* Site footer — its own short page after the officer scroller */
+#site-foot{position:relative;z-index:14;background:#08172B;color:#D7E2EA;
+  border-top:1px solid rgba(255,255,255,.1);
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:clamp(18px,3vw,32px);
+  padding:clamp(26px,3.4vw,40px) clamp(20px,5vw,64px);}
+.foot-top{order:3;display:inline-flex;align-items:center;gap:9px;padding:11px 22px;border-radius:999px;
+  border:1px solid rgba(185,151,91,.5);background:rgba(185,151,91,.08);color:#B9975B;text-decoration:none;
+  font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  transition:background .2s ease,color .2s ease,transform .2s ease;}
+.foot-top:hover{background:#B9975B;color:#0A1A30;transform:translateY(-2px);}
+.foot-top svg{transition:transform .25s ease;}
+.foot-top:hover svg{transform:translateY(-2px);}
+.foot-id{display:flex;align-items:center;gap:13px;}
+.foot-id img{width:42px;height:42px;border-radius:50%;display:block;}
+.foot-id b{display:block;font-weight:700;letter-spacing:1.5px;font-size:13px;color:#D7E2EA;}
+.foot-id span{display:block;color:#54708E;font-size:12px;letter-spacing:.5px;}
+.foot-meta{display:flex;flex-wrap:wrap;gap:18px;align-items:center;color:#6E89A6;font-size:12px;
+  letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
+.foot-meta .foot-tag{color:#B9975B;}
+@media(max-width:760px){
+  #site-foot{flex-direction:column;align-items:center;text-align:center;gap:16px;padding-bottom:clamp(30px,6vw,44px);}
+  .foot-top{order:-1;}
+  .foot-meta{justify-content:center;gap:12px;font-size:11px;}
+}
 /* Meeting notes — front-page minute book. The pane shows exactly three
    records (JS sizes it to the first three rows); the rest scroll inside
    it with snap, driven by the up/down arrows or the wheel. */
@@ -808,7 +759,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
    · TOOTH (spring physics, native cursor hidden): Learn/Serve/Lead pillars
      + Officer Profiles.
    · GLOW ONLY (no dot, no native cursor): the President's letter.
-   · Everywhere else (About, Gallery, The Bite, Big Little, Join, …): the
+   · Everywhere else (About, Gallery, The Bite, Join, …): the
      normal native cursor.
    html.dot-on is only set when initDotCursor actually runs (fine pointer,
    no reduced motion), so touch/reduced-motion users keep normal cursors. */
@@ -837,7 +788,7 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
 /* Offers: cursor-follow glow inside the stacked cards (lightens the navy) + radial gold text */
 .of-glow{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;background:radial-gradient(circle 360px at var(--gx,-999px) var(--gy,-999px),rgba(126,176,232,.42) 0%,rgba(75,156,211,.16) 46%,transparent 72%);mix-blend-mode:screen;opacity:0;transition:opacity .45s ease;}
 .of-glowtext{color:transparent;background-image:radial-gradient(circle 300px at var(--px,-999px) var(--py,-999px),#B9975B 0%,#B9975B 30%,var(--base,#EAF1F8) 70%);-webkit-background-clip:text;background-clip:text;}
-/* Big Little + Join DDS: the Members-section aurora carried across both
+/* Join DDS: the Members-section aurora carried across
    sections as one canvas — six big drifting blobs total, two per color
    (blue / violet / gold) at different luminances, plus the same
    cursor-follow color-dodge glow that lights up the text it passes over. */
@@ -866,12 +817,6 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   [data-officer-panel]{width:100% !important;height:auto !important;min-height:0 !important;padding:clamp(52px,11vw,92px) 18px 40px !important;perspective:none !important;}
   .op-grid{grid-template-columns:minmax(0,1fr) !important;}
   #officers-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
-  /* Big/Little: horizontal rail becomes a wrapped grid — no sideways scrolling on touch */
-  .bl-rail-shell{display:block;}
-  .bl-rail{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;overflow:visible;padding:6px 2px 8px;scroll-snap-type:none;}
-  .blr-wrap{width:auto;}
-  .blr-back{display:none;}
-  .bl-add-dock{border-left:0;justify-content:center;padding:18px 0 0;margin:0;}
 }
 @media(max-width:640px){
   .pd-panel{min-height:0 !important;padding:20px 0 40px !important;}
@@ -937,13 +882,14 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <a href="#members-preview" class="nav-dd-link" role="menuitem">Members<span>&rarr;</span></a>
         <a href="#officers" class="nav-dd-link" role="menuitem">Officers<span>&rarr;</span></a>
         <a href="#president-letter" class="nav-dd-link" role="menuitem">Letter From The President<span>&rarr;</span></a>
-        <a href="#big-little" class="nav-dd-link" role="menuitem">Big Little<span>&rarr;</span></a>
       </div>
     </div>
     <!-- Contact: top-level links down to the contact section -->
     <div class="nav-dd" data-nav-dd>
       <a class="nav-dd-btn" href="#join" aria-haspopup="true">Contact<svg class="nav-dd-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></a>
       <div class="nav-dd-menu nav-dd-menu-right" role="menu">
+        <a href="https://heellife.unc.edu/organization/delta-delta-sigma-predental-honor-society" target="_blank" rel="noopener" class="nav-dd-link" role="menuitem">Heel Life<span>&rarr;</span></a>
+        <a href="https://groupme.com/join_group/84455090/GEvNLTfw" target="_blank" rel="noopener" class="nav-dd-link" role="menuitem">GroupMe<span>&rarr;</span></a>
         <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener" class="nav-dd-link" role="menuitem">Instagram<span>&rarr;</span></a>
         <a href="https://www.linkedin.com/company/unc-delta-delta-sigma-dds" target="_blank" rel="noopener" class="nav-dd-link" role="menuitem">LinkedIn<span>&rarr;</span></a>
         <a href="#join" class="nav-dd-link" role="menuitem">Listserv<span>&rarr;</span></a>
@@ -954,36 +900,60 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   </div>
 </nav>
 
-<!-- MOBILE MENU -->
+<!-- MOBILE MENU
+     Each group is a closed accordion so the whole sitemap fits on one screen —
+     tap a heading to reveal its links. Home / Calendar / Login stay top-level. -->
 <div class="nav-mobile" data-nav-mobile aria-hidden="true">
   <button class="nav-mobile-close" type="button" aria-label="Close menu" data-nav-close><span></span><span></span></button>
   <div class="nav-mobile-list">
     <a href="#top">Home</a>
     <a href="#calendar">Calendar</a>
-    <span class="nav-mobile-group">About</span>
-    <a href="#about">About</a>
-    <a href="#pillars">The Pillars</a>
-    <a href="#offers">Offers</a>
-    <a href="#points">Points</a>
-    <a href="service.html">Points &middot; Service</a>
-    <a href="dental.html">Points &middot; Dental</a>
-    <a href="social.html">Points &middot; Social</a>
-    <span class="nav-mobile-group">Publishing</span>
-    <a href="#gallery">Gallery</a>
-    <a href="newsletter.html?tag=blog-post">Blog</a>
-    <a href="#toolkit">Toolkit</a>
-    <a href="archive.html">Meeting Notes</a>
-    <a href="newsletter.html">The Bite</a>
-    <span class="nav-mobile-group">People</span>
-    <a href="#members-preview">Members</a>
-    <a href="#officers">Officers</a>
-    <a href="#president-letter">Letter From The President</a>
-    <a href="#big-little">Big Little</a>
-    <span class="nav-mobile-group">Contact</span>
-    <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener">Instagram</a>
-    <a href="https://www.linkedin.com/company/unc-delta-delta-sigma-dds" target="_blank" rel="noopener">LinkedIn</a>
-    <a href="#join">Listserv</a>
-    <a href="#exec-copy">Email The Exec</a>
+
+    <div class="nav-mgroup" data-mgroup>
+      <button class="nav-mgroup-btn" type="button" aria-expanded="false">About<svg class="nav-mgroup-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-mgroup-drop"><div class="nav-mgroup-in">
+        <a href="#about">About</a>
+        <a href="#pillars">The Pillars</a>
+        <a href="#offers">Offers</a>
+        <a href="#points">Points</a>
+        <a href="service.html">Points &middot; Service</a>
+        <a href="dental.html">Points &middot; Dental</a>
+        <a href="social.html">Points &middot; Social</a>
+      </div></div>
+    </div>
+
+    <div class="nav-mgroup" data-mgroup>
+      <button class="nav-mgroup-btn" type="button" aria-expanded="false">Publishing<svg class="nav-mgroup-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-mgroup-drop"><div class="nav-mgroup-in">
+        <a href="#gallery">Gallery</a>
+        <a href="newsletter.html?tag=blog-post">Blog</a>
+        <a href="#toolkit">Toolkit</a>
+        <a href="archive.html">Meeting Notes</a>
+        <a href="newsletter.html">The Bite</a>
+      </div></div>
+    </div>
+
+    <div class="nav-mgroup" data-mgroup>
+      <button class="nav-mgroup-btn" type="button" aria-expanded="false">People<svg class="nav-mgroup-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-mgroup-drop"><div class="nav-mgroup-in">
+        <a href="#members-preview">Members</a>
+        <a href="#officers">Officers</a>
+        <a href="#president-letter">Letter From The President</a>
+      </div></div>
+    </div>
+
+    <div class="nav-mgroup" data-mgroup>
+      <button class="nav-mgroup-btn" type="button" aria-expanded="false">Contact<svg class="nav-mgroup-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-mgroup-drop"><div class="nav-mgroup-in">
+        <a href="https://heellife.unc.edu/organization/delta-delta-sigma-predental-honor-society" target="_blank" rel="noopener">Heel Life</a>
+        <a href="https://groupme.com/join_group/84455090/GEvNLTfw" target="_blank" rel="noopener">GroupMe</a>
+        <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.linkedin.com/company/unc-delta-delta-sigma-dds" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="#join">Listserv</a>
+        <a href="#exec-copy">Email The Exec</a>
+      </div></div>
+    </div>
+
     <a href="login.html">Member Login</a>
     <a href="dashboard.html" class="nav-mobile-cta">Dashboard</a>
   </div>
@@ -1031,7 +1001,10 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
           </span>
           <span class="cm-tip">The Bite &middot; Newsletter</span>
         </a>
-        <a data-cta-magnet href="#officers" class="cta-gold" style="display:inline-flex;align-items:center;justify-content:center;padding:16px clamp(26px,3vw,38px);border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:clamp(12px,2vw,18px);text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -12px rgba(185,151,91,.85);transition:transform .2s;letter-spacing:2px;min-width:280px;height:60px;">Meet the Officers&nbsp;→</a>
+        <a data-cta-magnet href="#officers" class="cta-outline" style="display:inline-flex;align-items:center;justify-content:center;padding:16px clamp(26px,3vw,38px);border-radius:999px;border:1.5px solid rgba(215,226,234,.6);color:#EAF1F8;font-weight:700;font-size:clamp(11px,1.5vw,15px);letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;min-width:280px;height:60px;background:rgba(10,26,48,.35);">Meet the Officers</a>
+        <i class="cta-row-break" aria-hidden="true"></i>
+        <!-- Join is the hero's primary call: it takes the gold pill and lands on Join DDS -->
+        <a data-cta-magnet href="#join" class="cta-gold" style="display:inline-flex;align-items:center;justify-content:center;padding:16px clamp(26px,3vw,38px);border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:clamp(12px,2vw,18px);text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -12px rgba(185,151,91,.85);transition:transform .2s;letter-spacing:2px;min-width:280px;height:60px;">Join DDS&nbsp;→</a>
         <i class="cta-row-break" aria-hidden="true"></i>
         <a data-cta-magnet href="login.html" id="hero-login" class="cta-outline" style="display:inline-flex;align-items:center;justify-content:center;padding:16px clamp(26px,3vw,38px);border-radius:999px;border:1.5px solid rgba(215,226,234,.6);color:#EAF1F8;font-weight:700;font-size:clamp(11px,1.5vw,15px);letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;min-width:280px;height:60px;background:rgba(10,26,48,.35);">Member Login</a>
         <!-- Meeting notes: the sheet of paper itself is the button (flanks the pills on the right) -->
@@ -1593,88 +1566,6 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
   </div>
 </section>
 
-<!-- OFFICER PROFILES (horizontal pin) -->
-<section id="officer-profiles" style="position:relative;z-index:7;background:#15171c;color:#fff;">
-  <div data-hpin-wrap style="position:relative;">
-    <div data-hpin-stage style="position:sticky;top:0;height:100vh;overflow:hidden;background:#15171c url('officer-bg.png') center/cover no-repeat;">
-      <div id="op-glow" class="hpin-only" style="position:absolute;top:0;left:0;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(75,156,211,.28) 0%,rgba(75,156,211,.09) 45%,transparent 70%);mix-blend-mode:screen;pointer-events:none;opacity:0;transition:opacity .5s ease,transform .22s ease-out;will-change:transform;z-index:0;"></div>
-      <div data-hpin-track style="position:absolute;inset:0;display:flex;will-change:transform;z-index:1;" id="hpin-track">
-        <!-- Panels injected by JS -->
-      </div>
-      <div style="position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.5;mix-blend-mode:overlay;z-index:5;"></div>
-      <div class="hpin-only" style="position:absolute;top:clamp(22px,4vh,40px);left:0;right:0;text-align:center;pointer-events:none;z-index:6;color:rgba(255,255,255,.6);font-size:12px;letter-spacing:2px;text-transform:uppercase;">Officer Profiles · keep scrolling&nbsp;↓</div>
-      <div class="hpin-only" style="position:absolute;left:50%;transform:translateX(-50%);bottom:clamp(22px,4vh,42px);width:min(420px,60vw);height:3px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden;z-index:6;pointer-events:none;"><div data-hpin-progress style="height:100%;width:0%;background:linear-gradient(90deg,#4B9CD3,#B9975B);border-radius:999px;transition:width .05s;"></div></div>
-      <a class="op-skip" id="op-skip" href="#big-little">Skip to Big/Little<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
-      <div id="tooth-officers" style="position:absolute;top:0;left:0;width:30px;height:39px;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform;filter:drop-shadow(0 4px 10px rgba(0,0,0,.65));"><img src="slot-hero-portrait.webp" alt="" style="display:block;width:100%;height:100%;object-fit:contain;"></div>
-    </div>
-  </div>
-</section>
-
-<!-- BIG LITTLE -->
-<section id="big-little" style="position:relative;z-index:8;background:radial-gradient(120% 80% at 50% -8%,#173461 0%,#0d1f3a 48%,#0A1A30 100%);border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;color:#fff;overflow:clip;padding:clamp(90px,12vw,160px) clamp(20px,4vw,48px) clamp(80px,11vw,140px);">
-  <div class="bl-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
-  <div class="aur-glow" id="bl-glow"></div>
-  <div style="position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.22;mix-blend-mode:overlay;z-index:0;"></div>
-  <div style="max-width:1120px;margin:0 auto;position:relative;z-index:2;">
-    <header data-reveal="0" style="text-align:center;max-width:760px;margin:0 auto;">
-      <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:20px;">
-        <span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span>
-        <span style="color:#B9975B;font-weight:600;letter-spacing:3px;font-size:13px;text-transform:uppercase;">Mentorship, Handed Down</span>
-        <span style="width:30px;height:1.5px;background:#B9975B;display:block;"></span>
-      </div>
-      <h2 style="margin:0 0 24px;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-0.02em;font-size:clamp(2.6rem,8vw,6rem);"><span style="background:linear-gradient(180deg,#8FB7DE 0%,#E8F0F8 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">Big Little.</span><span style="color:#B9975B;">&nbsp;Period.</span></h2>
-      <p style="margin:0 auto;max-width:600px;color:#A9C0D8;font-weight:300;line-height:1.7;font-size:clamp(.98rem,1.4vw,1.18rem);">When you join DDS you don't just get a chapter — you get a family. Every new member is paired with a <em style="color:#EAF1F8;font-style:normal;font-weight:500;">big</em>: an upperclassman mentor who has already walked the road to dental school. Bigs hand down notes, introductions, and hard-won advice; littles keep the line going. Pick a family below to trace its tree.</p>
-    </header>
-    <div data-reveal="0.05" class="bl-rail-shell">
-      <button class="bl-arrow" type="button" data-bl-prev aria-label="Scroll families left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <div class="bl-rail" data-bl-rail aria-label="DDS families — scroll sideways to browse"></div>
-      <button class="bl-arrow" type="button" data-bl-next aria-label="Scroll families right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="bl-add-dock">
-        <button type="button" class="blr-add" data-blm-open aria-label="Add yourself as a big or little"><span class="blr-plus">+</span><span class="blr-addlbl">Add a Big<br>or Little</span></button>
-      </div>
-    </div>
-    <div class="bl-stage" data-bl-stage>
-      <svg class="bl-links" data-bl-links preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bl-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9975B"/><stop offset="1" stop-color="#4B9CD3"/></linearGradient></defs></svg>
-      <div class="bl-tier bl-tier-big" data-bl-big></div>
-      <div class="bl-tier bl-tier-littles" data-bl-littles></div>
-    </div>
-    <div class="bl-note" data-bl-note></div>
-    <div data-reveal="0.1" style="text-align:center;margin-top:clamp(48px,6vw,80px);">
-      <p style="margin:0 0 20px;color:#8CA6C4;font-weight:300;font-size:clamp(.95rem,1.3vw,1.1rem);">Every member gets a big. Every big was once a little.</p>
-      <a href="#join" class="cta-gold" style="display:inline-flex;align-items:center;padding:16px 34px;border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 14px 34px -12px rgba(185,151,91,.85);transition:transform .2s;">Find Your Family&nbsp;&rarr;</a>
-    </div>
-  </div>
-  <!-- Add-yourself modal -->
-  <div class="blm-overlay" data-blm aria-hidden="true">
-    <div class="blm-card" role="dialog" aria-modal="true" aria-labelledby="blm-title">
-      <button class="blm-close" type="button" data-blm-close aria-label="Close">✕</button>
-      <h3 id="blm-title">Join The Tree</h3>
-      <p class="blm-sub" data-blm-sub>Add yourself as a potential big or little. Attach a PDF or link that tells your future family who you are.</p>
-      <div class="blm-toggle" data-blm-toggle>
-        <button type="button" data-role="big" class="active">I'm a Big</button>
-        <button type="button" data-role="little">I'm a Little</button>
-      </div>
-      <label>Your name<input type="text" data-blm-name placeholder="First Last" maxlength="40"></label>
-      <label>Class year<input type="text" data-blm-year placeholder="'27" maxlength="4"></label>
-      <label data-blm-photowrap>Your photo (optional)<input type="file" accept="image/*" data-blm-photo></label>
-      <div class="blm-photoprev" data-blm-photoprev hidden>
-        <img alt="Photo preview" data-blm-photoimg>
-        <div class="blm-photoprev-meta">
-          <span>Cropped to fit your card.</span>
-          <button type="button" class="blm-photoclear" data-blm-photoclear>Remove photo ✕</button>
-        </div>
-      </div>
-      <label data-blm-famwrap hidden>Join a family<select data-blm-family></select></label>
-      <label data-blm-newfamwrap>Name your new family line<input type="text" data-blm-newfam placeholder="e.g. The Milk Teeth" maxlength="40"></label>
-      <label>Link to your PDF or page<input type="url" data-blm-link placeholder="https://…"></label>
-      <label>Or upload a PDF (max 2 MB)<input type="file" accept="application/pdf" data-blm-file></label>
-      <div class="blm-err" data-blm-err></div>
-      <button type="button" class="blm-submit" data-blm-submit>Add Me To The Tree&nbsp;→</button>
-      <button type="button" class="blm-delete" data-blm-delete hidden>Remove me from the tree</button>
-      <p class="blm-note">Additions are saved in this browser and appear on the page instantly. The exec board publishes them for everyone in the next site update.</p>
-    </div>
-  </div>
-</section>
 
 <!-- JOIN / FOOTER -->
 <footer id="join" style="background:#0A1A30;color:#fff;border-radius:clamp(28px,4vw,56px) clamp(28px,4vw,56px) 0 0;margin-top:-30px;position:relative;z-index:9;padding:clamp(80px,11vw,150px) clamp(20px,4vw,48px) clamp(36px,4vw,56px);overflow:clip;">
@@ -1742,6 +1633,9 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
       </div>
     </div>
     <div data-reveal="0.1" style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:clamp(56px,8vw,96px);">
+      <!-- Heel Life + GroupMe: the two places a new rushee actually signs up -->
+      <a href="https://heellife.unc.edu/organization/delta-delta-sigma-predental-honor-society" target="_blank" rel="noopener" class="hl-btn" style="display:inline-flex;align-items:center;gap:10px;padding:16px 34px;border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:transform .2s;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9 12 4 2 9l10 5 10-5Z"/><path d="M6 11.5V17c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-5.5"/></svg>Heel Life</a>
+      <a href="https://groupme.com/join_group/84455090/GEvNLTfw" target="_blank" rel="noopener" class="gm-btn" style="display:inline-flex;align-items:center;gap:10px;padding:16px 34px;border-radius:999px;background:#B9975B;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:transform .2s;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.8L3 21l1.9-4.2A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>GroupMe</a>
       <a href="https://www.instagram.com/unc_dds/" target="_blank" rel="noopener" class="ig-btn" style="display:inline-flex;align-items:center;gap:10px;padding:16px 34px;border-radius:999px;background:#4B9CD3;color:#0A1A30;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:transform .2s;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>Follow @unc_dds</a>
       <button type="button" id="exec-copy" class="email-btn" data-email="ddsexec@unc.edu" style="scroll-margin-top:140px;display:inline-flex;align-items:center;gap:9px;padding:16px 34px;border-radius:999px;border:1.5px solid #D7E2EA;background:transparent;color:#D7E2EA;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,color .2s;">
         <span class="exec-copy-ic" aria-hidden="true" style="display:inline-flex;">
@@ -1949,19 +1843,46 @@ a:focus-visible,button:focus-visible,[role="button"]:focus-visible{outline:2px s
         <iframe id="gcal-frame" title="UNC DDS Calendar" style="border:0;display:block;width:100%;height:min(800px,80vh);" frameborder="0" scrolling="no"></iframe>
       </div>
     </details>
-    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;margin-top:clamp(56px,8vw,100px);padding-top:28px;border-top:1px solid rgba(255,255,255,.12);">
-      <div style="display:flex;align-items:center;gap:13px;">
-        <img src="logo-dds.png" alt="DDS" style="width:46px;height:46px;border-radius:50%;display:block;" onerror="this.src='https://placehold.co/46x46/13294B/4B9CD3'">
-        <div><div style="font-weight:700;letter-spacing:1.5px;font-size:13px;color:#D7E2EA;">DELTA DELTA SIGMA</div><div style="color:#54708E;font-size:12px;letter-spacing:.5px;">Pre-Dental Honor Society · UNC Chapel Hill</div></div>
+  </div>
+</section>
+
+<!-- OFFICER PROFILES (horizontal pin) -->
+<section id="officer-profiles" style="position:relative;z-index:13;background:#15171c;color:#fff;">
+  <div data-hpin-wrap style="position:relative;">
+    <div data-hpin-stage style="position:sticky;top:0;height:100vh;overflow:hidden;background:#15171c url('officer-bg.png') center/cover no-repeat;">
+      <div id="op-glow" class="hpin-only" style="position:absolute;top:0;left:0;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(75,156,211,.28) 0%,rgba(75,156,211,.09) 45%,transparent 70%);mix-blend-mode:screen;pointer-events:none;opacity:0;transition:opacity .5s ease,transform .22s ease-out;will-change:transform;z-index:0;"></div>
+      <div data-hpin-track style="position:absolute;inset:0;display:flex;will-change:transform;z-index:1;" id="hpin-track">
+        <!-- Panels injected by JS -->
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center;color:#6E89A6;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">
-        <span>Learn. Serve. Lead.</span>
-        <span style="color:#B9975B;">#FutureDDS</span>
-        <span>© <span id="yr"></span> ΔΔΣ</span>
-      </div>
+      <div style="position:absolute;inset:0;pointer-events:none;background:url('grain.png') repeat;opacity:.5;mix-blend-mode:overlay;z-index:5;"></div>
+      <div class="hpin-only" style="position:absolute;top:clamp(22px,4vh,40px);left:0;right:0;text-align:center;pointer-events:none;z-index:6;color:rgba(255,255,255,.6);font-size:12px;letter-spacing:2px;text-transform:uppercase;">Officer Profiles · keep scrolling&nbsp;↓</div>
+      <div class="hpin-only" style="position:absolute;left:50%;transform:translateX(-50%);bottom:clamp(22px,4vh,42px);width:min(420px,60vw);height:3px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden;z-index:6;pointer-events:none;"><div data-hpin-progress style="height:100%;width:0%;background:linear-gradient(90deg,#4B9CD3,#B9975B);border-radius:999px;transition:width .05s;"></div></div>
+      <a class="op-skip" id="op-skip" href="#site-foot">Skip to the end<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
+      <div id="tooth-officers" style="position:absolute;top:0;left:0;width:30px;height:39px;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform;filter:drop-shadow(0 4px 10px rgba(0,0,0,.65));"><img src="slot-hero-portrait.webp" alt="" style="display:block;width:100%;height:100%;object-fit:contain;"></div>
     </div>
   </div>
 </section>
+
+<!-- SITE FOOTER — the last stop: one line of identity and a ride back to the top -->
+<footer id="site-foot">
+  <a class="foot-top" href="#top" aria-label="Back to the top of the page">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    Back to top
+  </a>
+  <div class="foot-id">
+    <img src="logo-dds.png" alt="" onerror="this.style.display='none'">
+    <div>
+      <b>DELTA DELTA SIGMA</b>
+      <span>Pre-Dental Honor Society &middot; UNC Chapel Hill</span>
+    </div>
+  </div>
+  <div class="foot-meta">
+    <span>Learn. Serve. Lead.</span>
+    <span class="foot-tag">#FutureDDS</span>
+    <span>&copy; <span id="yr"></span> &Delta;&Delta;&Sigma;</span>
+  </div>
+</footer>
+
 </main>
 
 </div><!-- #root -->
@@ -2689,8 +2610,8 @@ const OFFICERS = [
 ];
 
 
-// ---- Big Little families (placeholder photos + copy; swap for real families later) ----
-// Base big/little families now live in dds-family.js (shared with dashboard.html).
+// Big/little families live in dds-family.js and are rendered on the member
+// dashboard (#family) — the home page no longer carries a copy of the tree.
 
 // ---- Year ----
 document.getElementById('yr').textContent = new Date().getFullYear();
@@ -3057,6 +2978,27 @@ ddsWrapAbout();
   if (closeBtn) closeBtn.addEventListener('click', shut);
   menu.querySelectorAll('a').forEach(a => a.addEventListener('click', shut));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') shut(); });
+
+  // Groups are accordions — one open at a time, all shut whenever the menu shuts,
+  // so the sitemap never turns back into one long scroll.
+  const groups = Array.from(menu.querySelectorAll('[data-mgroup]'));
+  const shutGroups = () => groups.forEach(g => {
+    g.classList.remove('open');
+    g.querySelector('.nav-mgroup-btn').setAttribute('aria-expanded', 'false');
+  });
+  groups.forEach(g => {
+    const btn = g.querySelector('.nav-mgroup-btn');
+    btn.addEventListener('click', () => {
+      const wasOpen = g.classList.contains('open');
+      shutGroups();
+      if (!wasOpen) {
+        g.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  burger.addEventListener('click', shutGroups);
+  if (closeBtn) closeBtn.addEventListener('click', shutGroups);
 })();
 
 // ---- Nav dropdowns (Publishing / People / Contact) ----
@@ -3144,10 +3086,14 @@ ddsWrapAbout();
     if (para) {
       const chars = Array.from(para.querySelectorAll('[data-char]'));
       if (chars.length) {
+        /* The sweep runs while the paragraph rises into view and finishes the
+           moment the whole of it is on screen — you read it lit, not half-lit.
+           (It used to only finish after the paragraph had been pushed off the
+           top, so most people never saw the end of the effect.) */
         const rect = para.getBoundingClientRect();
-        const start = vh * 0.85, end = vh * 0.25;
-        const span = (start - end) + rect.height;
-        let p = Math.max(0, Math.min(1, (start - rect.top) / span));
+        const start = vh * 0.95;                 // rect.top when the sweep begins
+        const end = vh * 0.80 - rect.height;     // rect.top when it's fully lit
+        let p = Math.max(0, Math.min(1, (start - rect.top) / (start - end)));
         const lit = p * chars.length;
         chars.forEach((c, i) => { c.style.opacity = i < lit ? '1' : '.18'; });
       }
@@ -3223,9 +3169,9 @@ ddsWrapAbout();
     maxShift = Math.max(0, track.scrollWidth - stage.clientWidth);
     wrap.style.height = (window.innerHeight + maxShift) + 'px';
   };
-  // Escape hatch: jump straight to Big/Little instead of scrolling all eight
+  // Escape hatch: jump straight to the footer instead of scrolling all eight
   // officers. Visible while the section owns the viewport, gone once the
-  // visitor has all but arrived at the next section anyway.
+  // visitor has all but arrived at the end anyway.
   const skip = document.getElementById('op-skip');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const syncSkip = () => {
@@ -3254,7 +3200,7 @@ ddsWrapAbout();
     syncSkip();
   };
   if (skip) skip.addEventListener('click', (e) => {
-    const target = document.getElementById('big-little');
+    const target = document.getElementById('site-foot');
     if (!target) return;                       // let the plain #hash do its job
     e.preventDefault();
     const y = Math.round(target.getBoundingClientRect().top + window.scrollY);
@@ -4252,10 +4198,10 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   sec.addEventListener('mouseleave', () => { glow.style.opacity = '0'; });
 })();
 
-// ---- Big Little + Join DDS: same cursor-follow aurora glow as Our Members ----
+// ---- Join DDS: same cursor-follow aurora glow as Our Members ----
 (function initAuroraGlows(){
   if (REDUCED_MOTION) return;
-  [['big-little','bl-glow'],['join','join-glow']].forEach(function(pair){
+  [['join','join-glow']].forEach(function(pair){
     const sec = document.getElementById(pair[0]);
     const glow = document.getElementById(pair[1]);
     if (!sec || !glow) return;
@@ -4371,400 +4317,6 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   });
 })();
 
-// ---- Big Little: horizontal family rail + tree + add-yourself modal ----
-(function initBigLittle(){
-  const root = document.getElementById('big-little');
-  if (!root) return;
-  const railEl = root.querySelector('[data-bl-rail]');
-  const bigEl = root.querySelector('[data-bl-big]');
-  const littlesEl = root.querySelector('[data-bl-littles]');
-  const noteEl = root.querySelector('[data-bl-note]');
-  const svg = root.querySelector('[data-bl-links]');
-  const stage = root.querySelector('.bl-stage');
-  const SVGNS = 'http://www.w3.org/2000/svg';
-  const STORE_KEY = 'dds-big-little-v1';
-  let paths = [], current = 0, families = [];
-
-  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  // Store + avatar generation are shared with dashboard.html via dds-family.js
-  const loadSaved = () => DDSFamily.load();
-  const saveList = (list) => DDSFamily.save(list);
-  const uid = () => DDSFamily.uid();
-
-  // data: PDFs can't open in a new tab directly — serve them through a blob URL
-  const linkHref = (m) => {
-    if (!m || !m.pdf) return null;
-    if (m.pdf.slice(0,5) !== 'data:') return m.pdf;
-    if (!m._blobUrl) {
-      try {
-        const byteStr = atob(m.pdf.split(',')[1]);
-        const bytes = new Uint8Array(byteStr.length);
-        for (let i = 0; i < byteStr.length; i++) bytes[i] = byteStr.charCodeAt(i);
-        m._blobUrl = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'}));
-      } catch(e){ return null; }
-    }
-    return m._blobUrl;
-  };
-
-  // Base families + everything saved in this browser, merged.
-  // The merge itself lives in dds-family.js so the dashboard renders the
-  // exact same tree.
-  const buildFamilies = () => { families = DDSFamily.build(); };
-
-  const nodeHTML = (m, kind, famIdx) => {
-    const href = linkHref(m);
-    return '<div class="bl-node bl-node-' + kind + '">' +
-      '<div class="bl-photo"><img src="' + m.photo + '" alt="' + esc(m.name) + '" onerror="this.style.opacity=0"></div>' +
-      '<div class="bl-meta">' +
-        '<span class="bl-role bl-role-' + kind + '">' + (kind === 'big' ? 'Big' : 'Little') + '</span>' +
-        '<span class="bl-name">' + esc(m.name) + '</span>' +
-        '<span class="bl-year">Class of ' + esc(m.year) + '</span>' +
-        (href ? '<a class="bl-doc" href="' + href + '" target="_blank" rel="noopener">About&nbsp;↗</a>' : '') +
-        (!href && kind === 'big' && !m.editId && famIdx != null
-          ? '<button class="bl-doc" type="button" data-attach="' + famIdx + '" style="background:none;border:0;padding:0;cursor:pointer;font-family:inherit;">Add a link&nbsp;+</button>' : '') +
-        (m.editId ? '<button class="bl-edit" type="button" data-edit="' + esc(m.editId) + '" aria-label="Edit ' + esc(m.name) + '\'s card">✎&nbsp;Edit</button>' : '') +
-      '</div>' +
-    '</div>';
-  };
-
-  const drawLinks = () => {
-    paths.forEach(p => p.remove());
-    paths = [];
-    const bigNode = bigEl.querySelector('.bl-node');
-    if (!bigNode) return;
-    const sr = stage.getBoundingClientRect();
-    if (!sr.width || !sr.height) return;
-    svg.setAttribute('viewBox', '0 0 ' + Math.round(sr.width) + ' ' + Math.round(sr.height));
-    const br = bigNode.querySelector('.bl-photo').getBoundingClientRect();
-    const sx = br.left + br.width / 2 - sr.left;
-    const sy = br.bottom - sr.top;
-    const littles = Array.from(littlesEl.querySelectorAll('.bl-node'));
-    littles.forEach((ln, i) => {
-      const lr = ln.querySelector('.bl-photo').getBoundingClientRect();
-      const ex = lr.left + lr.width / 2 - sr.left;
-      const ey = lr.top - sr.top;
-      const dy = ey - sy;
-      const d = 'M ' + sx + ' ' + sy + ' C ' + sx + ' ' + (sy + dy * 0.55) + ', ' + ex + ' ' + (ey - dy * 0.55) + ', ' + ex + ' ' + ey;
-      const path = document.createElementNS(SVGNS, 'path');
-      path.setAttribute('d', d);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', 'url(#bl-grad)');
-      path.setAttribute('stroke-width', '2.5');
-      path.setAttribute('stroke-linecap', 'round');
-      svg.appendChild(path);
-      paths.push(path);
-      ln.addEventListener('mouseenter', () => {
-        paths.forEach((p, j) => { p.style.opacity = j === i ? '1' : '.22'; p.style.strokeWidth = j === i ? '4px' : '2px'; });
-      });
-      ln.addEventListener('mouseleave', () => {
-        paths.forEach(p => { p.style.opacity = ''; p.style.strokeWidth = ''; });
-      });
-      if (!REDUCED_MOTION && path.getTotalLength && path.animate) {
-        const len = path.getTotalLength();
-        if (len) {
-          path.style.strokeDasharray = len;
-          path.animate(
-            [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
-            { duration: 850, delay: i * 90, easing: 'cubic-bezier(.25,.1,.25,1)', fill: 'both' }
-          );
-        }
-      }
-    });
-  };
-
-  const select = (idx) => {
-    current = idx;
-    const fam = families[idx];
-    if (!fam) return;
-    Array.from(railEl.querySelectorAll('.blr-card')).forEach((c, i) => {
-      c.classList.toggle('active', i === idx);
-      c.setAttribute('aria-pressed', i === idx ? 'true' : 'false');
-    });
-    bigEl.innerHTML = nodeHTML(fam.big, 'big', idx);
-    littlesEl.innerHTML = fam.littles.length
-      ? fam.littles.map(l => nodeHTML(l, 'little')).join('')
-      : '<div style="align-self:center;color:#8CA6C4;font-weight:300;font-size:.98rem;padding:26px 10px;border:2px dashed rgba(75,156,211,.3);border-radius:18px;">No littles yet — this line is recruiting.</div>';
-    noteEl.innerHTML =
-      '<div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:14px;">' +
-        '<span style="width:24px;height:1.5px;background:#B9975B;display:block;"></span>' +
-        '<span style="color:#B9975B;font-weight:600;letter-spacing:2px;text-transform:uppercase;font-size:11.5px;">Est. ' + esc(fam.founded) + ' &middot; ' + esc(fam.tag) + '</span>' +
-        '<span style="width:24px;height:1.5px;background:#B9975B;display:block;"></span>' +
-      '</div>' +
-      '<p style="margin:0;color:#C7D6E6;font-weight:400;line-height:1.7;font-size:clamp(1rem,1.4vw,1.2rem);font-family:\'Lora\',serif;font-style:italic;">' + esc(fam.note) + '</p>';
-    if (!REDUCED_MOTION) {
-      root.querySelectorAll('.bl-node').forEach((n, i) => {
-        n.style.opacity = '0'; n.style.transform = 'translateY(14px)';
-        n.style.transition = 'opacity .5s ease ' + (i * 0.06) + 's, transform .5s cubic-bezier(.25,.1,.25,1) ' + (i * 0.06) + 's';
-        requestAnimationFrame(() => { n.style.opacity = '1'; n.style.transform = 'none'; });
-      });
-    }
-    requestAnimationFrame(() => requestAnimationFrame(drawLinks));
-  };
-
-  // -- family rail --
-  const renderRail = () => {
-    railEl.innerHTML = '';
-    families.forEach((fam, i) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'blr-wrap';
-      const href = linkHref(fam.big);
-      let backBtns = '';
-      if (href) backBtns += '<a class="pb-btn" href="' + href + '" target="_blank" rel="noopener">Open Their PDF&nbsp;↗</a>';
-      if (fam.big.editId) backBtns += '<button class="pb-btn" type="button" data-edit="' + esc(fam.big.editId) + '" style="border:0;cursor:pointer;font-family:\'Montserrat\',sans-serif;">Edit My Card&nbsp;✎</button>';
-      else if (!href) backBtns += '<button class="pb-btn" type="button" data-attach="' + i + '" style="border:0;cursor:pointer;font-family:\'Montserrat\',sans-serif;">Add A Link&nbsp;+</button>';
-      wrap.innerHTML =
-        '<div class="blr-back" aria-hidden="true">' +
-          '<span class="blr-eyebrow">Learn about this Big / Little</span>' +
-          '<span class="blr-backname">' + esc(fam.big.name) + ' &middot; ' + esc(fam.name) + '</span>' +
-          backBtns +
-        '</div>' +
-        '<button class="blr-card" type="button" data-fam="' + i + '" aria-label="' + esc(fam.name) + ' — view family tree">' +
-          '<img src="' + fam.big.photo + '" alt="" onerror="this.style.opacity=0">' +
-          '<div class="blr-fam">' + esc(fam.name) + '</div>' +
-          '<div class="blr-sub">Big &middot; ' + esc(fam.big.name) + ' ' + esc(fam.big.year) + '</div>' +
-          '<div class="blr-sub" style="margin-top:3px;color:#B9975B;">' + (fam.littles.length ? fam.littles.length + ' little' + (fam.littles.length > 1 ? 's' : '') : 'Recruiting littles') + '</div>' +
-        '</button>';
-      railEl.appendChild(wrap);
-    });
-    updateArrows();
-  };
-
-  // Delegated: covers the rail cards AND the tree nodes below (attach/edit live in both)
-  root.addEventListener('click', (e) => {
-    const attach = e.target.closest('[data-attach]');
-    if (attach) { openModal({ mode:'attach', famIdx: parseInt(attach.getAttribute('data-attach'), 10) }); return; }
-    const edit = e.target.closest('[data-edit]');
-    if (edit) { openModal({ mode:'edit', entryId: edit.getAttribute('data-edit') }); return; }
-    const card = e.target.closest('[data-fam]');
-    if (card) select(parseInt(card.getAttribute('data-fam'), 10));
-  });
-
-  // -- rail arrows (outside the scroller, never scroll away) --
-  const prevBtn = root.querySelector('[data-bl-prev]');
-  const nextBtn = root.querySelector('[data-bl-next]');
-  const railStep = () => {
-    const w = railEl.querySelector('.blr-wrap');
-    return w ? w.getBoundingClientRect().width + 22 : 260;
-  };
-  function updateArrows(){
-    if (!prevBtn || !nextBtn) return;
-    const max = railEl.scrollWidth - railEl.clientWidth - 2;
-    prevBtn.disabled = railEl.scrollLeft <= 2;
-    nextBtn.disabled = railEl.scrollLeft >= max;
-  }
-  if (prevBtn) prevBtn.addEventListener('click', () => railEl.scrollBy({ left: -railStep(), behavior: 'smooth' }));
-  if (nextBtn) nextBtn.addEventListener('click', () => railEl.scrollBy({ left: railStep(), behavior: 'smooth' }));
-  railEl.addEventListener('scroll', updateArrows, { passive: true });
-  window.addEventListener('resize', updateArrows, { passive: true });
-  const dockAdd = root.querySelector('.bl-add-dock [data-blm-open]');
-  if (dockAdd) dockAdd.addEventListener('click', () => openModal({ mode: 'add' }));
-
-  // -- add-yourself modal --
-  const modal = document.querySelector('[data-blm]');
-  const mName = modal.querySelector('[data-blm-name]');
-  const mYear = modal.querySelector('[data-blm-year]');
-  const mFamily = modal.querySelector('[data-blm-family]');
-  const mFamWrap = modal.querySelector('[data-blm-famwrap]');
-  const mNewFamWrap = modal.querySelector('[data-blm-newfamwrap]');
-  const mNewFam = modal.querySelector('[data-blm-newfam]');
-  const mLink = modal.querySelector('[data-blm-link]');
-  const mFile = modal.querySelector('[data-blm-file]');
-  const mErr = modal.querySelector('[data-blm-err]');
-  const mSub = modal.querySelector('[data-blm-sub]');
-  const mPhoto = modal.querySelector('[data-blm-photo]');
-  const mPhotoWrap = modal.querySelector('[data-blm-photowrap]');
-  const mPhotoPrev = modal.querySelector('[data-blm-photoprev]');
-  const mPhotoImg = modal.querySelector('[data-blm-photoimg]');
-  const mToggle = modal.querySelector('[data-blm-toggle]');
-  const mSubmit = modal.querySelector('[data-blm-submit]');
-  const mDelete = modal.querySelector('[data-blm-delete]');
-  const roleBtns = Array.from(modal.querySelectorAll('[data-blm-toggle] button'));
-  let role = 'big', attachTarget = null, editTarget = null;
-  let photoData = null;  // freshly uploaded photo (dataURL)
-  let photoKept = null;  // photo already on the entry being edited
-
-  const setPhotoPreview = (src) => {
-    if (src) { mPhotoImg.src = src; mPhotoPrev.hidden = false; }
-    else { mPhotoImg.removeAttribute('src'); mPhotoPrev.hidden = true; }
-  };
-
-  // Downscale + center-crop to the card's 4:5 ratio so any photo fits the
-  // frame and stays small enough for localStorage
-  const processPhoto = (file, cb) => {
-    if (!/^image\//.test(file.type)) { showErr('That file is not an image — upload a JPG, PNG, or similar.'); return; }
-    if (file.size > 10 * 1024 * 1024) { showErr('That image is over 10 MB — pick a smaller one.'); return; }
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const TW = 480, TH = 600;
-      const c = document.createElement('canvas');
-      c.width = TW; c.height = TH;
-      const scale = Math.max(TW / img.naturalWidth, TH / img.naturalHeight);
-      const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
-      c.getContext('2d').drawImage(img, (TW - dw) / 2, (TH - dh) / 2, dw, dh);
-      cb(c.toDataURL('image/jpeg', 0.84));
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); showErr('Could not read that image — try a different file.'); };
-    img.src = url;
-  };
-
-  mPhoto.addEventListener('change', () => {
-    mErr.classList.remove('show');
-    const f = mPhoto.files && mPhoto.files[0];
-    if (!f) return;
-    processPhoto(f, (dataUrl) => { photoData = dataUrl; setPhotoPreview(dataUrl); });
-  });
-  modal.querySelector('[data-blm-photoclear]').addEventListener('click', () => {
-    photoData = null; photoKept = null; mPhoto.value = '';
-    setPhotoPreview(null);
-  });
-
-  const setRole = (r) => {
-    role = r;
-    roleBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-role') === r));
-    mFamWrap.hidden = (r === 'big');
-    mNewFamWrap.hidden = (r === 'little');
-  };
-  roleBtns.forEach(b => b.addEventListener('click', () => setRole(b.getAttribute('data-role'))));
-
-  const showErr = (msg) => { mErr.textContent = msg; mErr.classList.add('show'); };
-
-  function openModal(opts){
-    // Browsing the tree is open to everyone; adding to it is a member action
-    if (window.DDSAuth && !DDSAuth.promptLogin('index.html#big-little', 'add yourself to the family tree')) return;
-    attachTarget = null; editTarget = null;
-    photoData = null; photoKept = null;
-    mErr.classList.remove('show');
-    mName.value = ''; mYear.value = ''; mNewFam.value = ''; mLink.value = ''; mFile.value = ''; mPhoto.value = '';
-    setPhotoPreview(null);
-    mFamily.innerHTML = families.map(f => '<option value="' + esc(f.name) + '">' + esc(f.name) + '</option>').join('');
-    mToggle.style.display = '';
-    mPhotoWrap.hidden = false;
-    mDelete.hidden = true;
-    mSubmit.innerHTML = 'Add Me To The Tree&nbsp;→';
-    if (opts && opts.mode === 'attach') {
-      attachTarget = opts.famIdx;
-      const fam = families[opts.famIdx];
-      mSub.textContent = 'Attach a PDF or link to ' + fam.big.name + ' (' + fam.name + ') so rushees can learn about this big.';
-      mName.value = fam.big.name; mYear.value = fam.big.year || '';
-      setRole('big'); mNewFam.value = fam.name;
-      mPhotoWrap.hidden = true;
-      mSubmit.innerHTML = 'Attach It&nbsp;→';
-    } else if (opts && opts.mode === 'edit') {
-      const entry = loadSaved().find(e => e.id === opts.entryId);
-      if (!entry) return;
-      editTarget = entry.id;
-      mSub.textContent = 'Update your card — changes save to this browser instantly.';
-      mName.value = entry.name || ''; mYear.value = entry.year || '';
-      setRole(entry.role === 'big' ? 'big' : 'little');
-      mToggle.style.display = 'none';
-      mFamWrap.hidden = true; mNewFamWrap.hidden = true;
-      if (entry.link && entry.link.slice(0,5) !== 'data:') mLink.value = entry.link;
-      if (entry.photo) { photoKept = entry.photo; setPhotoPreview(entry.photo); }
-      mSubmit.innerHTML = 'Save Changes&nbsp;→';
-      mDelete.hidden = false;
-    } else {
-      mSub.textContent = 'Add yourself as a potential big or little. Attach a PDF or link that tells your future family who you are.';
-      setRole('big');
-      const me = window.DDSAuth && DDSAuth.current();
-      if (me) mName.value = me.name;
-    }
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden', 'false');
-    setTimeout(() => (attachTarget != null ? mLink : mName).focus(), 90);
-  }
-  const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); };
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-  modal.querySelector('[data-blm-close]').addEventListener('click', closeModal);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
-
-  const finish = (link) => {
-    const list = loadSaved();
-    let famName;
-    if (editTarget != null) {
-      const entry = list.find(e => e.id === editTarget);
-      if (!entry) { closeModal(); return; }
-      const name = mName.value.trim(), year = mYear.value.trim();
-      if (!name) { showErr('Please enter your name.'); return; }
-      if (!year) { showErr("Please enter your class year (e.g. '27)."); return; }
-      entry.name = name; entry.year = year;
-      if (link) entry.link = link;
-      entry.photo = photoData || photoKept || null;
-      famName = entry.family;
-    } else if (attachTarget != null) {
-      if (!link) { showErr('Add a link or upload a PDF to attach.'); return; }
-      famName = families[attachTarget].name;
-      list.push({ role:'link', family: famName, link: link });
-    } else {
-      const name = mName.value.trim(), year = mYear.value.trim();
-      if (!name) { showErr('Please enter your name.'); return; }
-      if (!year) { showErr("Please enter your class year (e.g. '27)."); return; }
-      if (role === 'big') {
-        famName = mNewFam.value.trim();
-        if (!famName) { showErr('Give your new family line a name.'); return; }
-        if (families.some(f => f.name.toLowerCase() === famName.toLowerCase())) { showErr('That family name already exists — pick another, or join it as a little.'); return; }
-        list.push({ id: uid(), role:'big', name: name, year: year, family: famName, link: link || null, photo: photoData || null });
-      } else {
-        famName = mFamily.value;
-        list.push({ id: uid(), role:'little', name: name, year: year, family: famName, link: link || null, photo: photoData || null });
-      }
-    }
-    try { saveList(list); }
-    catch(e) { showErr('That file is too large to save in this browser — try a smaller photo, or link to your PDF instead (Google Drive works great).'); return; }
-    closeModal();
-    buildFamilies();
-    renderRail();
-    const idx = families.findIndex(f => f.name === famName);
-    select(idx >= 0 ? idx : 0);
-    const cardEl = railEl.querySelectorAll('.blr-wrap')[idx];
-    if (cardEl) cardEl.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
-  };
-
-  mDelete.addEventListener('click', () => {
-    if (editTarget == null) return;
-    if (!confirm('Remove this card from the tree? (Only affects this browser.)')) return;
-    const list = loadSaved().filter(e => e.id !== editTarget);
-    try { saveList(list); } catch(e){}
-    closeModal();
-    buildFamilies();
-    renderRail();
-    select(0);
-  });
-
-  modal.querySelector('[data-blm-submit]').addEventListener('click', () => {
-    mErr.classList.remove('show');
-    const url = mLink.value.trim();
-    const f = mFile.files && mFile.files[0];
-    if (f) {
-      if (f.size > 2 * 1024 * 1024) { showErr('PDF is over 2 MB — upload a smaller file or paste a link instead.'); return; }
-      const reader = new FileReader();
-      reader.onload = () => finish(reader.result);
-      reader.onerror = () => showErr('Could not read that file — try again or paste a link.');
-      reader.readAsDataURL(f);
-    } else {
-      if (url && !/^https?:\/\//i.test(url)) { showErr('Links should start with http:// or https://'); return; }
-      finish(url || null);
-    }
-  });
-
-  buildFamilies();
-  renderRail();
-  select(0);
-  window.addEventListener('resize', drawLinks, {passive:true});
-  window.addEventListener('load', () => setTimeout(drawLinks, 120));
-  setTimeout(drawLinks, 450);
-
-  // Live sync: edits made on the dashboard (another tab) land here instantly
-  window.addEventListener('storage', (e) => {
-    if (e.key !== STORE_KEY) return;
-    const keep = families[current] && families[current].name;
-    buildFamilies();
-    renderRail();
-    const idx = families.findIndex(f => f.name === keep);
-    select(idx >= 0 ? idx : 0);
-  });
-})();
 
 })();
 </script>

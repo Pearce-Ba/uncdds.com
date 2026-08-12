@@ -215,6 +215,31 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 @media(max-width:980px){.duo{grid-template-columns:1fr;}}
 .panel-pad{padding:clamp(18px,2.8vw,30px);}
 
+/* ---- Semester bar — one tab of the points sheet per term, driving the duo ---- */
+.sem-strip{display:flex;align-items:center;gap:clamp(12px,2vw,18px);margin-bottom:clamp(14px,2vw,20px);
+  border:1px solid var(--line);border-radius:16px;background:rgba(11,24,46,.42);
+  backdrop-filter:blur(16px) saturate(1.45) brightness(1.04);-webkit-backdrop-filter:blur(16px) saturate(1.45) brightness(1.04);
+  padding:10px clamp(12px,1.8vw,16px);}
+.sem-lab{flex:none;display:flex;align-items:center;gap:8px;font-weight:700;font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:var(--ink3);}
+.sem-lab svg{flex:none;color:var(--gold-hi);opacity:.8;}
+.sem-scroll{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:2px 1px;
+  scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.sem-scroll::-webkit-scrollbar{height:0;}
+.sem-scroll.fade-l{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 100%);mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 100%);}
+.sem-scroll.fade-r{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);}
+.sem-scroll.fade-l.fade-r{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 22px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 22px),transparent 100%);}
+.sem-btn{flex:none;scroll-snap-align:start;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;cursor:pointer;
+  border:1px solid var(--line);background:rgba(151,186,227,.06);color:var(--ink2);border-radius:999px;padding:7px 15px;
+  font-family:var(--mont);font-weight:700;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;
+  transition:color .2s,border-color .2s,background .2s;}
+.sem-btn:hover{color:var(--gold-hi);border-color:rgba(227,194,124,.4);}
+.sem-btn:focus-visible{outline:none;border-color:var(--gold-hi);box-shadow:0 0 0 3px rgba(227,194,124,.18);}
+.sem-btn.on{color:var(--gold-hi);border-color:rgba(227,194,124,.45);background:rgba(227,194,124,.1);}
+.sem-btn .sem-now{font-size:8.5px;letter-spacing:1.2px;color:var(--gold-hi);background:rgba(227,194,124,.14);
+  border:1px solid rgba(227,194,124,.3);border-radius:999px;padding:1px 6px;line-height:1.7;}
+.sem-btn.on .sem-now{background:rgba(227,194,124,.2);}
+@media(max-width:620px){.sem-strip{flex-direction:column;align-items:stretch;gap:9px;}.sem-lab{padding-left:2px;}}
+
 /* ---- Upcoming events — live from the chapter Google Calendar ---- */
 .upe-list{display:flex;flex-direction:column;}
 .upe-item{display:flex;gap:clamp(14px,2.4vw,26px);padding:clamp(14px,2vw,19px) 2px;border-bottom:1px solid var(--line);}
@@ -610,6 +635,16 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
 .fam-node .fn-role{display:inline-block;margin-top:9px;font-weight:700;font-size:9px;letter-spacing:2.2px;text-transform:uppercase;color:var(--ink3);}
 .fam-node.is-big .fn-role{color:var(--gold-hi);}
 .fam-node .fn-name{display:block;font-weight:700;font-size:12.5px;color:var(--ink);margin-top:2px;}
+/* A name with an intro PDF behind it is the link — hover shows the paperclip */
+a.fn-name{color:var(--gold-hi);text-decoration:none;cursor:pointer;
+  display:flex;align-items:center;gap:5px;justify-content:center;
+  transition:color .2s ease;}
+a.fn-name span{border-bottom:1px dashed rgba(227,194,124,.45);padding-bottom:1px;transition:border-color .2s ease;}
+a.fn-name svg{flex:none;opacity:.6;transition:opacity .2s ease,transform .2s ease;}
+a.fn-name:hover,a.fn-name:focus-visible{color:#FFF0CE;}
+a.fn-name:hover span,a.fn-name:focus-visible span{border-bottom-color:#FFF0CE;}
+a.fn-name:hover svg,a.fn-name:focus-visible svg{opacity:1;transform:translateY(-1px);}
+a.fn-name:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px;border-radius:4px;}
 .fam-node .fn-year{display:block;color:var(--ink3);font-size:10.5px;margin-top:2px;font-family:var(--grotesk);}
 .fam-node .fn-links{margin-top:6px;display:flex;justify-content:center;gap:7px;flex-wrap:wrap;}
 .fam-node .fn-doc,.fam-node .fn-edit{font-weight:700;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;text-decoration:none;border-radius:999px;padding:4px 10px;cursor:pointer;font-family:var(--mont);}
@@ -887,13 +922,22 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
   </section>
 
   <!-- ======== Meetings + Service ======== -->
+  <!-- One button per semester tab on the points sheet; both columns below follow it. -->
+  <div class="sem-strip" data-acc="gold">
+    <span class="sem-lab">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
+      Semester
+    </span>
+    <div class="sem-scroll" id="sem-bar" role="tablist" aria-label="Choose a semester"></div>
+  </div>
+
   <div class="duo">
     <section id="meetings" data-acc="gold" style="margin-bottom:0;">
       <div class="sec-head">
         <div>
           <div class="eyebrow"><span class="tick"></span><span>Meetings</span></div>
           <h2>Meetings &amp; notes</h2>
-          <p class="sub">What the chapter has met about this year — your notes, plus the notes other members have shared on each meeting.</p>
+          <p class="sub" id="m-sub">What the chapter has met about this semester — your notes, plus the notes other members have shared on each meeting.</p>
         </div>
       </div>
       <div class="glass panel-pad">
@@ -908,6 +952,7 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
         <div>
           <div class="eyebrow"><span class="tick"></span><span>Service log</span></div>
           <h2>Where your hours live</h2>
+          <p class="sub" id="svc-sub">Every category the chapter tracks, filled in as your hours land on the sheet.</p>
         </div>
       </div>
       <div class="glass panel-pad" id="svc-panel">
@@ -1064,8 +1109,8 @@ section{scroll-margin-top:86px;margin-bottom:clamp(44px,6.5vw,84px);}
       <p class="fam-note" id="fam-note"></p>
       <div class="fam-foot">
         <span class="fam-sync">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B9975B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v5h-5"/></svg>
-          Synced with the homepage tree
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B9975B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+          Names in gold have an intro &mdash; click one to read it
         </span>
       </div>
     </div>

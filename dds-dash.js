@@ -270,12 +270,39 @@
 
   /* ================= Sheet sync ================= */
   var SHEET_ID = '1yXCL-EK5xeVeIATHolpgLdSzQcEDcndSCJL4bbnPFE4';
-  var SHEET_GID = '1629504388';
-  var CACHE_KEY = 'dds-sheet-cache-v1';
-  var HOURS_KEY = 'dds-hours-v1', HCATS_KEY = 'dds-hour-cats-v1';
-  var DATA = null, cbN = 0, lastFetch = 0;
 
-  function fetchSheet() {
+  /* One tab of the points sheet per semester, NEWEST FIRST. The first entry is
+     "now": it feeds the gauges, the standing chips and the hour log, and it's
+     what the duo shows until someone picks another term on the semester bar.
+
+     Adding a term: the exec board makes the tab, then drop a row on top here
+     with its gid — the number after "gid=" in the sheet URL while that tab is
+     open. `legacyNotes` marks the one tab whose meeting notes were written
+     before the bar existed, so those notes keep their original keys. */
+  var SEMESTERS = [
+    { id: 'f26', label: 'Fall 2026',   gid: '133133297' },
+    { id: 's26', label: 'Spring 2026', gid: '1629504388', legacyNotes: true },
+    { id: 'f25', label: 'Fall 2025',   gid: '542564169' },
+    { id: 's25', label: 'Spring 2025', gid: '2086364163' },
+    { id: 'f24', label: 'Fall 2024',   gid: '209518594' }
+  ];
+  var CUR_SEM = SEMESTERS[0];
+  var SEM_KEY = 'dds-semester-v1';
+  var VIEW_SEM = (function () {          // the term the duo is showing
+    var want = readLS(SEM_KEY, null);
+    for (var i = 0; i < SEMESTERS.length; i++) if (SEMESTERS[i].id === want) return SEMESTERS[i];
+    return CUR_SEM;
+  })();
+
+  var CACHE_KEY = 'dds-sheet-cache-v2:';  // + gid — one cache per semester tab
+  var HOURS_KEY = 'dds-hours-v1', HCATS_KEY = 'dds-hour-cats-v1';
+  var DATA = null;        // current semester, parsed — what the gauges read
+  var SEM_DATA = {};      // gid → parsed sheet, for every term opened this visit
+  var SEM_PENDING = {};   // gid → in-flight fetch, so a fast clicker can't double up
+  var SEM_TRIED = {};     // gid → already refetched this visit (past terms don't move)
+  var cbN = 0, lastFetch = 0;
+
+  function fetchSheet(gid) {
     return new Promise(function (resolve, reject) {
       var cb = '__ddsSheet' + (++cbN), done = false;
       var s = document.createElement('script');
@@ -283,7 +310,7 @@
       function finish() { done = true; clearTimeout(t); window[cb] = function () {}; s.remove(); }
       window[cb] = function (resp) { if (!done) { finish(); resolve(resp); } };
       s.onerror = function () { if (!done) { finish(); reject(new Error('network')); } };
-      s.src = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?gid=' + SHEET_GID +
+      s.src = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?gid=' + gid +
         '&tqx=out:json;responseHandler:' + cb + '&nocache=' + Date.now();
       document.head.appendChild(s);
     });
@@ -301,11 +328,32 @@
       dent: find(/^total dental/i), meetN: find(/^total meetings/i),
       soc: find(/^total socials?/i)
     };
-    var meetings = [], lastMeetCol = -1;
-    cols.forEach(function (l, i) {
-      var m = /^meeting\s*#\s*(\d+)\s*(.*)$/i.exec(l);
-      if (m) { meetings.push({ i: i, n: +m[1], title: m[2].trim() || ('Meeting ' + m[1]) }); lastMeetCol = i; }
-    });
+    /* Meeting columns are everything between "Total Meetings" and the first
+       service category. Only some semesters label them "Meeting #3 Dr. Hyman";
+       older tabs just write "10/21/24 Dr. Ghai", so position is what's reliable
+       and the "#n" is read off the header only when the exec board wrote one.
+       Blank spacer columns in the middle of the block are skipped. */
+    var svcStart = find(/^make-?\s*up dental/i);
+    var meetings = [], lastMeetCol = -1, seenN = {};
+    var addMeeting = function (i, label) {
+      var m = /^meeting\s*#\s*(\d+)\s*(.*)$/i.exec(label);
+      var n = m ? +m[1] : meetings.length + 1;
+      var title = (m ? m[2] : label).trim() || ('Meeting ' + n);
+      // a tab that repeats a meeting number (it happens) gets 3, 3b, 3c — so the
+      // rows read as two real meetings rather than one rendered twice, and each
+      // keeps its own note
+      seenN[n] = (seenN[n] || 0) + 1;
+      var suf = seenN[n] > 1 ? String.fromCharCode(96 + seenN[n]) : '';
+      meetings.push({ i: i, n: n, key: 'm' + n + suf, label: 'M' + n + suf, title: title });
+      lastMeetCol = i;
+    };
+    if (idx.meetN > -1 && svcStart > idx.meetN) {
+      for (var mi = idx.meetN + 1; mi < svcStart; mi++) if (cols[mi]) addMeeting(mi, cols[mi]);
+    } else {
+      // no recognisable service block — fall back to header-labelled meetings only
+      cols.forEach(function (l, i) { if (/^meeting\s*#\s*\d+/i.test(l)) addMeeting(i, l); });
+      svcStart = lastMeetCol + 1;
+    }
 
     // member row: email first, then "First (nick) Last" name match
     var email = String(ME.email || '').toLowerCase().trim();
@@ -321,11 +369,11 @@
       }) || null;
     }
 
-    // service categories = labelled columns after the meetings block
+    // service categories = labelled columns from the service block onward
     var dentalEnd = find(/^other dental/i);
     var svc = { dental: [], nondental: [] };
     if (row) cols.forEach(function (l, i) {
-      if (!l || i <= lastMeetCol) return;
+      if (!l || i < svcStart) return;
       var skip = false;
       for (var k in idx) if (idx[k] === i) skip = true;
       if (skip) return;
@@ -345,7 +393,7 @@
       // meetings count an hour apiece and socials five toward the total
       total: totCol > 0 ? totCol : dent + nond + meetN + soc * 5,
       gpa: row ? row[idx.gpa] : null, dues: row ? row[idx.dues] : null, meetsReq: row ? row[idx.meets] : null,
-      meetings: meetings.map(function (m) { return { n: m.n, title: m.title, went: row ? num(row[m.i]) > 0 : false }; }),
+      meetings: meetings.map(function (m) { return { n: m.n, key: m.key, label: m.label, title: m.title, went: row ? num(row[m.i]) > 0 : false }; }),
       svc: svc, at: Date.now()
     };
   }
@@ -376,8 +424,7 @@
     setChip($('chip-req'), reqMet ? true : null,
       reqMet ? '50-hour requirement met' : '50-hour requirement — ' + (Math.round(toGo * 10) / 10) + ' to go');
 
-    renderMeetings(d);
-    renderService(d);
+    renderDuo();
 
     if (!d.sheetFound && !$('nf-note')) {
       var n = document.createElement('p');
@@ -398,14 +445,31 @@
     $('sync-text').textContent = msg;
   }
 
-  function sync(manual) {
-    setSync('busy', manual ? 'Syncing…' : 'Connecting…');
-    return fetchSheet().then(function (resp) {
+  function keepSheet(gid, d) {
+    SEM_DATA[gid] = d;
+    try { writeLS(CACHE_KEY + gid, d); } catch (e) {}
+    if (gid === CUR_SEM.gid) DATA = d;
+  }
+
+  // one fetch per semester tab at a time, whatever clicks the bar collects
+  function loadSemester(sem) {
+    if (SEM_PENDING[sem.gid]) return SEM_PENDING[sem.gid];
+    var p = fetchSheet(sem.gid).then(function (resp) {
       var d = parseSheet(resp);
       if (!d) throw new Error('bad payload');
+      keepSheet(sem.gid, d);
+      return d;
+    });
+    p.catch(function () {}).then(function () { delete SEM_PENDING[sem.gid]; });
+    SEM_PENDING[sem.gid] = p;
+    return p;
+  }
+
+  function sync(manual) {
+    setSync('busy', manual ? 'Syncing…' : 'Connecting…');
+    return loadSemester(CUR_SEM).then(function (d) {
       SHEET_SEEN = true;
-      DATA = d; lastFetch = Date.now();
-      try { writeLS(CACHE_KEY, d); } catch (e) {}
+      lastFetch = Date.now();
       renderSheet(d);
       setSync('live', 'Live · synced ' + fmtTime(Date.now()));
     }).catch(function (e) {
@@ -414,10 +478,18 @@
     });
   }
 
-  var cached = readLS(CACHE_KEY, null);
+  function cachedSheet(sem) {
+    if (SEM_DATA[sem.gid]) return SEM_DATA[sem.gid];
+    var c = readLS(CACHE_KEY + sem.gid, null);
+    if (c && c.meetings) { SEM_DATA[sem.gid] = c; return c; }
+    return null;
+  }
+
+  var cached = cachedSheet(CUR_SEM);
+  if (VIEW_SEM !== CUR_SEM) cachedSheet(VIEW_SEM); // the remembered term paints too
   // boot render is wrapped so a bad/stale cache can only cost this paint, never
   // the rest of the dashboard (chat, members, gallery… all init below)
-  if (cached && cached.meetings) {
+  if (cached) {
     SHEET_SEEN = true; // the cache came from a real fetch, so the status box may speak
     DATA = cached;
     try { renderSheet(cached); } catch (e) { console.error('cached sheet render failed:', e); }
@@ -429,6 +501,109 @@
     if (document.visibilityState === 'visible' && Date.now() - lastFetch > 55000) sync(false);
   });
   $('chip-sync').addEventListener('click', function () { sync(true); });
+
+  /* ================= Semester bar =================
+     Sits above the Meetings + Service duo and drives both of them together.
+     The gauges, chips and hour log stay on the current term no matter what's
+     picked here — this bar is for reading back through the chapter's terms. */
+  function renderDuo() {
+    var sem = VIEW_SEM, raw = SEM_DATA[sem.gid];
+    if (!raw) {
+      var wait = '<p class="svc-empty">Pulling ' + esc(sem.label) + ' off the chapter sheet&hellip;</p>';
+      var ml = $('m-list'), sp = $('svc-panel');
+      ml.dataset.sig = ''; sp.dataset.sig = '';
+      ml.innerHTML = wait; sp.innerHTML = wait;
+      return;
+    }
+    // self-logged hours are "now" hours, so they only fold into the current term
+    var d = sem === CUR_SEM ? foldLogged(raw) : raw;
+    renderMeetings(d, sem);
+    renderService(d, sem);
+  }
+
+  function duoError(sem) {
+    if (VIEW_SEM !== sem || SEM_DATA[sem.gid]) return;
+    var msg = '<p class="svc-empty">Couldn&rsquo;t reach the ' + esc(sem.label) +
+      ' tab of the chapter sheet. Pick it again to retry.</p>';
+    $('m-list').innerHTML = msg; $('svc-panel').innerHTML = msg;
+    SEM_TRIED[sem.gid] = false;
+  }
+
+  function selectSemester(sem) {
+    VIEW_SEM = sem;
+    try { writeLS(SEM_KEY, sem.id); } catch (e) {}
+
+    var bar = $('sem-bar');
+    Array.prototype.forEach.call(bar.querySelectorAll('.sem-btn'), function (b) {
+      var on = b.getAttribute('data-sem') === sem.id;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+      if (on) revealBtn(b);
+    });
+
+    var past = sem !== CUR_SEM;
+    $('m-sub').textContent = past
+      ? 'What the chapter met about in ' + sem.label + ' — with every note written on those meetings.'
+      : 'What the chapter has met about this semester — your notes, plus the notes other members have shared on each meeting.';
+    $('svc-sub').textContent = past
+      ? 'Your ' + sem.label + ' log, off that tab of the sheet — the dials above stay on ' + CUR_SEM.label + '.'
+      : 'Every category the chapter tracks, filled in as your hours land on the sheet.';
+
+    cachedSheet(sem);   // paint from cache first if this browser has seen the term
+    renderDuo();
+    // past terms don't move, so they're pulled once a visit; the current one rides `sync`
+    if (past && !SEM_TRIED[sem.gid]) {
+      SEM_TRIED[sem.gid] = true;
+      loadSemester(sem).then(function () { if (VIEW_SEM === sem) renderDuo(); })
+        .catch(function () { duoError(sem); });
+    }
+  }
+
+  // keep the active pill in view without ever scrolling the page itself
+  function revealBtn(btn) {
+    var box = $('sem-bar');
+    var l = btn.offsetLeft, r = l + btn.offsetWidth;
+    if (l < box.scrollLeft) box.scrollLeft = Math.max(0, l - 14);
+    else if (r > box.scrollLeft + box.clientWidth) box.scrollLeft = r - box.clientWidth + 14;
+  }
+
+  (function initSemesterBar() {
+    var bar = $('sem-bar');
+    if (!bar) return;
+    bar.innerHTML = SEMESTERS.map(function (s) {
+      return '<button class="sem-btn" type="button" role="tab" data-sem="' + s.id + '" aria-selected="false" tabindex="-1">' +
+        esc(s.label) + (s === CUR_SEM ? '<span class="sem-now">Now</span>' : '') + '</button>';
+    }).join('');
+
+    bar.addEventListener('click', function (e) {
+      var b = e.target.closest('.sem-btn'); if (!b) return;
+      var id = b.getAttribute('data-sem');
+      for (var i = 0; i < SEMESTERS.length; i++) if (SEMESTERS[i].id === id) selectSemester(SEMESTERS[i]);
+    });
+    bar.addEventListener('keydown', function (e) {
+      var step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!step) return;
+      e.preventDefault();
+      var at = SEMESTERS.indexOf(VIEW_SEM);
+      var next = SEMESTERS[Math.min(SEMESTERS.length - 1, Math.max(0, at + step))];
+      selectSemester(next);
+      var btn = bar.querySelector('.sem-btn[data-sem="' + next.id + '"]');
+      if (btn) btn.focus();
+    });
+
+    // fade whichever edge still has terms hiding behind it
+    function edges() {
+      var more = bar.scrollWidth - bar.clientWidth;
+      bar.classList.toggle('fade-l', bar.scrollLeft > 4);
+      bar.classList.toggle('fade-r', more > 4 && bar.scrollLeft < more - 4);
+    }
+    bar.addEventListener('scroll', edges);
+    window.addEventListener('resize', edges);
+    if (window.ResizeObserver) new ResizeObserver(edges).observe(bar);
+    selectSemester(VIEW_SEM);
+    edges();
+  })();
 
   /* ================= Meetings & notes ================= */
   var NOTES_KEY = 'dds-notes-v1';
@@ -471,21 +646,31 @@
     });
   }
 
-  function renderMeetings(d) {
+  /* Note keys are scoped to the semester so the same "M3" in two terms keeps two
+     separate notes. The one tab that predates the semester bar keeps the bare
+     "m3" keys everything was written under. Word characters only — the key is
+     half of the note's document id in the cloud mirror. */
+  function noteKey(sem, m) {
+    var k = m.key || ('m' + m.n);
+    return sem.legacyNotes ? k : sem.id + '_' + k;
+  }
+
+  function renderMeetings(d, sem) {
     var list = $('m-list');
-    var sig = JSON.stringify(d.meetings);
+    var sig = sem.id + '|' + JSON.stringify(d.meetings);
     if (list.dataset.sig === sig) return; // don't clobber open note editors on poll
     list.dataset.sig = sig;
     var notes = myNotes();
     if (!d.meetings.length) {
-      list.innerHTML = '<p class="svc-empty">No meetings on the sheet yet — they land here as the exec board logs them.</p>';
+      list.innerHTML = '<p class="svc-empty">No meetings on the ' + esc(sem.label) +
+        ' sheet yet — they land here as the exec board logs them.</p>';
       return;
     }
     list.innerHTML = d.meetings.map(function (m) {
-      var key = 'm' + m.n, note = notes[key];
+      var key = noteKey(sem, m), note = notes[key];
       return '<div class="m-row' + (m.went ? ' went' : '') + '" data-key="' + key + '">' +
         '<div class="m-line">' +
-          '<span class="m-idx">M' + m.n + '</span>' +
+          '<span class="m-idx">' + esc(m.label || ('M' + m.n)) + '</span>' +
           '<span class="m-dot" title="' + (m.went ? 'Attended' : 'Not attended') + '"></span>' +
           '<span class="m-title">' + esc(m.title) + '</span>' +
           '<span class="m-went">Attended</span>' +
@@ -525,13 +710,15 @@
   });
 
   /* ================= Service breakdown ================= */
-  function renderService(d) {
+  function renderService(d, sem) {
     var panel = $('svc-panel');
-    var sig = JSON.stringify([d.svc, d.dental, d.nonDental]);
+    var sig = sem.id + '|' + JSON.stringify([d.svc, d.dental, d.nonDental]);
     if (panel.dataset.sig === sig) return;
     panel.dataset.sig = sig;
     if (!d.found) {
-      panel.innerHTML = '<p class="svc-empty">Your service log fills in once you&rsquo;re on the chapter sheet.</p>';
+      panel.innerHTML = '<p class="svc-empty">' + (sem === CUR_SEM
+        ? 'Your service log fills in once you&rsquo;re on the chapter sheet.'
+        : 'Nothing logged against your name on the ' + esc(sem.label) + ' sheet.') + '</p>';
       return;
     }
     var max = 0;
@@ -555,7 +742,10 @@
       group('Dental', d.svc.dental, d.dental) +
       group('Service', d.svc.nondental, d.nonDental) +
       ((d.svc.social && d.svc.social.length) ? group('Social', d.svc.social, d.socialsN * 5) : '') +
-      '<p class="svc-empty" style="border-top:1px solid rgba(163,196,233,.11);padding-top:14px;font-size:12.5px;">Logged something that isn&rsquo;t here? Nudge the service chair — this reads straight off their sheet.</p>';
+      '<p class="svc-empty" style="border-top:1px solid rgba(163,196,233,.11);padding-top:14px;font-size:12.5px;">' +
+      (sem === CUR_SEM
+        ? 'Logged something that isn&rsquo;t here? Nudge the service chair — this reads straight off their sheet.'
+        : 'Closed book: the ' + esc(sem.label) + ' tab as the exec board left it.') + '</p>';
   }
 
   /* ================= Classes & professors ================= */
@@ -1482,15 +1672,21 @@
     return m._blobUrl;
   }
 
+  /* The name IS the intro link — hover or click it to open that member's PDF.
+     Names without one stay plain text, so gold always means "there's more here". */
   function famNode(m, isBig) {
     var href = famPdfHref(m);
+    var clip = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>';
+    var name = href
+      ? '<a class="fn-name" href="' + esc(href) + '" target="_blank" rel="noopener" ' +
+        'title="Read ' + esc(m.name) + '&rsquo;s intro"><span>' + esc(m.name) + '</span>' + clip + '</a>'
+      : '<span class="fn-name" title="No intro uploaded yet">' + esc(m.name) + '</span>';
     return '<div class="fam-node' + (isBig ? ' is-big' : '') + '">' +
       '<div class="fn-photo"><img src="' + m.photo + '" alt="' + esc(m.name) + '" onerror="this.style.opacity=0"></div>' +
       '<span class="fn-role">' + (isBig ? 'Big' : 'Little') + '</span>' +
-      '<span class="fn-name">' + esc(m.name) + '</span>' +
+      name +
       '<span class="fn-year">Class of ' + esc(m.year) + '</span>' +
       '<span class="fn-links">' +
-        (href ? '<a class="fn-doc" href="' + href + '" target="_blank" rel="noopener">About&nbsp;&#8599;</a>' : '') +
         (m.editId ? '<button class="fn-edit" type="button" data-fedit="' + esc(m.editId) + '">&#9998; Edit</button>' : '') +
       '</span>' +
     '</div>';

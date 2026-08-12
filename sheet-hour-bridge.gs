@@ -25,7 +25,10 @@
    Site edits/deletes do NOT reach the sheet — only new entries. The sheet
    stays the official record the exec board can correct by hand. */
 
-var TAB_GID = 1629504388; // the members tab (from ...#gid=1629504388)
+// The CURRENT semester's tab — keep this in step with the first entry of
+// SEMESTERS in dds-dash.js, and re-deploy this script each time the exec
+// board starts a new term.
+var TAB_GID = 133133297; // Fall 2026 (from ...#gid=133133297)
 
 function doPost(e) {
   var out = { ok: false };

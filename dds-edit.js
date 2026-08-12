@@ -62,6 +62,7 @@
     dashboard: [
       '#hello-date', '#hello-h1', '#tb-name', '#tb-avatar', '#cluster', '#odo',
       '#svc-panel', '#m-list', '#log-list', '#log-cats', '#log-cta-sub', '#sync-text',
+      '#sem-bar', '#m-sub', '#svc-sub',   // semester bar + the two blurbs it rewrites
       '#upe-dash', '#cls-grid', '#cf-title', '#pr-title', '#res-folders',
       '#mem-space', '#mem-modal', '#ppop', '#mention-pop',
       '#chat-rail', '#chat-log', '#chat-title', '#chat-sub', '#chat-pend-txt',
