@@ -1,10 +1,10 @@
 [
  {
-  "id": "fcms5cprmovo3xuc",
   "parts": 1,
-  "size": 23976,
-  "up": 1785285204000,
   "name": "Local Dentists to Shadow.docx",
-  "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "id": "fcms5cprmovo3xuc",
+  "up": 1785285204000,
+  "size": 23976
  }
 ]
