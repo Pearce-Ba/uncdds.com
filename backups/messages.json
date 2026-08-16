@@ -5,21 +5,21 @@
   "up": 1783819546802
  },
  {
-  "id": "xmrh442nhhva2d",
   "text": "Goat",
-  "up": 1783819566701,
-  "at": 1783819566701,
-  "byId": "ex1",
   "ch": "dm-ex1-umr9hrkfmv17w9",
+  "id": "xmrh442nhhva2d",
+  "at": 1783819566701,
+  "up": 1783819566701,
+  "byId": "ex1",
   "by": "Pearce Barnes"
  },
  {
-  "by": "Pearce Barnes",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "at": 1784403198031,
-  "byId": "ex1",
-  "up": 1784403198031,
   "text": "chud",
-  "id": "xmrqrlbgv080ga"
+  "ch": "dm-ex1-umr9hrkfmv17w9",
+  "id": "xmrqrlbgv080ga",
+  "at": 1784403198031,
+  "up": 1784403198031,
+  "byId": "ex1",
+  "by": "Pearce Barnes"
  }
 ]

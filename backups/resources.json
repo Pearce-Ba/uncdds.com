@@ -1,15 +1,15 @@
 [
  {
-  "fileName": "Local Dentists to Shadow.docx",
-  "blurb": "",
-  "title": "DDS Local Dentists to Shadow",
-  "up": 1785285204132,
-  "id": "rms5cprqck442y",
-  "by": "Pearce Barnes",
-  "fileId": "fcms5cprmovo3xuc",
-  "cat": "shadow",
   "byId": "ex1",
+  "title": "DDS Local Dentists to Shadow",
+  "cat": "shadow",
+  "blurb": "",
+  "fileName": "Local Dentists to Shadow.docx",
+  "fileId": "fcms5cprmovo3xuc",
+  "id": "rms5cprqck442y",
+  "at": 1785285204132,
   "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "at": 1785285204132
+  "up": 1785285204132,
+  "by": "Pearce Barnes"
  }
 ]
