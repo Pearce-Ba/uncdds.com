@@ -43,6 +43,10 @@
     members: {
       key: 'dds-members-v1', coll: 'members', every: 30,
       when: function () { return true; },
+      autoTombstone: false,        // nothing on the site deletes an account, so a
+                                   // member row missing locally is always local data
+                                   // loss, never a deletion worth syncing outward
+
       toRows: function (v) { return Array.isArray(v) ? v : []; },
       fromRows: function (rows) {
         // Two browsers can each create an account for the same email before
@@ -174,9 +178,13 @@
   function writeJSON(key, v) { localStorage.setItem(key, JSON.stringify(v)); }
 
   /* Mirror writes can hit the browser's storage quota once other members'
-     photos start syncing in — shed the heaviest chat payloads first. */
+     photos start syncing in — shed the heaviest chat payloads first.
+     A store whose mirror write failed is left holding fewer rows than the
+     shadow says it has; mirrorLost marks it so the push side never reads
+     that gap as deletions (see diffScan). */
+  var mirrorLost = {};
   function writeMirror(name, key, v) {
-    try { writeJSON(key, v); return true; }
+    try { writeJSON(key, v); delete mirrorLost[name]; return true; }
     catch (e) {
       if (name === 'chatMsgs' && Array.isArray(v)) {
         var slim = v.map(function (m) {
@@ -185,8 +193,9 @@
           c.imgLost = true;
           return c;
         });
-        try { writeJSON(key, slim.slice(-300)); return true; } catch (e2) {}
+        try { writeJSON(key, slim.slice(-300)); delete mirrorLost[name]; return true; } catch (e2) {}
       }
+      mirrorLost[name] = true;
       console.warn('[DDSCloud] storage full — could not mirror ' + key);
       return false;
     }
@@ -382,13 +391,28 @@
       }
     });
 
-    if (st.autoTombstone !== false) {
-      Object.keys(sh).forEach(function (id) {
-        if (seen[id] || sh[id].del || id.indexOf('seed-') === 0) return;
-        sh[id] = { del: true, u: now, h: '' };
-        pd[id] = 1;
-        queued = true;
-      });
+    /* Shadow ids missing from the store are deletions — but only when the
+       store can be trusted. A mirror write that hit the storage quota, or
+       storage cleared out from under us, leaves the store short of rows
+       nobody deleted, and tombstoning those pushes the loss to the whole
+       chapter. So: skip a store whose last mirror write failed, and treat a
+       wholesale disappearance as local damage instead. Members really do get
+       deleted one or two at a time; a dozen at once is a broken browser.
+       (The site's delete buttons call DDSCloud.tombstone directly and are
+       never gated by any of this.) */
+    if (st.autoTombstone !== false && !mirrorLost[name]) {
+      var live = Object.keys(sh).filter(function (id) { return !sh[id].del && id.indexOf('seed-') !== 0; });
+      var gone = live.filter(function (id) { return !seen[id]; });
+      if (gone.length > 3 && gone.length > live.length * 0.25) {
+        console.warn('[DDSCloud] ' + gone.length + ' of ' + live.length + ' ' + name +
+          ' rows vanished from this browser — treating as lost local data, not deletions.');
+      } else {
+        gone.forEach(function (id) {
+          sh[id] = { del: true, u: now, h: '' };
+          pd[id] = 1;
+          queued = true;
+        });
+      }
     }
 
     if (touchedStore) writeMirror(name, st.key, st.fromRows(rows));
