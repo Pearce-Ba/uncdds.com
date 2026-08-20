@@ -1,25 +1,25 @@
 [
  {
   "id": "xmrfx7q9lbox1v",
-  "del": true,
-  "up": 1783819546802
+  "up": 1783819546802,
+  "del": true
  },
  {
+  "ch": "dm-ex1-umr9hrkfmv17w9",
   "id": "xmrh442nhhva2d",
-  "at": 1783819566701,
   "up": 1783819566701,
   "text": "Goat",
+  "byId": "ex1",
   "by": "Pearce Barnes",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "byId": "ex1"
+  "at": 1783819566701
  },
  {
   "at": 1784403198031,
-  "byId": "ex1",
-  "id": "xmrqrlbgv080ga",
-  "text": "chud",
   "by": "Pearce Barnes",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "up": 1784403198031
+  "byId": "ex1",
+  "text": "chud",
+  "id": "xmrqrlbgv080ga",
+  "up": 1784403198031,
+  "ch": "dm-ex1-umr9hrkfmv17w9"
  }
 ]
