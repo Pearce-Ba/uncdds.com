@@ -5,30 +5,30 @@
   "up": 1783819546802
  },
  {
-  "byId": "ex1",
+  "text": "Goat",
   "up": 1783819566701,
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "by": "Pearce Barnes",
-  "id": "xmrh442nhhva2d",
   "at": 1783819566701,
-  "text": "Goat"
+  "id": "xmrh442nhhva2d",
+  "byId": "ex1",
+  "by": "Pearce Barnes",
+  "ch": "dm-ex1-umr9hrkfmv17w9"
  },
  {
   "ch": "dm-ex1-umr9hrkfmv17w9",
   "by": "Pearce Barnes",
-  "at": 1784403198031,
-  "id": "xmrqrlbgv080ga",
+  "text": "chud",
   "byId": "ex1",
+  "at": 1784403198031,
   "up": 1784403198031,
-  "text": "chud"
+  "id": "xmrqrlbgv080ga"
  },
  {
-  "byId": "umr9hrkfmv17w9",
-  "up": 1787716953691,
   "ch": "dm-ex1-umr9hrkfmv17w9",
   "by": "Aaryan Patel",
+  "byId": "umr9hrkfmv17w9",
   "text": "chud",
   "at": 1787716953691,
+  "up": 1787716953691,
   "id": "xmt9kilp7x7sh1"
  }
 ]
