@@ -1,34 +1,34 @@
 [
  {
-  "up": 1783819546802,
   "del": true,
+  "up": 1783819546802,
   "id": "xmrfx7q9lbox1v"
  },
  {
-  "byId": "ex1",
-  "id": "xmrh442nhhva2d",
-  "at": 1783819566701,
-  "up": 1783819566701,
+  "text": "Goat",
   "by": "Pearce Barnes",
+  "id": "xmrh442nhhva2d",
   "ch": "dm-ex1-umr9hrkfmv17w9",
-  "text": "Goat"
+  "up": 1783819566701,
+  "at": 1783819566701,
+  "byId": "ex1"
  },
  {
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "by": "Pearce Barnes",
+  "at": 1784403198031,
   "byId": "ex1",
   "text": "chud",
+  "ch": "dm-ex1-umr9hrkfmv17w9",
   "up": 1784403198031,
   "id": "xmrqrlbgv080ga",
-  "at": 1784403198031
+  "by": "Pearce Barnes"
  },
  {
-  "text": "chud",
-  "by": "Aaryan Patel",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "id": "xmt9kilp7x7sh1",
+  "byId": "umr9hrkfmv17w9",
   "at": 1787716953691,
+  "ch": "dm-ex1-umr9hrkfmv17w9",
   "up": 1787716953691,
-  "byId": "umr9hrkfmv17w9"
+  "text": "chud",
+  "id": "xmt9kilp7x7sh1",
+  "by": "Aaryan Patel"
  }
 ]

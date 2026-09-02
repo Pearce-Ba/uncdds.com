@@ -1,26 +1,26 @@
 [
  {
-  "name": "",
-  "at": 1783819561781,
-  "up": 1783819561782,
-  "kind": "dm",
-  "id": "dm-ex1-umr9hrkfmv17w9",
-  "by": "ex1",
   "members": [
    "ex1",
    "umr9hrkfmv17w9"
-  ]
+  ],
+  "up": 1783819561782,
+  "id": "dm-ex1-umr9hrkfmv17w9",
+  "by": "ex1",
+  "at": 1783819561781,
+  "kind": "dm",
+  "name": ""
  },
  {
-  "name": "",
-  "up": 1787945439655,
-  "at": 1787945439655,
   "members": [
    "umr9hrkfmv17w9",
    "umtdc25b24d7v4"
   ],
+  "at": 1787945439655,
   "kind": "dm",
+  "name": "",
+  "by": "umtdc25b24d7v4",
   "id": "dm-umr9hrkfmv17w9-umtdc25b24d7v4",
-  "by": "umtdc25b24d7v4"
+  "up": 1787945439655
  }
 ]
