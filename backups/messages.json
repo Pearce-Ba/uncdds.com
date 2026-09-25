@@ -1,42 +1,42 @@
 [
  {
-  "id": "xmrfx7q9lbox1v",
   "del": true,
-  "up": 1783819546802
+  "up": 1783819546802,
+  "id": "xmrfx7q9lbox1v"
  },
  {
-  "id": "xmrh442nhhva2d",
-  "at": 1783819566701,
+  "up": 1783819566701,
   "byId": "ex1",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
+  "at": 1783819566701,
   "by": "Pearce Barnes",
   "text": "Goat",
-  "up": 1783819566701
+  "id": "xmrh442nhhva2d",
+  "ch": "dm-ex1-umr9hrkfmv17w9"
  },
  {
-  "id": "xmrqrlbgv080ga",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "at": 1784403198031,
+  "up": 1784403198031,
   "byId": "ex1",
   "text": "chud",
-  "by": "Pearce Barnes",
-  "up": 1784403198031
- },
- {
-  "up": 1787716953691,
-  "text": "chud",
-  "by": "Aaryan Patel",
+  "id": "xmrqrlbgv080ga",
   "ch": "dm-ex1-umr9hrkfmv17w9",
-  "at": 1787716953691,
-  "byId": "umr9hrkfmv17w9",
-  "id": "xmt9kilp7x7sh1"
+  "by": "Pearce Barnes",
+  "at": 1784403198031
  },
  {
+  "id": "xmt9kilp7x7sh1",
+  "ch": "dm-ex1-umr9hrkfmv17w9",
+  "text": "chud",
+  "at": 1787716953691,
+  "by": "Aaryan Patel",
+  "byId": "umr9hrkfmv17w9",
+  "up": 1787716953691
+ },
+ {
+  "text": "Hi Pearce, I was wondering where the service event for today was located?",
   "up": 1788369773528,
   "by": "Jack Bunt",
-  "text": "Hi Pearce, I was wondering where the service event for today was located?",
-  "byId": "umt8px342d7uj6",
   "at": 1788369773527,
+  "byId": "umt8px342d7uj6",
   "ch": "dm-ex1-umt8px342d7uj6",
   "id": "xmtkd6spj42bbg"
  }
