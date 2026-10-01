@@ -5,38 +5,38 @@
   "del": true
  },
  {
+  "ch": "dm-ex1-umr9hrkfmv17w9",
+  "id": "xmrh442nhhva2d",
+  "byId": "ex1",
   "at": 1783819566701,
   "by": "Pearce Barnes",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "byId": "ex1",
   "up": 1783819566701,
-  "text": "Goat",
-  "id": "xmrh442nhhva2d"
+  "text": "Goat"
+ },
+ {
+  "id": "xmrqrlbgv080ga",
+  "ch": "dm-ex1-umr9hrkfmv17w9",
+  "at": 1784403198031,
+  "by": "Pearce Barnes",
+  "text": "chud",
+  "up": 1784403198031,
+  "byId": "ex1"
  },
  {
   "text": "chud",
-  "up": 1784403198031,
-  "id": "xmrqrlbgv080ga",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "by": "Pearce Barnes",
-  "byId": "ex1",
-  "at": 1784403198031
- },
- {
-  "byId": "umr9hrkfmv17w9",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
+  "up": 1787716953691,
   "by": "Aaryan Patel",
   "at": 1787716953691,
   "id": "xmt9kilp7x7sh1",
-  "text": "chud",
-  "up": 1787716953691
+  "ch": "dm-ex1-umr9hrkfmv17w9",
+  "byId": "umr9hrkfmv17w9"
  },
  {
   "text": "Hi Pearce, I was wondering where the service event for today was located?",
-  "id": "xmtkd6spj42bbg",
   "up": 1788369773528,
-  "byId": "umt8px342d7uj6",
   "ch": "dm-ex1-umt8px342d7uj6",
+  "id": "xmtkd6spj42bbg",
+  "byId": "umt8px342d7uj6",
   "by": "Jack Bunt",
   "at": 1788369773527
  }
