@@ -5,48 +5,48 @@
   "del": true
  },
  {
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "at": 1783819566701,
   "up": 1783819566701,
   "text": "Goat",
-  "by": "Pearce Barnes",
   "byId": "ex1",
-  "id": "xmrh442nhhva2d"
+  "id": "xmrh442nhhva2d",
+  "ch": "dm-ex1-umr9hrkfmv17w9",
+  "by": "Pearce Barnes",
+  "at": 1783819566701
  },
  {
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "at": 1784403198031,
   "byId": "ex1",
-  "up": 1784403198031,
-  "by": "Pearce Barnes",
   "id": "xmrqrlbgv080ga",
-  "text": "chud"
+  "ch": "dm-ex1-umr9hrkfmv17w9",
+  "by": "Pearce Barnes",
+  "at": 1784403198031,
+  "text": "chud",
+  "up": 1784403198031
  },
  {
   "up": 1787716953691,
-  "text": "chud",
-  "ch": "dm-ex1-umr9hrkfmv17w9",
-  "at": 1787716953691,
   "byId": "umr9hrkfmv17w9",
   "id": "xmt9kilp7x7sh1",
-  "by": "Aaryan Patel"
+  "at": 1787716953691,
+  "by": "Aaryan Patel",
+  "text": "chud",
+  "ch": "dm-ex1-umr9hrkfmv17w9"
  },
  {
+  "up": 1788369773528,
   "text": "Hi Pearce, I was wondering where the service event for today was located?",
-  "by": "Jack Bunt",
   "id": "xmtkd6spj42bbg",
   "byId": "umt8px342d7uj6",
+  "by": "Jack Bunt",
   "at": 1788369773527,
-  "ch": "dm-ex1-umt8px342d7uj6",
-  "up": 1788369773528
+  "ch": "dm-ex1-umt8px342d7uj6"
  },
  {
-  "text": "Hey Brandon, I was just wondering about meeting requirements and if we were still doing the two articles to account for two meeting points. I had also messaged someone on exec about this earlier in the school year but I never got a response. I have a class, HNRS 325 that meets on Mondays from 6:30-8:00 which conflicts with most of DDS' speaker meetings. In previous years, students with class conflicts were given a pass because we can't miss class for the meetings but I would like to know what I can do to make up for this. I am happy to send you two dental article summaries and see that on the member forms, that's still an option. I can also try to attend the last couple meetings of the year since I think my last HNRS 325 class is next Monday. Please let me know if this is something you can help me with, I want to remain a dedicated member of DDS (having been one since 2024) but I also can't sacrifice my classes for it.",
-  "by": "Rachel Lin",
-  "id": "xmw487b1gj37nm",
+  "up": 1793924287397,
   "byId": "umtk9s9fr1nkku",
-  "ch": "dm-umrmpl0irf1gib-umtk9s9fr1nkku",
+  "id": "xmw487b1gj37nm",
+  "by": "Rachel Lin",
   "at": 1793924287396,
-  "up": 1793924287397
+  "ch": "dm-umrmpl0irf1gib-umtk9s9fr1nkku",
+  "text": "Hey Brandon, I was just wondering about meeting requirements and if we were still doing the two articles to account for two meeting points. I had also messaged someone on exec about this earlier in the school year but I never got a response. I have a class, HNRS 325 that meets on Mondays from 6:30-8:00 which conflicts with most of DDS' speaker meetings. In previous years, students with class conflicts were given a pass because we can't miss class for the meetings but I would like to know what I can do to make up for this. I am happy to send you two dental article summaries and see that on the member forms, that's still an option. I can also try to attend the last couple meetings of the year since I think my last HNRS 325 class is next Monday. Please let me know if this is something you can help me with, I want to remain a dedicated member of DDS (having been one since 2024) but I also can't sacrifice my classes for it."
  }
 ]
